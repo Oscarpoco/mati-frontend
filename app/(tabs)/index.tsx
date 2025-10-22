@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
 
   // STATS CARD SECTION
   statsCard: {
-    borderRadius: 0,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
 
   // QUICK REQUEST CARD
   quickCard: {
-    borderRadius: 0,
+    borderRadius: 22,
     padding: 16,
     borderWidth: 1,
     marginBottom: 20,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
 
   quickSubtitle: {
-    fontSize: 12,
+    fontSize: 16,
     opacity: 0.6,
     marginBottom: 16,
   },
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
 
   stylingDotThree: {
     position: "absolute",
-    top: -12,
+    top: -10,
     right: "50%",
     width: 45,
     height: 45,
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   stylingDotFour: {
     position: "absolute",
     bottom: -50,
-    left: "50%",
+    left: "48%",
     width: 45,
     height: 45,
     borderRadius: 24,

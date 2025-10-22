@@ -32,7 +32,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: [
           styles.tabBar,
-          { backgroundColor: "none", borderColor: theme.border },
+          { backgroundColor: "transparent" },
         ],
       }}
     >
@@ -86,13 +86,6 @@ const styles = StyleSheet.create({
     right: 20,
     height: Platform.select({ ios: 72, android: 80 }),
     borderTopWidth: 0,
-    elevation: 0,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    borderRadius: 20,
     marginHorizontal: 10,
   },
 
