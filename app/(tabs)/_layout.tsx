@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { View, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
+import AuthWrapper from "@/auth/authWrapper";
 
 type TabConfig = {
   name: string;
@@ -22,58 +23,62 @@ const TABS: TabConfig[] = [
 export default function TabLayout() {
   // USE DARK THEME DIRECTLY - NO HOOK
   const theme = Colors.dark;
+  const [isAuthenticated, setIsAuthenticaed] = React.useState(true);
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: theme.tint,
-        tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: [
-          styles.tabBar,
-          { backgroundColor: "transparent" },
-        ],
-      }}
-    >
-      {TABS.map(({ name, icon, iconSize = 26 }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            // TAB LABEL TEXT
-            tabBarShowLabel: false,
-            // CIRCULAR ICON CONTAINER - ACTIVE/INACTIVE STATES
-            tabBarIcon: ({ color, focused }) => (
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: focused ? theme.tint : theme.card,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={icon}
-                  size={iconSize}
-                  color={focused ? theme.background : color}
-                />
-                {name !== "profile" && (
+    <React.Fragment>
+      {isAuthenticated ? (
+        <AuthWrapper />
+      ) : (
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarHideOnKeyboard: true,
+            tabBarActiveTintColor: theme.tint,
+            tabBarInactiveTintColor: theme.textSecondary,
+            tabBarStyle: [styles.tabBar, { backgroundColor: "transparent" }],
+          }}
+        >
+          {TABS.map(({ name, icon, iconSize = 26 }) => (
+            <Tabs.Screen
+              key={name}
+              name={name}
+              options={{
+                // TAB LABEL TEXT
+                tabBarShowLabel: false,
+                // CIRCULAR ICON CONTAINER - ACTIVE/INACTIVE STATES
+                tabBarIcon: ({ color, focused }) => (
                   <View
                     style={[
-                      styles.linkButton,
+                      styles.iconContainer,
                       {
                         backgroundColor: focused ? theme.tint : theme.card,
                       },
                     ]}
-                  />
-                )}
-              </View>
-            ),
-          }}
-        />
-      ))}
-    </Tabs>
+                  >
+                    <Ionicons
+                      name={icon}
+                      size={iconSize}
+                      color={focused ? theme.background : color}
+                    />
+                    {name !== "profile" && (
+                      <View
+                        style={[
+                          styles.linkButton,
+                          {
+                            backgroundColor: focused ? theme.tint : theme.card,
+                          },
+                        ]}
+                      />
+                    )}
+                  </View>
+                ),
+              }}
+            />
+          ))}
+        </Tabs>
+      )}
+    </React.Fragment>
   );
 }
 

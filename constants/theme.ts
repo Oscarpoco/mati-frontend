@@ -1,12 +1,13 @@
 import { Platform } from 'react-native';
 
-const primaryGreen = '#22C55E';   
+const primaryGreen = '#41F4DA';   
 const backgroundDark = '#000'; 
 const cardGray = '#252525';       
 const textPrimary = '#FFFFFF';    // White main text
 const textSecondary = '#9BA1A6';  // Muted gray text
 const borderGray = '#1F1F1F';     // Subtle border line
 const warningRed = '#EF4444';     // Red for errors/warnings  
+const successGreen = '#22C55E'; // Green for success messages
 
 export const Colors = {
   light: {
@@ -21,6 +22,7 @@ export const Colors = {
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
+    successGreen: successGreen
   },
   dark: {
     text: textPrimary,
@@ -34,6 +36,7 @@ export const Colors = {
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
+    successGreen: successGreen
   },
 };
 
