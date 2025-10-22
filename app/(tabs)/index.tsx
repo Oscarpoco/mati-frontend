@@ -1,98 +1,506 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  Animated,
+  TouchableOpacity,
+  TextInput,
+  useColorScheme,
+} from "react-native";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors, Fonts } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState, useRef } from "react";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  // GET CURRENT COLOR SCHEME
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "dark"];
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // STATE FOR QUANTITY AND LOCATION
+  const [quantity, setQuantity] = useState(20);
+  const [location, setLocation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const loadingAnim = useRef(new Animated.Value(0)).current;
+
+  // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
+  const handleConfirm = () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    Animated.timing(loadingAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: false,
+    }).start(() => {
+      setIsLoading(false);
+      loadingAnim.setValue(0);
+    });
+  };
+
+  return (
+    <ThemedView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      {/* HEADER SECTION WITH TITLE AND BUTTONS */}
+      <View style={styles.header}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Ionicons name="water" size={32} color={colors.tint} />
+            <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+              Mati
+            </ThemedText>
+          </View>
+
+          <View style={styles.headerButtons}>
+            {/* SCANNER BUTTON */}
+            <TouchableOpacity
+              style={[
+                styles.iconButton,
+                { backgroundColor: colors.card, borderColor: colors.border },
+              ]}
+            >
+              <Ionicons name="scan" size={28} color={colors.tint} />
+            </TouchableOpacity>
+
+            {/* LOCATION BUTTON */}
+            <TouchableOpacity
+              style={[
+                styles.LocationButton,
+                { backgroundColor: colors.card, borderColor: colors.border },
+              ]}
+            >
+              <ThemedText
+                style={[styles.locationText, { fontFamily: Fonts.sans }]}
+              >
+                Upington
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* STATS CARD - SHOWS LITRES BOUGHT */}
+      <View
+        style={[
+          styles.statsCard,
+          { backgroundColor: colors.card, borderColor: colors.border },
+        ]}
+      >
+
+        <View style={[styles.stylingDotOne, {backgroundColor: colors.background}]} />
+        <View style={[styles.stylingDotTwo, {backgroundColor: colors.background}]} />
+        <View style={[styles.stylingDotThree, {backgroundColor: colors.background}]} />
+
+        <View style={styles.statsContent}>
+          <Ionicons name="water" size={28} color={colors.tint} />
+          <View style={styles.statsText}>
+            <ThemedText style={styles.statsLabel}>Total Purchased</ThemedText>
+            <ThemedText style={[styles.statsValue, { color: colors.tint }]}>
+              500 Litres
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.statsDetails}>
+          <View style={styles.statItem}>
+            <Ionicons name="calendar" size={16} color={colors.textSecondary} />
+            <ThemedText style={styles.statText}>This Month</ThemedText>
+          </View>
+          <View style={styles.statItem}>
+            <Ionicons name="trending-up" size={16} color={colors.tint} />
+            <ThemedText style={[styles.statText, { color: colors.tint }]}>
+              +50L
+            </ThemedText>
+          </View>
+        </View>
+      </View>
+
+      <View>
+        {/* I WANT A CARD THAT SHOWS AN ONGOING DELIVERY IF THERES ANY BUT IF THERE'S NONE RENDER THAT NO BOOKINGS AVAILABLE  */}
+      </View>
+
+      {/* QUICK REQUEST SECTION */}
+      <View
+        style={[
+          styles.quickCard,
+          { backgroundColor: colors.card, borderColor: colors.border },
+        ]}
+      >
+        <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
+        <ThemedText style={styles.quickSubtitle}>Book your water</ThemedText>
+
+        <View style={[styles.stylingDotOne, {backgroundColor: colors.background}]} />
+        <View style={[styles.stylingDotTwo, {backgroundColor: colors.background}]} />
+        <View style={[styles.stylingDotThree, {backgroundColor: colors.background}]} />
+        <View style={[styles.stylingDotFour, {backgroundColor: colors.background}]} />
+
+        {/* LOCATION INPUT WITH AUTO BUTTON */}
+        <View style={styles.locationRow}>
+          <TextInput
+            style={[
+              styles.locationInput,
+              {
+                backgroundColor: colors.background,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholder="Enter location"
+            placeholderTextColor={colors.textSecondary}
+            value={location}
+            onChangeText={setLocation}
+          />
+          <TouchableOpacity
+            style={[styles.autoButton, { backgroundColor: colors.tint }]}
+          >
+            <ThemedText
+              style={{
+                color: colors.background,
+                fontWeight: "600",
+                fontSize: 12,
+              }}
+            >
+              AUTO
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        {/* QUANTITY CONTROLS */}
+        <View style={styles.quantityRow}>
+          <TouchableOpacity
+            onPress={() => quantity > 1 && setQuantity(quantity - 1)}
+            style={[
+              styles.quantityButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Ionicons name="remove" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View
+            style={[
+              styles.quantityDisplay,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <ThemedText style={styles.quantityText}>{quantity}</ThemedText>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => setQuantity(quantity + 1)}
+            style={[
+              styles.quantityButton,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Ionicons name="add" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
+        <View
+          style={[
+            styles.confirmContainer,
+            { backgroundColor: colors.background },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={handleConfirm}
+            disabled={isLoading}
+            style={[styles.confirmButton, { backgroundColor: colors.tint }]}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={32}
+              color={colors.background}
+            />
+          </TouchableOpacity>
+
+          <ThemedText style={styles.confirmText}>CONFIRM</ThemedText>
+
+          <View
+            style={{
+              alignItems: "center",
+              backgroundColor: colors.background,
+              flexDirection: "row",
+            }}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color={colors.textSecondary}
+            />
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color={colors.textSecondary}
+            />
+          </View>
+        </View>
+      </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  // MAIN CONTAINER - NO SCROLL
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "ios" ? 60 : 60,
+    paddingBottom: 100,
+    justifyContent: "space-between",
   },
-  stepContainer: {
+
+  // HEADER WITH TITLE AND BUTTONS
+  header: {
+    marginBottom: 24,
+  },
+
+  title: {
+    fontSize: 34,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+    lineHeight: 50,
+  },
+
+  locationText: {
+    fontSize: 14,
+    fontWeight: "800",
+  },
+
+  headerButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  iconButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+
+  LocationButton: {
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+
+  // STATS CARD SECTION
+  statsCard: {
+    borderRadius: 0,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+
+  statsContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 12,
+  },
+
+  statsText: {
+    flex: 1,
+  },
+
+  statsLabel: {
+    fontSize: 12,
+    opacity: 0.7,
+    marginBottom: 4,
+  },
+
+  statsValue: {
+    fontSize: 24,
+    fontWeight: "600",
+  },
+
+  statsDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+
+  statItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  statText: {
+    fontSize: 12,
+    opacity: 0.8,
+  },
+
+  // QUICK REQUEST CARD
+  quickCard: {
+    borderRadius: 0,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 20,
+  },
+
+  quickTitle: {
+    fontSize: 28,
+    fontWeight: "600",
+    marginBottom: 4,
+    lineHeight: 50,
+  },
+
+  quickSubtitle: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginBottom: 16,
+  },
+
+  stylingDotOne: {
+    position: "absolute",
+    top: "60%",
+    right: -25,
+    width: 45,
+    height: 45,
+    borderRadius: 24,
+    transform: [{ translateY: -22.5 }],
+  },
+
+  stylingDotTwo: {
+    position: "absolute",
+    top: "60%",
+    left: -25,
+    width: 45,
+    height: 45,
+    borderRadius: 24,
+    transform: [{ translateY: -22.5 }],
+  },
+
+  stylingDotThree: {
+    position: "absolute",
+    top: -12,
+    right: "50%",
+    width: 45,
+    height: 45,
+    borderRadius: 24,
+    transform: [{ translateY: -22.5 }],
+  },
+
+  stylingDotFour: {
+    position: "absolute",
+    bottom: -50,
+    left: "50%",
+    width: 45,
+    height: 45,
+    borderRadius: 24,
+    transform: [{ translateY: -22.5 }],
+  },
+
+  // LOCATION INPUT
+  locationRow: {
+    flexDirection: "row",
     gap: 8,
+    marginBottom: 16,
+  },
+
+  locationInput: {
+    flex: 1,
+    height: 50,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    borderWidth: 1,
+  },
+
+  autoButton: {
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // QUANTITY CONTROLS
+  quantityRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+    justifyContent: "center",
+  },
+
+  quantityButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+
+  quantityDisplay: {
+    width: 150,
+    height: 60,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+
+  quantityText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+
+  // CONFIRM BUTTON WITH LOADING
+  confirmContainer: {
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 8,
+    borderRadius: 32,
+    flexDirection: "row",
+    padding: 4,
+    paddingRight: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  confirmButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "flex-start",
+  },
+
+  loadingBar: {
+    height: 3,
+    borderRadius: 1.5,
+  },
+
+  confirmText: {
+    fontSize: 14,
+    textAlign: "center",
+    opacity: 0.7,
+    letterSpacing: 1.2,
   },
 });
