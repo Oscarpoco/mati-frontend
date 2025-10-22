@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   useColorScheme,
+  Text
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -23,6 +24,7 @@ export default function HomeScreen() {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const loadingAnim = useRef(new Animated.Value(0)).current;
+  const notifications = 3
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
@@ -64,18 +66,19 @@ export default function HomeScreen() {
               <Ionicons name="scan" size={28} color={colors.tint} />
             </TouchableOpacity>
 
-            {/* LOCATION BUTTON */}
+            {/* NOTIFICATION BUTTON */}
             <TouchableOpacity
               style={[
-                styles.LocationButton,
+                styles.iconButton,
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <ThemedText
-                style={[styles.locationText, { fontFamily: Fonts.sans }]}
-              >
-                Upington
-              </ThemedText>
+              <Ionicons name="notifications" size={28} color={colors.tint} />
+              {notifications > 0 && (
+                <View style={[styles.notificationBadge, {backgroundColor: colors.warningRed}]}>
+                  <Text style={{fontWeight: '600', color: colors.text, fontSize: 14}}>{notifications}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -147,7 +150,7 @@ export default function HomeScreen() {
                 borderColor: colors.border,
               },
             ]}
-            placeholder="Enter location"
+            placeholder="Enter Your location"
             placeholderTextColor={colors.textSecondary}
             value={location}
             onChangeText={setLocation}
@@ -159,7 +162,7 @@ export default function HomeScreen() {
               style={{
                 color: colors.background,
                 fontWeight: "600",
-                fontSize: 12,
+                fontSize: 14,
               }}
             >
               AUTO
@@ -174,12 +177,12 @@ export default function HomeScreen() {
             style={[
               styles.quantityButton,
               {
-                backgroundColor: colors.background,
+                backgroundColor: colors.warningRed,
                 borderColor: colors.border,
               },
             ]}
           >
-            <Ionicons name="remove" size={18} color={colors.textSecondary} />
+            <Ionicons name="remove" size={32} color={colors.background} />
           </TouchableOpacity>
 
           <View
@@ -199,12 +202,12 @@ export default function HomeScreen() {
             style={[
               styles.quantityButton,
               {
-                backgroundColor: colors.background,
+                backgroundColor: colors.tint,
                 borderColor: colors.border,
               },
             ]}
           >
-            <Ionicons name="add" size={18} color={colors.textSecondary} />
+            <Ionicons name="add" size={32} color={colors.background} />
           </TouchableOpacity>
         </View>
 
@@ -270,7 +273,7 @@ const styles = StyleSheet.create({
 
   // HEADER WITH TITLE AND BUTTONS
   header: {
-    marginBottom: 24,
+    marginBottom: 14,
   },
 
   title: {
@@ -297,6 +300,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: -18,
+    right: -6,
+    width: 27,
+    height: 27,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   LocationButton: {
@@ -331,11 +344,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.7,
     marginBottom: 4,
+    textTransform: "uppercase",
+    textAlign: 'left'
   },
 
   statsValue: {
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: "800",
   },
 
   statsDetails: {
@@ -353,8 +368,10 @@ const styles = StyleSheet.create({
   },
 
   statText: {
-    fontSize: 12,
+    fontSize: 14,
     opacity: 0.8,
+    textTransform: "uppercase",
+    textAlign: 'center'
   },
 
   // QUICK REQUEST CARD
@@ -381,7 +398,7 @@ const styles = StyleSheet.create({
   stylingDotOne: {
     position: "absolute",
     top: "60%",
-    right: -25,
+    right: -30,
     width: 45,
     height: 45,
     borderRadius: 24,
@@ -391,7 +408,7 @@ const styles = StyleSheet.create({
   stylingDotTwo: {
     position: "absolute",
     top: "60%",
-    left: -25,
+    left: -30,
     width: 45,
     height: 45,
     borderRadius: 24,
@@ -427,10 +444,10 @@ const styles = StyleSheet.create({
 
   locationInput: {
     flex: 1,
-    height: 50,
+    height: 64,
     borderRadius: 18,
-    paddingHorizontal: 12,
-    fontSize: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
     borderWidth: 1,
   },
 
@@ -439,6 +456,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+    height: 60,
   },
 
   // QUANTITY CONTROLS

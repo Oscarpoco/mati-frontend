@@ -1,11 +1,12 @@
 import { Platform } from 'react-native';
 
-const primaryGreen = '#22C55E';   // Accent / Primary brand color
-const backgroundDark = '#0E0E0E'; // Background color from design
-const cardGray = '#151718';       // Card or section background
+const primaryGreen = '#22C55E';   
+const backgroundDark = '#000'; 
+const cardGray = '#252525';       
 const textPrimary = '#FFFFFF';    // White main text
 const textSecondary = '#9BA1A6';  // Muted gray text
 const borderGray = '#1F1F1F';     // Subtle border line
+const warningRed = '#EF4444';     // Red for errors/warnings  
 
 export const Colors = {
   light: {
@@ -19,6 +20,7 @@ export const Colors = {
     success: primaryGreen,
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
+    warningRed: warningRed,
   },
   dark: {
     text: textPrimary,
@@ -31,6 +33,7 @@ export const Colors = {
     success: primaryGreen,
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
+    warningRed: warningRed,
   },
 };
 
