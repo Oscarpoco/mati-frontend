@@ -1,18 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Dimensions,
   ScrollView,
   TouchableOpacity,
   useColorScheme,
-} from 'react-native';
-import { Colors } from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
-import LottieView from 'lottie-react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+  Animated,
+} from "react-native";
+import { Colors, Fonts } from "@/constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import LottieView from "lottie-react-native";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface OnboardingData {
   id: number;
@@ -20,43 +21,54 @@ interface OnboardingData {
   description: string;
   lottieSource: any;
   icon: keyof typeof Ionicons.glyphMap;
+  color: string;
 }
 
 const onboardingData: OnboardingData[] = [
   {
     id: 1,
-    title: 'Welcome to Mati',
-    description: 'Join thousands of communities getting water delivered to their door while supporting local providers and reducing unemployment.',
-    lottieSource: require('@/assets/animations/welcome.json'),
-    icon: 'water',
+    title: "Welcome to Mati",
+    description:
+      "Join thousands of communities getting water delivered to their door while supporting local providers.",
+    lottieSource: require("@/assets/animations/welcome.json"),
+    icon: "water",
+    color: "#007AFF",
   },
   {
     id: 2,
-    title: 'Quick QR Scanning',
-    description: 'Simply scan QR codes when your delivery arrives to ensure safety and confirm receipt.',
-    lottieSource: require('@/assets/animations/qr-scan.json'),
-    icon: 'scan',
+    title: "Quick QR Scanning",
+    description:
+      "Simply scan QR codes when your delivery arrives to ensure safety and confirm receipt instantly.",
+    lottieSource: require("@/assets/animations/qr-scan.json"),
+    icon: "scan",
+    color: "#34C759",
   },
   {
     id: 3,
-    title: 'Smart Matching',
-    description: 'Our intelligent system matches you with the nearest water providers for faster, more efficient deliveries.',
-    lottieSource: require('@/assets/animations/ai.json'),
-    icon: 'flash',
+    title: "Smart Matching",
+    description:
+      "Our intelligent system matches you with the nearest water providers for faster deliveries.",
+    lottieSource: require("@/assets/animations/ai.json"),
+    icon: "flash",
+    color: "#AF52DE",
   },
   {
     id: 4,
-    title: 'Stay Connected',
-    description: 'Receive real-time notifications about offers, delivery status, and updates from your favorite providers.',
-    lottieSource: require('@/assets/animations/notifications.json'),
-    icon: 'notifications',
+    title: "Stay Connected",
+    description:
+      "Receive real-time notifications about offers, delivery status, and updates from providers.",
+    lottieSource: require("@/assets/animations/notifications.json"),
+    icon: "notifications",
+    color: "#FF9500",
   },
   {
     id: 5,
-    title: 'Easy Requests',
-    description: 'Request water deliveries from nearby providers with just a few taps. Set quantity and location with ease.',
-    lottieSource: require('@/assets/animations/success.json'),
-    icon: 'checkmark-circle',
+    title: "Easy Requests",
+    description:
+      "Request water deliveries from nearby providers with just a few taps. Simple and fast.",
+    lottieSource: require("@/assets/animations/success.json"),
+    icon: "checkmark-circle",
+    color: "#32D74B",
   },
 ];
 
@@ -64,12 +76,23 @@ interface OnboardingScreenProps {
   onComplete: () => void;
 }
 
-export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
+export default function OnboardingScreen({
+  onComplete,
+}: OnboardingScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const colors = Colors[colorScheme ?? "dark"];
   const animationRefs = useRef<(LottieView | null)[]>([]);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: currentIndex,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  }, [currentIndex, slideAnim]);
 
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
@@ -127,31 +150,46 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       return (
         <View
           style={{
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            backgroundColor: colors.tint + '20',
-            justifyContent: 'center',
-            alignItems: 'center',
+            width: 140,
+            height: 140,
+            borderRadius: 70,
+            backgroundColor: item.color + "20",
+            justifyContent: "center",
+            alignItems: "center",
             marginBottom: 40,
+            shadowColor: item.color,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
           }}
         >
-          <Ionicons name={item.icon} size={60} color={colors.tint} />
+          <Ionicons name={item.icon} size={70} color={item.color} />
         </View>
       );
     }
 
     return (
-      <View style={{ marginBottom: 40, height: 200 }}>
+      <View
+        style={{
+          marginBottom: 40,
+          height: 220,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <LottieView
           ref={(ref) => {
             animationRefs.current[index] = ref;
           }}
           source={item.lottieSource}
-          style={{ width: '100%', height: '100%' }}
+          style={{
+            width: 200,
+            height: 200,
+          }}
           autoPlay={index === 0}
           loop={true}
-          speed={0.8}
+          speed={1}
           onAnimationFailure={() => setAnimationError(true)}
         />
       </View>
@@ -159,12 +197,17 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   };
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ThemedView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       {/* Skip Button */}
       {currentIndex < onboardingData.length - 1 && (
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-          <ThemedText style={[styles.skipText, { color: colors.textSecondary }]}>
-            Skip
+        <TouchableOpacity
+          style={[styles.skipButton, { backgroundColor: colors.tint }]}
+          onPress={handleSkip}
+        >
+          <ThemedText style={[styles.skipText, { color: colors.background }]}>
+            SKIP
           </ThemedText>
         </TouchableOpacity>
       )}
@@ -172,14 +215,20 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       {/* Progress Bar */}
       <View style={styles.progressBarContainer}>
         <View
-          style={[styles.progressBarBackground, { backgroundColor: colors.card }]}
+          style={[
+            styles.progressBarBackground,
+            { backgroundColor: colors.card },
+          ]}
         >
-          <View
+          <Animated.View
             style={[
               styles.progressBar,
               {
-                width: `${((currentIndex + 1) / onboardingData.length) * 100}%`,
                 backgroundColor: colors.tint,
+                width: slideAnim.interpolate({
+                  inputRange: [0, onboardingData.length - 1],
+                  outputRange: ["0%", "100%"],
+                }),
               },
             ]}
           />
@@ -198,8 +247,22 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         decelerationRate="fast"
       >
         {onboardingData.map((item, index) => (
-          <View key={item.id} style={[styles.slide, { width: screenWidth }]}>
-            <View style={styles.contentContainer}>
+          <View
+            key={item.id}
+            style={[
+              styles.slide,
+              { width: screenWidth, justifyContent: "center" },
+            ]}
+          >
+            <View
+              style={[
+                styles.contentContainer,
+                {
+                  minHeight: screenHeight * 0.5,
+                  justifyContent: "center",
+                },
+              ]}
+            >
               {/* Animation/Icon */}
               <AnimationComponent item={item} index={index} />
 
@@ -207,14 +270,22 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               <ThemedText
                 style={[
                   styles.stepText,
-                  { color: colors.textSecondary, opacity: 0.7 },
+                  {
+                    color: colors.textSecondary,
+                    opacity: 0.6,
+                  },
                 ]}
               >
                 Step {index + 1} of {onboardingData.length}
               </ThemedText>
 
               {/* Title */}
-              <ThemedText style={[styles.title, { color: colors.text }]}>
+              <ThemedText
+                style={[
+                  styles.title,
+                  { color: colors.text, fontFamily: Fonts.sans },
+                ]}
+              >
                 {item.title}
               </ThemedText>
 
@@ -222,7 +293,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               <ThemedText
                 style={[
                   styles.description,
-                  { color: colors.textSecondary, lineHeight: 24 },
+                  {
+                    color: colors.textSecondary,
+                    lineHeight: 24,
+                  },
                 ]}
               >
                 {item.description}
@@ -237,15 +311,15 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         {/* Page Indicators */}
         <View style={styles.indicatorContainer}>
           {onboardingData.map((_, index) => (
-            <View
+            <Animated.View
               key={index}
               style={[
                 styles.indicator,
                 {
                   backgroundColor:
                     index === currentIndex ? colors.tint : colors.card,
-                  width: index === currentIndex ? 24 : 8,
-                  opacity: index === currentIndex ? 1 : 0.4,
+                  width: index === currentIndex ? 28 : 8,
+                  opacity: index === currentIndex ? 1 : 0.3,
                 },
               ]}
             />
@@ -253,8 +327,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </View>
 
         {/* Button Container */}
-        <View style={styles.buttonContainer}>
-          {/* Back Button (hidden on first slide) */}
+        <View style={[styles.buttonContainer, { width: "100%" }]}>
           {currentIndex > 0 && (
             <TouchableOpacity
               style={[
@@ -265,6 +338,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 },
               ]}
               onPress={handleBack}
+              activeOpacity={0.7}
             >
               <Ionicons name="chevron-back" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -274,7 +348,11 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           <View
             style={[
               styles.confirmContainer,
-              { backgroundColor: colors.tint + '10' },
+              {
+                backgroundColor: colors.tint + "10",
+                // flex: currentIndex > 0 ? 1 : undefined,
+                width: currentIndex > 0 ? "80%" : "100%",
+              },
             ]}
           >
             <TouchableOpacity
@@ -289,29 +367,33 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               />
             </TouchableOpacity>
             <ThemedText style={styles.confirmText}>
-              {currentIndex === onboardingData.length - 1 ? 'START' : 'NEXT'}
+              {currentIndex === onboardingData.length - 1 ? "START" : "NEXT"}
             </ThemedText>
             <View
               style={{
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-                flexDirection: 'row',
+                alignItems: "center",
+                backgroundColor: "transparent",
+                flexDirection: "row",
+                gap: 2,
               }}
             >
               <Ionicons
                 name="chevron-forward"
                 size={12}
                 color={colors.textSecondary}
+                style={{ opacity: 0.6 }}
               />
               <Ionicons
                 name="chevron-forward"
                 size={12}
                 color={colors.textSecondary}
+                style={{ opacity: 0.4 }}
               />
               <Ionicons
                 name="chevron-forward"
                 size={12}
                 color={colors.textSecondary}
+                style={{ opacity: 0.2 }}
               />
             </View>
           </View>
@@ -324,83 +406,88 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 const styles = {
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingHorizontal: 0,
+    paddingTop: 40,
     paddingBottom: 40,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   } as any,
 
   skipButton: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 16,
+    alignSelf: "flex-end",
+    paddingHorizontal: 24,
+    paddingVertical: 6,
+    marginBottom: 8,
+    marginHorizontal: 24,
+    borderRadius: 16,
   } as any,
 
   skipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "800",
   } as any,
 
   progressBarContainer: {
-    height: 4,
-    marginBottom: 32,
-    borderRadius: 2,
+    height: 15,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    borderRadius: 8,
+    overflow: "hidden",
   } as any,
 
   progressBarBackground: {
-    height: '100%',
-    borderRadius: 2,
-    overflow: 'hidden',
+    height: "100%",
+    borderRadius: 8,
+    overflow: "hidden",
   } as any,
 
   progressBar: {
-    height: '100%',
-    borderRadius: 2,
+    height: "100%",
+    borderRadius: 8,
   } as any,
 
   slide: {
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 24,
+    alignItems: "center",
   } as any,
 
   contentContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
+    alignItems: "center",
+    width: "100%",
   } as any,
 
   stepText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
     marginBottom: 16,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   } as any,
 
   title: {
     fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 12,
-    textAlign: 'center',
+    fontWeight: "800",
+    marginBottom: 16,
+    textAlign: "center",
     letterSpacing: -0.5,
     lineHeight: 40,
   } as any,
 
   description: {
     fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: "500",
+    textAlign: "center",
+    maxWidth: "95%",
   } as any,
 
   bottomContainer: {
+    paddingHorizontal: 24,
     gap: 20,
   } as any,
 
   indicatorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
   } as any,
 
   indicator: {
@@ -409,26 +496,27 @@ const styles = {
   } as any,
 
   buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+    justifyContent: "center",
   } as any,
 
   backButton: {
     width: 60,
     height: 60,
-    borderRadius: 24,
+    borderRadius: 34,
     borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   } as any,
 
   confirmContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
     borderRadius: 32,
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 4,
     paddingRight: 20,
     height: 60,
@@ -438,14 +526,14 @@ const styles = {
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   } as any,
 
   confirmText: {
     fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     letterSpacing: 1.2,
     opacity: 0.7,
   } as any,
