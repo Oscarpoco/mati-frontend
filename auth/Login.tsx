@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Animated,
+  Text
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -68,7 +69,7 @@ export function LoginScreen() {
         >
           {/* HEADER */}
           <View>
-            <View style={{ height: 120 }}>
+            <View style={{ height: 100 }}>
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
               >
@@ -77,9 +78,9 @@ export function LoginScreen() {
                 >
                   <Ionicons name="water" size={32} color={colors.background} />
                 </View>
-                <ThemedText style={[styles.logo, { fontFamily: Fonts.sans }]}>
+                <Text style={[styles.logo, { fontFamily: Fonts.sans, color: colors.text }]}>
                   Mati
-                </ThemedText>
+                </Text>
               </View>
             </View>
 

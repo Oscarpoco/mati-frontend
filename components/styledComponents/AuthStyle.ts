@@ -4,7 +4,7 @@ export const AuthStyles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "ios" ? 60 : 60,
+    paddingTop: Platform.OS === "ios" ? 70 : 60,
     paddingBottom: 40,
   },
 
@@ -27,6 +27,7 @@ export const AuthStyles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 8,
     letterSpacing: -0.5,
+    lineHeight: 50
   },
 
   subtitle: {

@@ -68,15 +68,16 @@ export function ResetPasswordScreen() {
         >
           {/* HEADER */}
           <View>
-            <View style={{ height: 80 }}>
+            <View style={{ height: 80, flexDirection: "row", alignItems: "center", gap: 16, justifyContent: "flex-start" }}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={{width: 40, height: 40, justifyContent: "center", alignItems: "center" , borderRadius: 24, backgroundColor: colors.tint }}>
                 <Ionicons name="chevron-back" size={28} color={colors.background} />
               </TouchableOpacity>
+              <ThemedText style={styles.title}>Reset Password</ThemedText>
+
             </View>
 
             {/* TITLE SECTION */}
             <View style={{ marginBottom: 40 }}>
-              <ThemedText style={styles.title}>Reset Password</ThemedText>
               <ThemedText
                 style={[styles.subtitle, { color: colors.textSecondary }]}
               >

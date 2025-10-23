@@ -7,6 +7,7 @@ import {
   useColorScheme,
   KeyboardAvoidingView,
   ScrollView,
+  Text
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -70,7 +71,7 @@ export function RegisterScreen() {
         >
           {/* HEADER */}
           <View>
-            <View style={{ height: 80 }}>
+            <View style={{ height: 60, flexDirection: "row", alignItems: "center", gap: 16, justifyContent: "flex-start" }}>
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
@@ -88,11 +89,12 @@ export function RegisterScreen() {
                   color={colors.background}
                 />
               </TouchableOpacity>
+
+              <Text style={[styles.title, { color: colors.text}]}>Create Account</Text>
             </View>
 
             {/* TITLE SECTION */}
             <View style={{ marginBottom: 40 }}>
-              <ThemedText style={styles.title}>Create Account</ThemedText>
               <ThemedText
                 style={[styles.subtitle, { color: colors.textSecondary }]}
               >

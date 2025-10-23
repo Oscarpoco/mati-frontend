@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
 import { View, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import AuthWrapper from "@/auth/authWrapper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import OnboardingScreen from "@/onBoarding/OnBoardingScreen";
+import SplashScreen from "@/components/ui/SplashScreen";
 
 type TabConfig = {
   name: string;
@@ -12,7 +15,6 @@ type TabConfig = {
   iconSize?: number;
 };
 
-// TAB CONFIGURATION - HOME, BOOKINGS, NEWS, PROFILE
 const TABS: TabConfig[] = [
   { name: "index", title: "Home", icon: "home", iconSize: 22 },
   { name: "bookings", title: "Bookings", icon: "calendar", iconSize: 22 },
@@ -21,9 +23,55 @@ const TABS: TabConfig[] = [
 ] as const;
 
 export default function TabLayout() {
-  // USE DARK THEME DIRECTLY - NO HOOK
   const theme = Colors.dark;
-  const [isAuthenticated, setIsAuthenticaed] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticaed] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    checkAppState();
+  }, []);
+
+  const checkAppState = async () => {
+    try {
+      const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
+     
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      setShowSplash(false);
+
+      // If user hasn't seen onboarding, show it
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.error("Error checking app state:", error);
+      setShowSplash(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOnboardingComplete = async () => {
+    try {
+      await AsyncStorage.setItem("hasSeenOnboarding", "true");
+      setShowOnboarding(false);
+    } catch (error) {
+      console.error("Error saving onboarding status:", error);
+      setShowOnboarding(false);
+    }
+  };
+
+  // Splash Screen
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
+  // Onboarding Screen
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
 
   return (
     <React.Fragment>
@@ -44,9 +92,7 @@ export default function TabLayout() {
               key={name}
               name={name}
               options={{
-                // TAB LABEL TEXT
                 tabBarShowLabel: false,
-                // CIRCULAR ICON CONTAINER - ACTIVE/INACTIVE STATES
                 tabBarIcon: ({ color, focused }) => (
                   <View
                     style={[
@@ -83,7 +129,6 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  // TAB BAR CONTAINER WITH BLUR AND SHADOW
   tabBar: {
     position: "absolute",
     bottom: 25,
@@ -94,7 +139,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
 
-  // CIRCULAR ICON BUTTON CONTAINER
   iconContainer: {
     width: 70,
     height: 70,
@@ -108,7 +152,7 @@ const styles = StyleSheet.create({
   linkButton: {
     position: "absolute",
     right: -25,
-    width: 30,
+    width: 50,
     height: 30,
     borderTopWidth: 0,
     borderBottomWidth: 0,

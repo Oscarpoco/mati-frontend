@@ -21,7 +21,7 @@ export default function AuthWrapper() {
       screenOptions={{
         headerShown: false,
         animation: "fade",
-        animationDuration: 5000,
+        animationDuration: 500,
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
