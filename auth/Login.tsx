@@ -14,19 +14,22 @@ import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef } from "react";
 
+// React Navigation imports
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "./authWrapper";
+
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
 
-interface LoginScreenProps {
-  onNavigateToRegister: () => void;
-  onNavigateToReset: () => void;
-}
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  "Login"
+>;
 
-export function LoginScreen({
-  onNavigateToRegister,
-  onNavigateToReset,
-}: LoginScreenProps) {
+export function LoginScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,7 +112,7 @@ export function LoginScreen({
                     alignItems: "center",
                     padding: 5,
                     backgroundColor: colors.tint,
-                    borderRadius: 12,
+                    borderRadius: 20,
                   }}
                 >
                   <Ionicons name="mail" size={22} color={colors.background} />
@@ -138,11 +141,11 @@ export function LoginScreen({
                 <ThemedText style={[styles.label, { color: colors.text }]}>
                   Password
                 </ThemedText>
-                <TouchableOpacity onPress={onNavigateToReset}>
+                <TouchableOpacity onPress={() => navigation.navigate("ResetPassword")}>
                   <ThemedText
                     style={[styles.forgotLink, { color: colors.tint }]}
                   >
-                    Forgot?
+                    Forgot Password?
                   </ThemedText>
                 </TouchableOpacity>
               </View>
@@ -160,7 +163,7 @@ export function LoginScreen({
                     alignItems: "center",
                     padding: 5,
                     backgroundColor: colors.tint,
-                    borderRadius: 12,
+                    borderRadius: 20,
                   }}
                 >
                   <Ionicons name="lock-closed" size={22} color={colors.background} />
@@ -193,7 +196,7 @@ export function LoginScreen({
             <View
               style={[
                 styles.confirmContainer,
-                { backgroundColor: colors.background },
+                { backgroundColor: colors.tint + "10" },
               ]}
             >
               <TouchableOpacity
@@ -211,7 +214,7 @@ export function LoginScreen({
               <View
                 style={{
                   alignItems: "center",
-                  backgroundColor: colors.background,
+                  backgroundColor: 'transparent',
                   flexDirection: "row",
                 }}
               >
@@ -275,7 +278,7 @@ export function LoginScreen({
               <ThemedText style={{ color: colors.textSecondary }}>
                 Do not have an account?{" "}
               </ThemedText>
-              <TouchableOpacity onPress={onNavigateToRegister}>
+              <TouchableOpacity onPress={() => navigation.navigate("Register")}>
                 <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
                   Sign up
                 </ThemedText>

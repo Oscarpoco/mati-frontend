@@ -14,17 +14,22 @@ import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef } from "react";
 
+// React Navigation imports
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "./authWrapper";
+
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
 
-interface ResetPasswordScreenProps {
-  onNavigateToLogin: () => void;
-}
+type ResetPasswordNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  "ResetPassword"
+>;
 
-export function ResetPasswordScreen({
-  onNavigateToLogin,
-}: ResetPasswordScreenProps) {
+export function ResetPasswordScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const navigation = useNavigation<ResetPasswordNavigationProp>();
 
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +69,8 @@ export function ResetPasswordScreen({
           {/* HEADER */}
           <View>
             <View style={{ height: 80 }}>
-              <TouchableOpacity onPress={onNavigateToLogin} style={{width: 40, height: 40, justifyContent: "center", alignItems: "center" , borderRadius: 24, backgroundColor: colors.tint }}>
-                <Ionicons name="arrow-back" size={28} color={colors.background} />
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{width: 40, height: 40, justifyContent: "center", alignItems: "center" , borderRadius: 24, backgroundColor: colors.tint }}>
+                <Ionicons name="chevron-back" size={28} color={colors.background} />
               </TouchableOpacity>
             </View>
 
@@ -104,7 +109,7 @@ export function ResetPasswordScreen({
                         alignItems: "center",
                         padding: 5,
                         backgroundColor: colors.tint,
-                        borderRadius: 12,
+                        borderRadius: 20,
                       }}
                     >
                       <Ionicons
@@ -170,7 +175,7 @@ export function ResetPasswordScreen({
                 <View
                   style={[
                     styles.confirmContainer,
-                    { backgroundColor: colors.background },
+                    { backgroundColor: colors.tint + "10" },
                   ]}
                 >
                   <TouchableOpacity
@@ -191,7 +196,7 @@ export function ResetPasswordScreen({
                   <View
                     style={{
                       alignItems: "center",
-                      backgroundColor: colors.background,
+                      backgroundColor: "transparent",
                       flexDirection: "row",
                     }}
                   >
@@ -223,7 +228,7 @@ export function ResetPasswordScreen({
                   ]}
                 >
                   <TouchableOpacity
-                    onPress={onNavigateToLogin}
+                    onPress={() => navigation.navigate("Login")}
                     style={[
                       styles.confirmButton,
                       { backgroundColor: colors.tint },

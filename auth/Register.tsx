@@ -10,19 +10,26 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef } from "react";
 
+// React Navigation imports
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "./authWrapper";
+
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
 
-interface RegisterScreenProps {
-  onNavigateToLogin: () => void;
-}
+type RegisterScreenNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  "Register"
+>;
 
-export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
+export function RegisterScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const navigation = useNavigation<RegisterScreenNavigationProp>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,7 +72,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
           <View>
             <View style={{ height: 80 }}>
               <TouchableOpacity
-                onPress={onNavigateToLogin}
+                onPress={() => navigation.goBack()}
                 style={{
                   width: 40,
                   height: 40,
@@ -76,7 +83,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
                 }}
               >
                 <Ionicons
-                  name="arrow-back"
+                  name="chevron-back"
                   size={28}
                   color={colors.background}
                 />
@@ -112,7 +119,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
                     alignItems: "center",
                     padding: 5,
                     backgroundColor: colors.tint,
-                    borderRadius: 12,
+                    borderRadius: 20,
                   }}
                 >
                   <Ionicons name="mail" size={22} color={colors.background} />
@@ -148,14 +155,14 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
                     alignItems: "center",
                     padding: 5,
                     backgroundColor: colors.tint,
-                    borderRadius: 12,
+                    borderRadius: 20,
                   }}
                 >
                   <Ionicons name="call" size={22} color={colors.background} />
                 </View>
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+27 (66) 000-0000"
                   placeholderTextColor={colors.textSecondary}
                   value={phone}
                   onChangeText={setPhone}
@@ -184,7 +191,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
                     alignItems: "center",
                     padding: 5,
                     backgroundColor: colors.tint,
-                    borderRadius: 12,
+                    borderRadius: 20,
                   }}
                 >
                   <Ionicons
@@ -252,7 +259,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
             <View
               style={[
                 styles.confirmContainer,
-                { backgroundColor: colors.background },
+                { backgroundColor: colors.tint + "10" },
               ]}
             >
               <TouchableOpacity
@@ -270,7 +277,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
               <View
                 style={{
                   alignItems: "center",
-                  backgroundColor: colors.background,
+                  backgroundColor: "transparent",
                   flexDirection: "row",
                 }}
               >
@@ -303,7 +310,7 @@ export function RegisterScreen({ onNavigateToLogin }: RegisterScreenProps) {
               <ThemedText style={{ color: colors.textSecondary }}>
                 Already have an account?{" "}
               </ThemedText>
-              <TouchableOpacity onPress={onNavigateToLogin}>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
                 <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
                   Login
                 </ThemedText>
