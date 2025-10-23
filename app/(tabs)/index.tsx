@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   useColorScheme,
-  Text
+  Text,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -24,7 +24,7 @@ export default function HomeScreen() {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const loadingAnim = useRef(new Animated.Value(0)).current;
-  const notifications = 3
+  const notifications = 3;
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
@@ -48,11 +48,119 @@ export default function HomeScreen() {
       {/* HEADER SECTION WITH TITLE AND BUTTONS */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Ionicons name="water" size={32} color={colors.tint} />
-            <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
-              Mati
-            </ThemedText>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            {/* Animated Water Circle Logo */}
+            <View
+              style={{
+                position: "relative",
+                width: 56,
+                height: 56,
+              }}
+            >
+              {/* Outer gradient circle effect */}
+              <View
+                style={{
+                  position: "absolute",
+                  width: 48,
+                  height: 48,
+                  borderRadius: 28,
+                  backgroundColor: colors.tint + "15",
+                  borderWidth: 2,
+                  borderColor: colors.tint + "30",
+                }}
+              />
+
+              {/* Inner circle with water drop */}
+              <View
+                style={{
+                  position: "absolute",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 24,
+                  backgroundColor: colors.tint,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  top: 4,
+                  left: 4,
+                  shadowColor: colors.tint,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
+              >
+                <Ionicons name="water" size={28} color={colors.background} />
+              </View>
+
+              {/* Top accent dot */}
+              <View
+                style={{
+                  position: "absolute",
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: colors.tint,
+                  top: -3,
+                  right: 8,
+                  opacity: 0.6,
+                }}
+              />
+
+              {/* Bottom accent dot */}
+              <View
+                style={{
+                  position: "absolute",
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: colors.tint,
+                  bottom: -2,
+                  left: 8,
+                  opacity: 0.4,
+                }}
+              />
+            </View>
+
+            {/* Text Logo */}
+            <View
+              style={{
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: Fonts.sans,
+                  color: colors.text,
+                  fontSize: 24,
+                  fontWeight: "800",
+                  letterSpacing: -0.8,
+                  lineHeight: 38,
+                }}
+              >
+                MATI
+              </Text>
+              <Text
+                style={{
+                  fontFamily: Fonts.sans,
+                  color: colors.tint,
+                  fontSize: 8,
+                  fontWeight: "600",
+                  letterSpacing: 1.2,
+                  textTransform: "uppercase",
+                  opacity: 0.8,
+                  marginBottom: 8,
+                }}
+              >
+                Pure Water
+              </Text>
+            </View>
           </View>
 
           <View style={styles.headerButtons}>
@@ -75,8 +183,21 @@ export default function HomeScreen() {
             >
               <Ionicons name="notifications" size={28} color={colors.tint} />
               {notifications > 0 && (
-                <View style={[styles.notificationBadge, {backgroundColor: colors.warningRed}]}>
-                  <Text style={{fontWeight: '600', color: colors.text, fontSize: 14}}>{notifications}</Text>
+                <View
+                  style={[
+                    styles.notificationBadge,
+                    { backgroundColor: colors.warningRed },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "600",
+                      color: colors.text,
+                      fontSize: 14,
+                    }}
+                  >
+                    {notifications}
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -91,10 +212,18 @@ export default function HomeScreen() {
           { backgroundColor: colors.card, borderColor: colors.border },
         ]}
       >
-
-        <View style={[styles.stylingDotOne, {backgroundColor: colors.background}]} />
-        <View style={[styles.stylingDotTwo, {backgroundColor: colors.background}]} />
-        <View style={[styles.stylingDotThree, {backgroundColor: colors.background}]} />
+        <View
+          style={[styles.stylingDotOne, { backgroundColor: colors.background }]}
+        />
+        <View
+          style={[styles.stylingDotTwo, { backgroundColor: colors.background }]}
+        />
+        <View
+          style={[
+            styles.stylingDotThree,
+            { backgroundColor: colors.background },
+          ]}
+        />
 
         <View style={styles.statsContent}>
           <Ionicons name="water" size={28} color={colors.tint} />
@@ -134,10 +263,24 @@ export default function HomeScreen() {
         <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
         <ThemedText style={styles.quickSubtitle}>Book your water</ThemedText>
 
-        <View style={[styles.stylingDotOne, {backgroundColor: colors.background}]} />
-        <View style={[styles.stylingDotTwo, {backgroundColor: colors.background}]} />
-        <View style={[styles.stylingDotThree, {backgroundColor: colors.background}]} />
-        <View style={[styles.stylingDotFour, {backgroundColor: colors.background}]} />
+        <View
+          style={[styles.stylingDotOne, { backgroundColor: colors.background }]}
+        />
+        <View
+          style={[styles.stylingDotTwo, { backgroundColor: colors.background }]}
+        />
+        <View
+          style={[
+            styles.stylingDotThree,
+            { backgroundColor: colors.background },
+          ]}
+        />
+        <View
+          style={[
+            styles.stylingDotFour,
+            { backgroundColor: colors.background },
+          ]}
+        />
 
         {/* LOCATION INPUT WITH AUTO BUTTON */}
         <View style={styles.locationRow}>
@@ -345,7 +488,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginBottom: 4,
     textTransform: "uppercase",
-    textAlign: 'left'
+    textAlign: "left",
   },
 
   statsValue: {
@@ -371,7 +514,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.8,
     textTransform: "uppercase",
-    textAlign: 'center'
+    textAlign: "center",
   },
 
   // QUICK REQUEST CARD

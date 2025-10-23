@@ -24,7 +24,7 @@ const TABS: TabConfig[] = [
 
 export default function TabLayout() {
   const theme = Colors.dark;
-  const [isAuthenticated, setIsAuthenticaed] = useState(true);
+  const [isAuthenticated, setIsAuthenticaed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +75,7 @@ export default function TabLayout() {
 
   return (
     <React.Fragment>
-      {isAuthenticated ? (
+      {!isAuthenticated ? (
         <AuthWrapper />
       ) : (
         <Tabs

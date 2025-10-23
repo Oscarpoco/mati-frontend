@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Animated,
-  Text
+  Text,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -71,16 +71,122 @@ export function LoginScreen() {
           <View>
             <View style={{ height: 100 }}>
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                }}
               >
+                {/* Animated Water Circle Logo */}
                 <View
-                  style={[styles.iconCircle, { backgroundColor: colors.tint }]}
+                  style={{
+                    position: "relative",
+                    width: 56,
+                    height: 56,
+                  }}
                 >
-                  <Ionicons name="water" size={32} color={colors.background} />
+                  {/* Outer gradient circle effect */}
+                  <View
+                    style={{
+                      position: "absolute",
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      backgroundColor: colors.tint + "15",
+                      borderWidth: 2,
+                      borderColor: colors.tint + "30",
+                    }}
+                  />
+
+                  {/* Inner circle with water drop */}
+                  <View
+                    style={{
+                      position: "absolute",
+                      width: 48,
+                      height: 48,
+                      borderRadius: 24,
+                      backgroundColor: colors.tint,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      top: 4,
+                      left: 4,
+                      shadowColor: colors.tint,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 8,
+                      elevation: 8,
+                    }}
+                  >
+                    <Ionicons
+                      name="water"
+                      size={28}
+                      color={colors.background}
+                    />
+                  </View>
+
+                  {/* Top accent dot */}
+                  <View
+                    style={{
+                      position: "absolute",
+                      width: 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: colors.tint,
+                      top: 1,
+                      right: 0,
+                      opacity: 0.6,
+                    }}
+                  />
+
+                  {/* Bottom accent dot */}
+                  <View
+                    style={{
+                      position: "absolute",
+                      width: 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: colors.tint,
+                      bottom: -2,
+                      left: 2,
+                      opacity: 0.4,
+                    }}
+                  />
                 </View>
-                <Text style={[styles.logo, { fontFamily: Fonts.sans, color: colors.text }]}>
-                  Mati
-                </Text>
+
+                {/* Text Logo */}
+                <View
+                  style={{
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: Fonts.sans,
+                      color: colors.text,
+                      fontSize: 32,
+                      fontWeight: "800",
+                      letterSpacing: -0.8,
+                      lineHeight: 38,
+                      marginBottom: -2,
+                    }}
+                  >
+                    MATI
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.sans,
+                      color: colors.tint,
+                      fontSize: 10,
+                      fontWeight: "600",
+                      letterSpacing: 1.2,
+                      textTransform: "uppercase",
+                      opacity: 0.8,
+                    }}
+                  >
+                    Pure Water
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -142,7 +248,9 @@ export function LoginScreen() {
                 <ThemedText style={[styles.label, { color: colors.text }]}>
                   Password
                 </ThemedText>
-                <TouchableOpacity onPress={() => navigation.navigate("ResetPassword")}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ResetPassword")}
+                >
                   <ThemedText
                     style={[styles.forgotLink, { color: colors.tint }]}
                   >
@@ -167,7 +275,11 @@ export function LoginScreen() {
                     borderRadius: 20,
                   }}
                 >
-                  <Ionicons name="lock-closed" size={22} color={colors.background} />
+                  <Ionicons
+                    name="lock-closed"
+                    size={22}
+                    color={colors.background}
+                  />
                 </View>
                 <TextInput
                   style={[styles.input, { color: colors.text, flex: 1 }]}
@@ -215,7 +327,7 @@ export function LoginScreen() {
               <View
                 style={{
                   alignItems: "center",
-                  backgroundColor: 'transparent',
+                  backgroundColor: "transparent",
                   flexDirection: "row",
                 }}
               >
