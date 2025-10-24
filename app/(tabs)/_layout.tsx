@@ -24,7 +24,7 @@ const TABS: TabConfig[] = [
 
 export default function TabLayout() {
   const theme = Colors.dark;
-  const [isAuthenticated, setIsAuthenticaed] = useState(false);
+  const [isAuthenticated, setIsAuthenticaed] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,7 +84,7 @@ export default function TabLayout() {
             tabBarHideOnKeyboard: true,
             tabBarActiveTintColor: theme.tint,
             tabBarInactiveTintColor: theme.textSecondary,
-            tabBarStyle: [styles.tabBar, { backgroundColor: "transparent" }],
+            tabBarStyle: [styles.tabBar, { backgroundColor: 'rgba(0, 0, 0, .7)' }],
           }}
         >
           {TABS.map(({ name, icon, iconSize = 26 }) => (
@@ -136,7 +136,6 @@ const styles = StyleSheet.create({
     right: 20,
     height: Platform.select({ ios: 72, android: 80 }),
     borderTopWidth: 0,
-    marginHorizontal: 10,
   },
 
   iconContainer: {
@@ -146,13 +145,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 0,
-    marginTop: 35,
+    marginTop: 40,
   },
 
   linkButton: {
     position: "absolute",
-    right: -25,
-    width: 50,
+    right: -40,
+    width: 100,
     height: 30,
     borderTopWidth: 0,
     borderBottomWidth: 0,
