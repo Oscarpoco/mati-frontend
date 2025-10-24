@@ -1,13 +1,14 @@
 import { Platform } from 'react-native';
 
-const primaryGreen = '#41F4DA';   
+const primaryGreen = '#41F4DA' + "80";   
+const bottomNav = '#1f8e7dff';   
 const backgroundDark = '#000'; 
 const cardGray = '#252525';       
-const textPrimary = '#FFFFFF';    // White main text
-const textSecondary = '#9BA1A6';  // Muted gray text
-const borderGray = '#1F1F1F';     // Subtle border line
-const warningRed = '#EF4444';     // Red for errors/warnings  
-const successGreen = '#22C55E'; // Green for success messages
+const textPrimary = '#FFFFFF';    
+const textSecondary = '#9BA1A6';  
+const borderGray = '#1F1F1F';     
+const warningRed = '#b34d4dff';     
+const successGreen = '#22C55E'; 
 
 export const Colors = {
   light: {
@@ -15,14 +16,15 @@ export const Colors = {
     textSecondary,
     background: backgroundDark,
     card: cardGray,
-    tint: primaryGreen,
+    tint: primaryGreen, 
     icon: textSecondary,
     border: borderGray,
     success: primaryGreen,
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
-    successGreen: successGreen
+    successGreen: successGreen,
+    bottomNav: bottomNav
   },
   dark: {
     text: textPrimary,
@@ -36,7 +38,8 @@ export const Colors = {
     tabIconDefault: textSecondary,
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
-    successGreen: successGreen
+    successGreen: successGreen,
+    bottomNav: bottomNav
   },
 };
 

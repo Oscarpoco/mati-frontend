@@ -7,14 +7,14 @@ import {
   Animated,
   Dimensions,
   Platform,
-  Modal,
-  StatusBar,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
+import { BookingDetailsModal } from "@/components/booking-details-modal";
+import { TimelineTracker } from "@/components/timeline-tracker";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
@@ -152,7 +152,8 @@ export default function BookingsScreen() {
       ]}
       activeOpacity={0.7}
     >
-      {/* Status Badge */}
+      <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
+
       <View
         style={[
           styles.statusBadge,
@@ -183,96 +184,17 @@ export default function BookingsScreen() {
       >
         {booking.bookingId}
       </ThemedText>
+      </View>
 
       {/* Timeline Tracker */}
-      <View style={styles.timelineTracker}>
-        <View style={styles.timelineStep}>
-          <View
-            style={[
-              styles.timelineCircle,
-              { backgroundColor: colors.successGreen, borderColor: colors.successGreen },
-            ]}
-          >
-            <View
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: colors.background,
-              }}
-            />
-          </View>
-          <ThemedText
-            style={[styles.timelineLabel, { color: colors.textSecondary }]}
-          >
-            Picked
-          </ThemedText>
-        </View>
-
-        {/* Dashed Line */}
-       <View
-          style={{
-            flex: 1,
-            height: 2,
-            borderStyle: "dashed",
-            borderWidth: 1,
-            borderColor: colors.tint + "20",
-            marginTop: 6,
-          }}
-        />
-
-        <View style={styles.timelineStep}>
-          <View
-            style={[
-              styles.timelineCircle,
-              { backgroundColor: colors.tint + "30", borderColor: colors.tint },
-            ]}
-          >
-            <View
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: colors.tint + "60",
-              }}
-            />
-          </View>
-          <ThemedText
-            style={[styles.timelineLabel, { color: colors.textSecondary }]}
-          >
-            Delivery
-          </ThemedText>
-        </View>
-
-        {/* Dashed Line */}
-        <View
-          style={{
-            flex: 1,
-            height: 2,
-            borderStyle: "dashed",
-            borderWidth: 1,
-            borderColor: colors.tint + "20",
-            marginTop: 6,
-          }}
-        />
-
-        <View style={styles.timelineStep}>
-          <View
-            style={[
-              styles.timelineCircle,
-              {
-                backgroundColor: colors.tint + "15",
-                borderColor: colors.tint + "40",
-              },
-            ]}
-          />
-          <ThemedText
-            style={[styles.timelineLabel, { color: colors.textSecondary }]}
-          >
-            Delivered
-          </ThemedText>
-        </View>
-      </View>
+      <TimelineTracker
+        steps={[
+          { label: "Picked", icon: "checkmark-circle", status: booking.status === "completed" ? "completed" : "completed" },
+          { label: "Delivery", icon: "car", status: booking.status === "active" ? "in-progress" : "completed" },
+          { label: "Delivered", icon: "home", status: booking.status === "completed" ? "completed" : "pending" },
+        ]}
+        currentStep={booking.status === "completed" ? 2 : 1}
+      />
 
       {/* Location Info */}
       <View style={styles.locationSection}>
@@ -284,7 +206,7 @@ export default function BookingsScreen() {
             {booking.fromLocation}
           </ThemedText>
         </View>
-       
+
         <View style={styles.locationItem}>
           <Ionicons name="location" size={16} color={colors.warningRed} />
           <ThemedText
@@ -297,7 +219,7 @@ export default function BookingsScreen() {
 
       {/* Footer with Date and Provider */}
       <View style={styles.cardFooter}>
-        <View>
+        <View style={{width: "60%"}}>
           <ThemedText
             style={[styles.footerLabel, { color: colors.textSecondary }]}
           >
@@ -307,7 +229,7 @@ export default function BookingsScreen() {
             {booking.bookedDate}
           </ThemedText>
         </View>
-        <View style={{ marginLeft: "auto" }}>
+        <View style={{width: "40%"}}>
           <ThemedText
             style={[styles.footerLabel, { color: colors.textSecondary }]}
           >
@@ -322,27 +244,27 @@ export default function BookingsScreen() {
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: colors.tint + "20" }]}
+          style={[styles.actionButton, { backgroundColor: colors.bottomNav }]}
         >
-          <Ionicons name="call" size={20} color={colors.tint} />
+          <Ionicons name="call" size={20} color={colors.background} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.actionButton,
             {
-              backgroundColor: colors.warningRed + "20",
+              backgroundColor: colors.warningRed,
               borderWidth: 1,
               borderColor: colors.border,
             },
           ]}
         >
-          <Ionicons name="close" size={20} color={colors.tint} />
+          <Ionicons name="close" size={20} color={colors.background} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.actionButton,
             {
-              backgroundColor: colors.card,
+              backgroundColor: colors.background,
               borderWidth: 1,
               borderColor: colors.border,
             },
@@ -456,361 +378,12 @@ export default function BookingsScreen() {
         ))}
       </ScrollView>
 
-      {/* Details Popup */}
-      {selectedBooking && (
-        <Modal
-          transparent
-          animationType="none"
-          visible={true}
-          onRequestClose={hideDetails} 
-        >
-          
-          <StatusBar hidden={true} />
-
-          <TouchableOpacity
-            style={styles.backdrop}
-            activeOpacity={0.7}
-            onPress={hideDetails}
-          />
-
-          <Animated.View
-            style={[
-              styles.modalContainer,
-              {
-                transform: [{ translateY: slideAnim }],
-                backgroundColor: colors.background,
-              },
-            ]}
-          >
-            <View
-              style={[styles.modalHeader, { borderBottomColor: colors.border }]}
-            >
-              <TouchableOpacity
-                onPress={hideDetails}
-                style={{
-                  width: 50,
-                  height: 50,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 18,
-                  backgroundColor: colors.tint,
-                }}
-              >
-                <Ionicons
-                  name="chevron-back"
-                  size={28}
-                  color={colors.background}
-                />
-              </TouchableOpacity>
-              <ThemedText
-                style={[
-                  {
-                    color: colors.text,
-                    textAlign: "center",
-                    fontSize: 22,
-                    fontWeight: "600",
-                  },
-                ]}
-              >
-                Booking Details
-              </ThemedText>
-              <TouchableOpacity
-                onPress={hideDetails}
-                style={{
-                  width: 50,
-                  height: 50,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 18,
-                  backgroundColor: colors.tint,
-                }}
-              >
-                <Ionicons
-                  name="scan"
-                  size={28}
-                  color={colors.background}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.modalContent}
-            >
-              {/* Booking ID and Status */}
-              <View style={styles.modalTopSection}>
-                <ThemedText
-                  style={[
-                    styles.modalBookingId,
-                    { color: colors.tint, fontFamily: Fonts.sans },
-                  ]}
-                >
-                  {selectedBooking.bookingId}
-                </ThemedText>
-                <View
-                  style={[
-                    styles.modalStatusBadge,
-                    {
-                      backgroundColor:
-                        selectedBooking.status === "active"
-                          ? colors.tint
-                          : colors.textSecondary,
-                    },
-                  ]}
-                >
-                  <ThemedText
-                    style={{
-                      color: colors.background,
-                      fontWeight: "700",
-                      fontSize: 11,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {selectedBooking.status}
-                  </ThemedText>
-                </View>
-              </View>
-
-              {/* Map Placeholder */}
-              <View
-                style={[
-                  styles.mapPlaceholder,
-                  { backgroundColor: colors.card, opacity: 0.6 },
-                ]}
-              >
-                <Ionicons name="map" size={60} color={colors.tint} />
-                <ThemedText
-                  style={{
-                    marginTop: 12,
-                    color: colors.textSecondary,
-                    fontWeight: "500",
-                  }}
-                >
-                  Live Tracking
-                </ThemedText>
-              </View>
-
-              {/* Provider Card */}
-              <View
-                style={[
-                  styles.modalSection,
-                  { backgroundColor: colors.card, opacity: 0.6 },
-                ]}
-              >
-                <View style={styles.providerHeader}>
-                  <View
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: 18,
-                      backgroundColor: colors.tint,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ThemedText
-                      style={{
-                        fontWeight: "800",
-                        fontSize: 16,
-                        color: colors.background,
-                      }}
-                    >
-                      {selectedBooking.provider.avatar}
-                    </ThemedText>
-                  </View>
-                  <View style={{ marginLeft: 12, flex: 1 }}>
-                    <ThemedText
-                      style={[styles.providerName, { fontFamily: Fonts.sans }]}
-                    >
-                      {selectedBooking.provider.name}
-                    </ThemedText>
-                    <ThemedText
-                      style={{
-                        fontSize: 11,
-                        color: colors.textSecondary,
-                        marginTop: 2,
-                      }}
-                    >
-                      Customer Service
-                    </ThemedText>
-                  </View>
-                  <TouchableOpacity
-                    style={[
-                      styles.callButton,
-                      { backgroundColor: colors.tint },
-                    ]}
-                  >
-                    <Ionicons name="call" size={20} color={colors.background} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Tracking Info */}
-              <View style={styles.modalSection}>
-                <View style={styles.infoRow}>
-                  <View style={{ width: "60%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      Tracking ID
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                    >
-                      {selectedBooking.bookingId}
-                    </ThemedText>
-                  </View>
-                  <View style={{ width: "40%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      Customer
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                    >
-                      Ryan Lubin
-                    </ThemedText>
-                  </View>
-                </View>
-              </View>
-
-              {/* Location Details */}
-              <View style={styles.modalSection}>
-                <View style={styles.infoRow}>
-                  <View style={{ width: "60%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      From
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                      numberOfLines={2}
-                    >
-                      {selectedBooking.fromLocation}
-                    </ThemedText>
-                  </View>
-                  <View style={{ width: "40%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      To
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                      numberOfLines={2}
-                    >
-                      {selectedBooking.toLocation}
-                    </ThemedText>
-                  </View>
-                </View>
-              </View>
-
-              {/* Dates */}
-              <View style={styles.modalSection}>
-                <View style={styles.infoRow}>
-                  <View style={{ width: "60%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      Date
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                    >
-                      {selectedBooking.bookedDate}
-                    </ThemedText>
-                  </View>
-                  <View style={{ width: "40%" }}>
-                    <ThemedText
-                      style={[
-                        styles.infoLabel,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      Estimated
-                    </ThemedText>
-                    <ThemedText
-                      style={[styles.infoValue, { color: colors.text }]}
-                    >
-                      {selectedBooking.expectedDelivery}
-                    </ThemedText>
-                  </View>
-                </View>
-              </View>
-
-              {/* Live Tracking Button */}
-              <TouchableOpacity
-                style={[
-                  styles.liveTrackingButton,
-                  { backgroundColor: colors.tint },
-                ]}
-              >
-                <View
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 35,
-                    backgroundColor: colors.background,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Ionicons name="location" size={24} color={colors.tint} />
-                </View>
-
-                <ThemedText
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    color: colors.background,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Live Tracking
-                </ThemedText>
-
-                <View style={{ flexDirection: "row", gap: 0 }}>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color={colors.background}
-                    style={{ marginTop: 4 }}
-                  />
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color={colors.background}
-                    style={{ marginTop: 4 }}
-                  />
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color={colors.background}
-                    style={{ marginTop: 4 }}
-                  />
-                </View>
-              </TouchableOpacity>
-            </ScrollView>
-          </Animated.View>
-        </Modal>
-      )}
+      {/* Details Modal */}
+      <BookingDetailsModal
+        selectedBooking={selectedBooking}
+        slideAnim={slideAnim}
+        onClose={hideDetails}
+      />
     </ThemedView>
   );
 }
@@ -889,7 +462,7 @@ const styles = StyleSheet.create({
     borderRadius: 38,
     borderWidth: 1,
     marginBottom: 12,
-    padding: 26,
+    padding: 16,
   },
 
   statusBadge: {
@@ -985,117 +558,5 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#000000",
-    opacity: 0.5,
-  },
-
-  modalContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: screenHeight * 1,
-  },
-
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    paddingTop: 70,
-  },
-
-  modalContent: {
-    paddingHorizontal: 16,
-    paddingTop: 30,
-    paddingBottom: 0,
-  },
-
-  modalTopSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-
-  modalBookingId: {
-    fontSize: 20,
-    fontWeight: "800",
-  },
-
-  modalStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 18,
-  },
-
-  mapPlaceholder: {
-    height: 220,
-    borderRadius: 36,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-
-  modalSection: {
-    marginBottom: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 28,
-  },
-
-  providerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  providerName: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-
-  callButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  infoLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-
-  infoValue: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
-
-  liveTrackingButton: {
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 32,
-    flexDirection: "row",
-    padding: 4,
-    paddingRight: 20,
-    marginBottom: 40,
   },
 });

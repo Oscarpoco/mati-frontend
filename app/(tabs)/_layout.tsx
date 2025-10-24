@@ -36,9 +36,9 @@ export default function TabLayout() {
   const checkAppState = async () => {
     try {
       const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
-     
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       setShowSplash(false);
 
       // If user hasn't seen onboarding, show it
@@ -84,7 +84,10 @@ export default function TabLayout() {
             tabBarHideOnKeyboard: true,
             tabBarActiveTintColor: theme.tint,
             tabBarInactiveTintColor: theme.textSecondary,
-            tabBarStyle: [styles.tabBar, { backgroundColor: 'rgba(0, 0, 0, .7)' }],
+            tabBarStyle: [
+              styles.tabBar,
+              { backgroundColor: "rgba(0, 0, 0, .7)" },
+            ],
           }}
         >
           {TABS.map(({ name, icon, iconSize = 26 }) => (
@@ -98,24 +101,43 @@ export default function TabLayout() {
                     style={[
                       styles.iconContainer,
                       {
-                        backgroundColor: focused ? theme.tint : theme.card,
+                        backgroundColor: focused ? theme.bottomNav : theme.card,
+                        borderColor: theme.bottomNav,
                       },
                     ]}
                   >
                     <Ionicons
                       name={icon}
                       size={iconSize}
-                      color={focused ? theme.background : color}
+                      color={focused ? theme.background : theme.bottomNav}
                     />
                     {name !== "profile" && (
                       <View
                         style={[
                           styles.linkButton,
                           {
-                            backgroundColor: focused ? theme.tint : theme.card,
+                            backgroundColor: theme.bottomNav,
                           },
                         ]}
-                      />
+                      >
+                        {name === "index" ? (
+                          <Ionicons
+                            name="chevron-back"
+                            color={theme.background}
+                            size={18}
+                            style={{ marginLeft: 40 }}
+                          />
+                        ) : name === "bookings" ? (
+                          null
+                        ) : (
+                          <Ionicons
+                            name="chevron-forward"
+                            color={theme.background}
+                            size={18}
+                            style={{ marginLeft: 40 }}
+                          />
+                        )}
+                      </View>
                     )}
                   </View>
                 ),
@@ -144,8 +166,8 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 0,
     marginTop: 40,
+    borderWidth: 1,
   },
 
   linkButton: {
@@ -156,5 +178,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomWidth: 0,
     zIndex: -1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -164,15 +164,6 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.headerButtons}>
-            {/* SCANNER BUTTON */}
-            <TouchableOpacity
-              style={[
-                styles.iconButton,
-                { backgroundColor: colors.card, borderColor: colors.border },
-              ]}
-            >
-              <Ionicons name="scan" size={28} color={colors.tint} />
-            </TouchableOpacity>
 
             {/* NOTIFICATION BUTTON */}
             <TouchableOpacity
@@ -193,7 +184,7 @@ export default function HomeScreen() {
                     style={{
                       fontWeight: "600",
                       color: colors.text,
-                      fontSize: 14,
+                      fontSize: 12,
                     }}
                   >
                     {notifications}
@@ -448,8 +439,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -18,
     right: -6,
-    width: 27,
-    height: 27,
+    width: 22,
+    height: 22,
     borderRadius: 9,
     justifyContent: "center",
     alignItems: "center",
