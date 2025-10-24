@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -22,10 +22,35 @@ export function TimelineTracker({
     { label: "Delivery", icon: "car", status: "in-progress" },
     { label: "Delivered", icon: "home", status: "pending" },
   ],
- 
+  currentStep = 1,
 }: TimelineTrackerProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+
+  // Create pulse animations for each step
+  const pulseAnimations = steps.map(() => new Animated.Value(0));
+
+  useEffect(() => {
+    // Start pulse animation for current step
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnimations[currentStep], {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(pulseAnimations[currentStep], {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    return () => animation.stop();
+  }, [currentStep]);
 
   const getStepColor = (status: string) => {
     switch (status) {
@@ -34,7 +59,7 @@ export function TimelineTracker({
       case "in-progress":
         return colors.tint;
       case "pending":
-        return colors.tint + "15";
+        return colors.textSecondary;
       default:
         return colors.textSecondary;
     }
@@ -47,7 +72,7 @@ export function TimelineTracker({
       case "in-progress":
         return colors.tint;
       case "pending":
-        return colors.tint + "40";
+        return colors.text;
       default:
         return colors.border;
     }
@@ -75,6 +100,33 @@ export function TimelineTracker({
             {/* Step Node */}
             <View style={styles.stepWrapper}>
               <View style={styles.stepNodeContainer}>
+                {/* Pulse Ring */}
+                {index === currentStep && (
+                  <Animated.View
+                    style={[
+                      styles.pulseRing,
+                      {
+                        opacity: pulseAnimations[index],
+                        transform: [
+                          {
+                            scale: pulseAnimations[index].interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [1, 1.8],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.pulseRingInner,
+                        { borderColor: getStepColor(step.status) },
+                      ]}
+                    />
+                  </Animated.View>
+                )}
+
                 {/* Circle with Icon */}
                 <View
                   style={[
@@ -93,15 +145,15 @@ export function TimelineTracker({
                 >
                   {step.status === "completed" ? (
                     <Ionicons
-                      name="checkmark"
-                      size={10}
+                      name="checkmark-circle"
+                      size={14}
                       color={colors.background}
                       style={{ fontWeight: "900" }}
                     />
                   ) : (
                     <Ionicons
                       name={step.icon}
-                      size={8}
+                      size={14}
                       color={getIconColor(step.status)}
                     />
                   )}
@@ -138,7 +190,6 @@ const styles = StyleSheet.create({
   timelineContainer: {
     marginBottom: 16,
     paddingVertical: 8,
-    overflow: "hidden",
   },
 
   horizontalTimeline: {
@@ -146,6 +197,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 0,
+    marginHorizontal: -30,
   },
 
   stepWrapper: {
@@ -160,15 +212,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     minWidth: 50,
+    position: "relative",
   },
 
   timelineCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 25,
+    height: 25,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     minWidth: 20,
+  },
+
+  pulseRing: {
+    position: "absolute",
+    width: 25,
+    height: 25,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    top: 0
+  },
+
+  pulseRingInner: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    borderWidth: 2,
   },
 
   stepLabel: {
