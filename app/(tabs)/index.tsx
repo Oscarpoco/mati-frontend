@@ -4,31 +4,46 @@ import {
   View,
   Animated,
   TouchableOpacity,
-  TextInput,
   useColorScheme,
   Text,
+  Modal,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef } from "react";
+import AddressModal from "@/components/AddressModal";
+import { Calendar } from "react-native-calendars";
 
 export default function HomeScreen() {
   // GET CURRENT COLOR SCHEME
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
-  // STATE FOR QUANTITY AND LOCATION
+  // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
-  const [location, setLocation] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [addressModalVisible, setAddressModalVisible] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [addressModalInitialView, setAddressModalInitialView] = useState<"list" | "search">("list");
   const loadingAnim = useRef(new Animated.Value(0)).current;
-  const notifications = 3;
+  const notifications = 0;
+
+  // MOCK SAVED ADDRESSES
+  const [savedAddresses, setSavedAddresses] = useState([
+    "123 Main Street, Downtown",
+    "456 Oak Avenue, Midtown",
+  ]);
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
-    if (isLoading) return;
+    if (isLoading || !selectedAddress || !selectedDate) {
+      alert("Please select an address and delivery date");
+      return;
+    }
 
     setIsLoading(true);
     Animated.timing(loadingAnim, {
@@ -40,6 +55,35 @@ export default function HomeScreen() {
       loadingAnim.setValue(0);
     });
   };
+
+  const handleOpenAddressModal = (view: "list" | "search" = "list") => {
+    setAddressModalInitialView(view);
+    setAddressModalVisible(true);
+  };
+
+  const handleAddAddress = (address: string) => {
+    setSavedAddresses([...savedAddresses, address]);
+  };
+
+  const handleSelectAddress = (address: string) => {
+    setSelectedAddress(address);
+  };
+
+  const handleDateSelect = (day: any) => {
+    setSelectedDate(day.dateString);
+    setDatePickerVisible(false);
+  };
+
+  const formatDate = (dateString: string) => {
+  if (!dateString) return "Select Date";
+
+  const date = new Date(dateString);
+  const month = date.toLocaleString("en-US", { month: "long" });
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${month}\n${day}, ${year}`; 
+};
 
   return (
     <ThemedView
@@ -164,7 +208,6 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.headerButtons}>
-
             {/* NOTIFICATION BUTTON */}
             <TouchableOpacity
               style={[
@@ -240,8 +283,9 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* ONGOING DELIVERY CARD - PLACEHOLDER */}
       <View>
-        {/* I WANT A CARD THAT SHOWS AN ONGOING DELIVERY IF THERES ANY BUT IF THERE'S NONE RENDER THAT NO BOOKINGS AVAILABLE  */}
+        {/* Ongoing delivery card would go here */}
       </View>
 
       {/* QUICK REQUEST SECTION */}
@@ -252,7 +296,7 @@ export default function HomeScreen() {
         ]}
       >
         <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
-        <ThemedText style={styles.quickSubtitle}>Book your water</ThemedText>
+        <ThemedText style={styles.quickSubtitle}>Book your water from your nearest provider</ThemedText>
 
         <View
           style={[styles.stylingDotOne, { backgroundColor: colors.background }]}
@@ -273,33 +317,52 @@ export default function HomeScreen() {
           ]}
         />
 
-        {/* LOCATION INPUT WITH AUTO BUTTON */}
+        {/* LOCATION AND DATE BUTTONS ROW */}
         <View style={styles.locationRow}>
-          <TextInput
+          <TouchableOpacity
             style={[
-              styles.locationInput,
+              styles.locationButton,
               {
                 backgroundColor: colors.background,
-                color: colors.text,
-                borderColor: colors.border,
+                width: "50%"
               },
             ]}
-            placeholder="Enter Your location"
-            placeholderTextColor={colors.textSecondary}
-            value={location}
-            onChangeText={setLocation}
-          />
+            onPress={() => handleOpenAddressModal("list")}
+          >
+            <ThemedText style={[styles.locationButtonText, {width: "80%"}]}>
+              {selectedAddress || "Select Address"}
+            </ThemedText>
+            <Ionicons name="location" size={20} color={colors.tint} style={{marginRight: 15,width: "20%"}} />
+          </TouchableOpacity>
+
           <TouchableOpacity
-            style={[styles.autoButton, { backgroundColor: colors.tint }]}
+            style={[
+              styles.dateButton,
+              {
+                backgroundColor: colors.background,
+               width: "50%"
+              },
+            ]}
+            onPress={() => setDatePickerVisible(true)}
+          >
+            <Ionicons name="calendar" size={20} color={colors.tint} />
+            <ThemedText style={styles.dateButtonText}>
+              {formatDate(selectedDate)}
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.newButton, { backgroundColor: colors.card }]}
+            onPress={() => handleOpenAddressModal("search")}
           >
             <ThemedText
               style={{
-                color: colors.background,
+                color: colors.tint,
                 fontWeight: "600",
-                fontSize: 14,
+                fontSize: 12,
               }}
             >
-              AUTO
+              + NEW ADDRESS
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -391,12 +454,82 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+
+      {/* ADDRESS MODAL */}
+      <AddressModal
+        visible={addressModalVisible}
+        onClose={() => setAddressModalVisible(false)}
+        onSelectAddress={handleSelectAddress}
+        savedAddresses={savedAddresses}
+        onAddAddress={handleAddAddress}
+        initialView={addressModalInitialView}
+      />
+
+      {/* CALENDAR MODAL */}
+      <Modal
+        visible={datePickerVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setDatePickerVisible(false)}
+      >
+        <View
+          style={[
+            styles.calendarOverlay,
+            { backgroundColor: colors.background },
+          ]}
+        >
+          <View style={styles.calendarHeader}>
+            <ThemedText style={styles.calendarTitle}>
+              Select Delivery Date
+            </ThemedText>
+            <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
+              <Ionicons name="close" size={28} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+
+          <View
+            style={[
+              styles.calendarContainer,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <Calendar
+              onDayPress={handleDateSelect}
+              markedDates={
+                selectedDate
+                  ? {
+                      [selectedDate]: {
+                        selected: true,
+                        selectedColor: colors.tint,
+                      },
+                    }
+                  : {}
+              }
+              minDate={new Date().toISOString().split("T")[0]}
+              theme={{
+                backgroundColor: colors.card,
+                calendarBackground: colors.card,
+                textSectionTitleColor: colors.text,
+                selectedDayBackgroundColor: colors.tint,
+                selectedDayTextColor: colors.background,
+                todayTextColor: colors.tint,
+                dayTextColor: colors.text,
+                textDisabledColor: colors.textSecondary,
+                dotColor: colors.tint,
+                selectedDotColor: colors.background,
+                monthTextColor: colors.text,
+                indicatorColor: colors.tint,
+                arrowColor: colors.tint,
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  // MAIN CONTAINER - NO SCROLL
   container: {
     flex: 1,
     paddingHorizontal: 16,
@@ -405,7 +538,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  // HEADER WITH TITLE AND BUTTONS
   header: {
     marginBottom: 14,
   },
@@ -435,6 +567,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
+
   notificationBadge: {
     position: "absolute",
     top: -18,
@@ -446,18 +579,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  LocationButton: {
-    paddingHorizontal: 14,
-    height: 48,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
-
-  // STATS CARD SECTION
   statsCard: {
-    borderRadius: 20,
+    borderRadius: 38,
     padding: 16,
     marginBottom: 20,
     borderWidth: 1,
@@ -508,25 +631,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // QUICK REQUEST CARD
   quickCard: {
-    borderRadius: 22,
+    borderRadius: 38,
     padding: 16,
     borderWidth: 1,
     marginBottom: 20,
   },
 
   quickTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "600",
     marginBottom: 4,
     lineHeight: 50,
   },
 
   quickSubtitle: {
-    fontSize: 16,
+    fontSize: 14.3,
     opacity: 0.6,
     marginBottom: 16,
+    fontWeight: "400",
   },
 
   stylingDotOne: {
@@ -569,31 +692,62 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -22.5 }],
   },
 
-  // LOCATION INPUT
   locationRow: {
     flexDirection: "row",
     gap: 8,
     marginBottom: 16,
+    marginHorizontal:-18
   },
 
-  locationInput: {
-    flex: 1,
-    height: 64,
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    fontSize: 16,
+  locationButton: {
+    height: 60,
+    borderTopRightRadius: 18,
+    borderBottomRightRadius: 18,
     borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    // overflow: "hidden",
   },
 
-  autoButton: {
-    paddingHorizontal: 14,
-    borderRadius: 18,
+  locationButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
+    textTransform: "uppercase",
+    textAlign: "left",
+  },
+
+  dateButton: {
+    height: 60,
+    borderTopLeftRadius: 18,
+    borderBottomLeftRadius: 18,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+
+  dateButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
+    textTransform: "uppercase",
+    textAlign: "right",
+  },
+
+  newButton: {
+    paddingHorizontal: 0,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    height: 60,
+    height: 35,
+    position: "absolute",
+    top: -85,
+    right: 16,
   },
 
-  // QUANTITY CONTROLS
   quantityRow: {
     flexDirection: "row",
     gap: 8,
@@ -624,7 +778,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // CONFIRM BUTTON WITH LOADING
   confirmContainer: {
     alignItems: "center",
     justifyContent: "space-between",
@@ -644,15 +797,36 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
 
-  loadingBar: {
-    height: 3,
-    borderRadius: 1.5,
-  },
-
   confirmText: {
     fontSize: 14,
     textAlign: "center",
     opacity: 0.7,
     letterSpacing: 1.2,
+  },
+
+  calendarOverlay: {
+    flex: 1,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+  },
+
+  calendarHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+
+  calendarTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    flex: 1,
+  },
+
+  calendarContainer: {
+    marginHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 16,
   },
 });

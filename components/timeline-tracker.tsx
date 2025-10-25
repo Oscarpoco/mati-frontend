@@ -50,7 +50,7 @@ export function TimelineTracker({
     animation.start();
 
     return () => animation.stop();
-  }, [currentStep]);
+  }, [currentStep, pulseAnimations]);
 
   const getStepColor = (status: string) => {
     switch (status) {
