@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   Text,
-  Modal,
+  Modal
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -16,6 +16,8 @@ import React, { useState, useRef } from "react";
 import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
+import { StatusBar } from 'expo-status-bar';
+
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
@@ -99,6 +101,9 @@ export default function CustomerHomeScreen() {
     <ThemedView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
+
+              <StatusBar style="light" />
+      
       {/* HEADER SECTION WITH TITLE AND BUTTONS */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
