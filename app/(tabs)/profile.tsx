@@ -176,8 +176,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 52,
-    fontWeight: "400",
+    fontSize: 48,
+    fontWeight: "600",
     marginBottom: 4,
     lineHeight: 60,
   },

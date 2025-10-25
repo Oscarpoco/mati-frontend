@@ -175,21 +175,21 @@ export default function CustomerHomeScreen() {
         </ThemedText>
 
         <View
-          style={[styles.stylingDotOne, { backgroundColor: colors.background }]}
+          style={[styles.stylingDotOne, { backgroundColor: colors.tint }]}
         />
         <View
-          style={[styles.stylingDotTwo, { backgroundColor: colors.background }]}
+          style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]}
         />
         <View
           style={[
             styles.stylingDotThree,
-            { backgroundColor: colors.background },
+            { backgroundColor: colors.tint },
           ]}
         />
         <View
           style={[
             styles.stylingDotFour,
-            { backgroundColor: colors.background },
+            { backgroundColor: colors.tint },
           ]}
         />
 
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
 
   quickCard: {
-    borderRadius: 0,
+    borderRadius: 38,
     paddingHorizontal: 10,
     paddingVertical: 30,
     borderWidth: 1,
@@ -485,38 +485,39 @@ const styles = StyleSheet.create({
 
   stylingDotOne: {
     position: "absolute",
-    top: -10,
-    right: -5,
-    width: 45,
-    height: 45,
-    borderRadius: 24,
+    top: 0,
+    right: 0,
+    width: 30,
+    height: 30,
+    borderTopRightRadius: 38,
+    borderBottomLeftRadius: 18,
   },
-
   stylingDotTwo: {
     position: "absolute",
-    bottom: -10,
-    right: -5,
-    width: 45,
-    height: 45,
-    borderRadius: 24,
+    bottom: 0,
+    right: 0,
+    width: 30,
+    height: 30,
+    borderBottomRightRadius: 38,
+    borderTopLeftRadius: 18,
   },
-
   stylingDotThree: {
     position: "absolute",
-    top: -10,
-    left: -5,
-    width: 45,
-    height: 45,
-    borderRadius: 24,
+    top: 0,
+    left: 0,
+    width: 30,
+    height: 30,
+    borderTopLeftRadius: 38,
+    borderBottomRightRadius: 18,
   },
-
   stylingDotFour: {
     position: "absolute",
-    bottom: -10,
-    left: -5,
-    width: 45,
-    height: 45,
-    borderRadius: 24,
+    bottom: 0,
+    left: 0,
+    width: 30,
+    height: 30,
+    borderBottomLeftRadius: 38,
+    borderTopRightRadius: 18,
   },
 
   locationRow: {

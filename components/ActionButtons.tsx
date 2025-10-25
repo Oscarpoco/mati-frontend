@@ -27,12 +27,23 @@ export default function ActionButtons({
       <TouchableOpacity
         style={[
           styles.actionButton,
-          { backgroundColor: colors.card, borderColor: colors.border },
+          { backgroundColor: colors.background, borderColor: colors.border },
         ]}
         onPress={onEditDetails}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Ionicons name="create" size={24} color={colors.tint} />
+          <View
+            style={{
+              height: 50,
+              width: 50,
+              backgroundColor: colors.tint,
+              borderRadius: 18,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="create" size={28} color={colors.background} />
+          </View>
           <View>
             <ThemedText style={styles.actionButtonText}>
               Edit Personal Details
@@ -58,7 +69,18 @@ export default function ActionButtons({
         onPress={onManageAddresses}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Ionicons name="location" size={24} color={colors.tint} />
+          <View
+            style={{
+              height: 50,
+              width: 50,
+              backgroundColor: colors.tint,
+              borderRadius: 18,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="location" size={28} color={colors.background} />
+          </View>
           <View>
             <ThemedText style={styles.actionButtonText}>
               Manage Addresses
@@ -79,12 +101,23 @@ export default function ActionButtons({
       <TouchableOpacity
         style={[
           styles.actionButton,
-          { backgroundColor: colors.card, borderColor: colors.border },
+          { backgroundColor: colors.background, borderColor: colors.border },
         ]}
         onPress={onDocuments}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Ionicons name="document" size={24} color={colors.tint} />
+          <View
+            style={{
+              height: 50,
+              width: 50,
+              backgroundColor: colors.tint,
+              borderRadius: 18,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="document" size={28} color={colors.background} />
+          </View>
           <View>
             <ThemedText style={styles.actionButtonText}>Documents</ThemedText>
             <ThemedText style={styles.actionButtonSubtext}>
@@ -108,7 +141,22 @@ export default function ActionButtons({
         onPress={onTerms}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Ionicons name="document-text" size={24} color={colors.tint} />
+          <View
+            style={{
+              height: 50,
+              width: 50,
+              backgroundColor: colors.tint,
+              borderRadius: 18,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons
+              name="document-text"
+              size={28}
+              color={colors.background}
+            />
+          </View>
           <View>
             <ThemedText style={styles.actionButtonText}>
               Terms & Conditions
@@ -127,7 +175,7 @@ export default function ActionButtons({
 
       {/* LOGOUT */}
       <TouchableOpacity
-        style={[styles.saveButton, { backgroundColor: colors.warningRed }]}
+        style={[styles.saveButton, { backgroundColor: colors.button  }]}
         onPress={onLogout}
       >
         <View
@@ -135,7 +183,7 @@ export default function ActionButtons({
             width: 56,
             height: 56,
             borderRadius: 28,
-            backgroundColor: colors.background,
+            backgroundColor: colors.warningRed,
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -147,7 +195,7 @@ export default function ActionButtons({
           style={{
             fontSize: 14,
             fontWeight: "600",
-            color: colors.background,
+            color: colors.textSecondary,
             textTransform: "uppercase",
           }}
         >
@@ -160,7 +208,7 @@ export default function ActionButtons({
               key={i}
               name="chevron-forward"
               size={16}
-              color={colors.background}
+              color={colors.textSecondary}
               style={{ marginTop: 4 }}
             />
           ))}
@@ -195,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     flexDirection: "row",
     padding: 4,
-    paddingRight: 20,
+    paddingRight: 25,
     marginBottom: 0,
     marginTop: 24,
   },
