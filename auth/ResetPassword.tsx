@@ -6,7 +6,7 @@ import {
   TextInput,
   useColorScheme,
   KeyboardAvoidingView,
-  ScrollView,
+  ScrollView
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -176,7 +176,7 @@ export function ResetPasswordScreen() {
                 <View
                   style={[
                     styles.confirmContainer,
-                    { backgroundColor: colors.tint + "10" },
+                    { backgroundColor: colors.button },
                   ]}
                 >
                   <TouchableOpacity
@@ -225,7 +225,7 @@ export function ResetPasswordScreen() {
                 <View
                   style={[
                     styles.confirmContainer,
-                    { backgroundColor: colors.background },
+                    { backgroundColor: colors.button },
                   ]}
                 >
                   <TouchableOpacity
@@ -247,7 +247,7 @@ export function ResetPasswordScreen() {
                   <View
                     style={{
                       alignItems: "center",
-                      backgroundColor: colors.background,
+                      backgroundColor: 'transparent',
                       flexDirection: "row",
                     }}
                   >

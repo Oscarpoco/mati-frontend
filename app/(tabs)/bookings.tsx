@@ -246,7 +246,7 @@ export default function BookingsScreen() {
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: colors.bottomNav }]}
         >
-          <Ionicons name="call" size={20} color={colors.background} />
+          <Ionicons name="call" size={32} color={colors.textSecondary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -258,19 +258,19 @@ export default function BookingsScreen() {
             },
           ]}
         >
-          <Ionicons name="close" size={20} color={colors.background} />
+          <Ionicons name="close" size={32} color={colors.textSecondary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.actionButton,
             {
-              backgroundColor: colors.background,
+              backgroundColor: colors.button,
               borderWidth: 1,
               borderColor: colors.border,
             },
           ]}
         >
-          <Ionicons name="chatbox" size={20} color={colors.tint} />
+          <Ionicons name="chatbox" size={32} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -549,13 +549,15 @@ const styles = StyleSheet.create({
 
   actionButtons: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: 8,
   },
 
   actionButton: {
-    flex: 1,
-    height: 44,
-    borderRadius: 18,
+    height: 60,
+    width: 60,
+    borderRadius: 38,
     justifyContent: "center",
     alignItems: "center",
   },

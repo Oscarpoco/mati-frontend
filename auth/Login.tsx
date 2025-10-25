@@ -6,21 +6,27 @@ import {
   useColorScheme,
   KeyboardAvoidingView,
   ScrollView,
-  Animated,
   Text,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 
-// React Navigation imports
+// REACT NAV
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "./authWrapper";
 
+// REDUX
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "@/redux/slice/loginSlice";
+import { RootState, AppDispatch } from "@/redux/store/store";
+
+// STYLES
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
+import LoadingBanner from "@/components/ui/LoadingBanner";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -31,25 +37,21 @@ export function LoginScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.login);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const loadingAnim = useRef(new Animated.Value(0)).current;
 
+  // Handle login
   const handleLogin = () => {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (!email || !password) {
+      alert("Please enter your email and password");
+      return;
+    }
 
-    Animated.timing(loadingAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: false,
-    }).start(() => {
-      setIsLoading(false);
-      loadingAnim.setValue(0);
-    });
+    dispatch(loginUser({ email, password }));
   };
 
   return (
@@ -231,7 +233,7 @@ export function LoginScreen() {
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
-                  editable={!isLoading}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -250,6 +252,7 @@ export function LoginScreen() {
                 </ThemedText>
                 <TouchableOpacity
                   onPress={() => navigation.navigate("ResetPassword")}
+                  disabled={loading}
                 >
                   <ThemedText
                     style={[styles.forgotLink, { color: colors.tint }]}
@@ -288,7 +291,7 @@ export function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  editable={!isLoading}
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -303,51 +306,92 @@ export function LoginScreen() {
             </View>
           </View>
 
+          <React.Fragment>
+            {error && (
+              <View
+                style={{
+                  padding: 10,
+                  alignItems: "center",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                <ThemedText
+                  style={{
+                    color: colors.warningRed,
+                    fontSize: 12,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    width: "100%",
+                  }}
+                >
+                  {typeof error === "string" ? error : "Something went wrong"}
+                </ThemedText>
+              </View>
+            )}
+          </React.Fragment>
+
           {/* BOTTOM SECTION */}
           <View>
             {/* LOGIN BUTTON */}
-            <View
-              style={[
-                styles.confirmContainer,
-                { backgroundColor: colors.tint + "10" },
-              ]}
-            >
-              <TouchableOpacity
-                onPress={handleLogin}
-                disabled={isLoading}
-                style={[styles.confirmButton, { backgroundColor: colors.tint }]}
-              >
-                <Ionicons
-                  name="chevron-forward"
-                  size={32}
-                  color={colors.background}
+
+            {loading ? (
+              <React.Fragment>
+                <LoadingBanner
+                  loading={loading}
+                  error={error}
+                  onPress={() => console.log("Button pressed")}
                 />
-              </TouchableOpacity>
-              <ThemedText style={styles.confirmText}>LOGIN</ThemedText>
-              <View
-                style={{
-                  alignItems: "center",
-                  backgroundColor: "transparent",
-                  flexDirection: "row",
-                }}
-              >
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </View>
-            </View>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <View
+                  style={[
+                    styles.confirmContainer,
+                    { backgroundColor: colors.button },
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={handleLogin}
+                    disabled={loading}
+                    style={[
+                      styles.confirmButton,
+                      { backgroundColor: colors.tint },
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={32}
+                      color={colors.background}
+                    />
+                  </TouchableOpacity>
+                  <ThemedText style={styles.confirmText}>SIGN IN</ThemedText>
+                  <View
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: "transparent",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                  </View>
+                </View>
+              </React.Fragment>
+            )}
 
             {/* DIVIDER */}
             <View style={[styles.divider, { borderTopColor: colors.border }]}>
@@ -371,6 +415,7 @@ export function LoginScreen() {
                 styles.socialButton,
                 { borderColor: colors.border, backgroundColor: colors.card },
               ]}
+              disabled={loading}
             >
               <Ionicons name="logo-google" size={24} color={colors.tint} />
               <ThemedText
@@ -391,7 +436,10 @@ export function LoginScreen() {
               <ThemedText style={{ color: colors.textSecondary }}>
                 Do not have an account?{" "}
               </ThemedText>
-              <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Register")}
+                disabled={loading}
+              >
                 <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
                   Sign up
                 </ThemedText>

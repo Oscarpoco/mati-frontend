@@ -9,11 +9,10 @@ import {
   Platform,
   FlatList,
   useColorScheme,
-  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/themed-text";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 
 interface AddressModalProps {
   visible: boolean;

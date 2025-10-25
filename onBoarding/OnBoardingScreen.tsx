@@ -203,10 +203,10 @@ export default function OnboardingScreen({
       {/* Skip Button */}
       {currentIndex < onboardingData.length - 1 && (
         <TouchableOpacity
-          style={[styles.skipButton, { backgroundColor: colors.tint }]}
+          style={[styles.skipButton, { backgroundColor: 'transparent' }]}
           onPress={handleSkip}
         >
-          <ThemedText style={[styles.skipText, { color: colors.background }]}>
+          <ThemedText style={[styles.skipText, { color: colors.textSecondary }]}>
             SKIP
           </ThemedText>
         </TouchableOpacity>
@@ -349,7 +349,7 @@ export default function OnboardingScreen({
             style={[
               styles.confirmContainer,
               {
-                backgroundColor: colors.tint + "10",
+                backgroundColor: colors.button,
                 // flex: currentIndex > 0 ? 1 : undefined,
                 width: currentIndex > 0 ? "80%" : "100%",
               },
@@ -407,14 +407,13 @@ const styles = {
   container: {
     flex: 1,
     paddingHorizontal: 0,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 40,
     justifyContent: "space-between",
   } as any,
 
   skipButton: {
     alignSelf: "flex-end",
-    paddingHorizontal: 24,
     paddingVertical: 6,
     marginBottom: 8,
     marginHorizontal: 24,
@@ -422,27 +421,23 @@ const styles = {
   } as any,
 
   skipText: {
-    fontSize: 14,
+    fontSize: 22,
     fontWeight: "800",
   } as any,
 
   progressBarContainer: {
     height: 15,
-    marginHorizontal: 24,
     marginBottom: 24,
-    borderRadius: 8,
     overflow: "hidden",
   } as any,
 
   progressBarBackground: {
     height: "100%",
-    borderRadius: 8,
     overflow: "hidden",
   } as any,
 
   progressBar: {
     height: "100%",
-    borderRadius: 8,
   } as any,
 
   slide: {

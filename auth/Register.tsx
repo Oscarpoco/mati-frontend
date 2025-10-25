@@ -1,26 +1,33 @@
 import {
   Platform,
   View,
-  Animated,
   TouchableOpacity,
   TextInput,
   useColorScheme,
   KeyboardAvoidingView,
   ScrollView,
-  Text
+  Text,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 
-// React Navigation imports
+// REACT NAV
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "./authWrapper";
 
+// REDUX
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "@/redux/slice/registerSlice";
+import { loginUser } from "@/redux/slice/loginSlice";
+import { RootState, AppDispatch } from "@/redux/store/store";
+
+// SCREENS
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
+import LoadingBanner from "@/components/ui/LoadingBanner";
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -32,26 +39,46 @@ export function RegisterScreen() {
   const colors = Colors[colorScheme ?? "dark"];
   const navigation = useNavigation<RegisterScreenNavigationProp>();
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.register);
+
+  const name = "Champ!";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [isProvider, setIsProvider] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const loadingAnim = useRef(new Animated.Value(0)).current;
 
-  const handleRegister = () => {
-    if (isLoading) return;
-    setIsLoading(true);
+  const handleRegister = async () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      alert("Please fill in all required fields");
+      return;
+    }
 
-    Animated.timing(loadingAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: false,
-    }).start(() => {
-      setIsLoading(false);
-      loadingAnim.setValue(0);
-    });
+    try {
+      const resultAction = await dispatch(
+        registerUser({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+          phoneNumber: phone || "",
+          role: isProvider ? "provider" : "customer",
+        })
+      );
+
+      if (registerUser.fulfilled.match(resultAction)) {
+        await dispatch(
+          loginUser({
+            email: email.trim().toLowerCase(),
+            password,
+          })
+        );
+      } else {
+        alert(resultAction.payload || "Registration failed");
+      }
+    } catch (err) {
+      console.error("Registration/Login error:", err);
+    }
   };
 
   return (
@@ -71,7 +98,15 @@ export function RegisterScreen() {
         >
           {/* HEADER */}
           <View>
-            <View style={{ height: 60, flexDirection: "row", alignItems: "center", gap: 16, justifyContent: "flex-start" }}>
+            <View
+              style={{
+                height: 60,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 16,
+                justifyContent: "flex-start",
+              }}
+            >
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
@@ -90,7 +125,9 @@ export function RegisterScreen() {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.title, { color: colors.text}]}>Create Account</Text>
+              <Text style={[styles.title, { color: colors.text }]}>
+                Create Account
+              </Text>
             </View>
 
             {/* TITLE SECTION */}
@@ -133,7 +170,7 @@ export function RegisterScreen() {
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
-                  editable={!isLoading}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -169,7 +206,7 @@ export function RegisterScreen() {
                   value={phone}
                   onChangeText={setPhone}
                   keyboardType="phone-pad"
-                  editable={!isLoading}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -209,7 +246,7 @@ export function RegisterScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  editable={!isLoading}
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -230,7 +267,7 @@ export function RegisterScreen() {
                 styles.checkboxContainer,
                 { borderColor: colors.border, backgroundColor: colors.card },
               ]}
-              disabled={isLoading}
+              disabled={loading}
             >
               <View
                 style={[
@@ -255,51 +292,94 @@ export function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* BOTTOM SECTION */}
-          <View>
-            {/* REGISTER BUTTON */}
-            <View
-              style={[
-                styles.confirmContainer,
-                { backgroundColor: colors.tint + "10" },
-              ]}
-            >
-              <TouchableOpacity
-                onPress={handleRegister}
-                disabled={isLoading}
-                style={[styles.confirmButton, { backgroundColor: colors.tint }]}
-              >
-                <Ionicons
-                  name="chevron-forward"
-                  size={32}
-                  color={colors.background}
-                />
-              </TouchableOpacity>
-              <ThemedText style={styles.confirmText}>SIGN UP</ThemedText>
+          {/* ERROR DISPLAY */}
+          <React.Fragment>
+            {error && (
               <View
                 style={{
+                  padding: 10,
                   alignItems: "center",
-                  backgroundColor: "transparent",
-                  flexDirection: "row",
+                  width: "100%",
+                  justifyContent: "center",
                 }}
               >
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                />
+                <ThemedText
+                  style={{
+                    color: colors.warningRed,
+                    fontSize: 12,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    width: "100%",
+                  }}
+                >
+                  {typeof error === "string" ? error : "Something went wrong"}
+                </ThemedText>
               </View>
-            </View>
+            )}
+          </React.Fragment>
+          {/* ENDS */}
+
+          {/* BOTTOM SECTION */}
+          <View>
+            {/* LOGIN BUTTON */}
+
+            {loading ? (
+              <React.Fragment>
+                <LoadingBanner
+                  loading={loading}
+                  error={error}
+                  onPress={() => console.log("Button pressed")}
+                />
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <View
+                  style={[
+                    styles.confirmContainer,
+                    { backgroundColor: colors.button },
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={handleRegister}
+                    disabled={loading}
+                    style={[
+                      styles.confirmButton,
+                      { backgroundColor: colors.tint },
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={32}
+                      color={colors.background}
+                    />
+                  </TouchableOpacity>
+                  <ThemedText style={styles.confirmText}>SIGN UP</ThemedText>
+                  <View
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: "transparent",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                    />
+                  </View>
+                </View>
+              </React.Fragment>
+            )}
 
             {/* LOGIN LINK */}
             <View
@@ -312,7 +392,7 @@ export function RegisterScreen() {
               <ThemedText style={{ color: colors.textSecondary }}>
                 Already have an account?{" "}
               </ThemedText>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")} disabled={loading}>
                 <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
                   Login
                 </ThemedText>

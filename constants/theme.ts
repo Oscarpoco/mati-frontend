@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 
 const primaryGreen = '#41F4DA' + "80";   
+const button = '#41F4DA' + "10";   
 const bottomNav = '#1f8e7dff';   
 const backgroundDark = '#000'; 
 const cardGray = '#252525';       
@@ -24,7 +25,8 @@ export const Colors = {
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
     successGreen: successGreen,
-    bottomNav: bottomNav
+    bottomNav: bottomNav,
+    button: button
   },
   dark: {
     text: textPrimary,
@@ -39,7 +41,8 @@ export const Colors = {
     tabIconSelected: primaryGreen,
     warningRed: warningRed,
     successGreen: successGreen,
-    bottomNav: bottomNav
+    bottomNav: bottomNav,
+    button: button
   },
 };
 

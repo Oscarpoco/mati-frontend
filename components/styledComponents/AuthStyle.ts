@@ -25,7 +25,6 @@ export const AuthStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "700",
-    marginBottom: 8,
     letterSpacing: -0.5,
     lineHeight: 50
   },
@@ -99,7 +98,7 @@ export const AuthStyles = StyleSheet.create({
   socialButton: {
     flexDirection: "row",
     height: 56,
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",

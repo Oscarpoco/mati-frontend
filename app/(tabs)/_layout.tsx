@@ -5,8 +5,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import AuthWrapper from "@/auth/authWrapper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// SCREENS
 import OnboardingScreen from "@/onBoarding/OnBoardingScreen";
 import SplashScreen from "@/components/ui/SplashScreen";
+
+// REDUX
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { restoreSession } from "../../redux/slice/authSlice";
+
 
 type TabConfig = {
   name: string;
@@ -24,55 +31,66 @@ const TABS: TabConfig[] = [
 
 export default function TabLayout() {
   const theme = Colors.dark;
-  const [isAuthenticated, setIsAuthenticaed] = useState(true);
+  const dispatch = useAppDispatch();
+
+  // 🔹 REDUX AUTH STATE
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+
+  // 🔹 LOCAL UI STATES
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(true);
 
+  // 🔹 RUN ON APP START
   useEffect(() => {
-    checkAppState();
+    initializeApp();
   }, []);
 
-  const checkAppState = async () => {
+  const initializeApp = async () => {
     try {
+      // 1️⃣ CHECK ONBOARDING STATUS
       const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
 
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // 2️⃣ RESTORE USER SESSION (FROM REDUX THUNK)
+      await dispatch(restoreSession());
+
+      // 3️⃣ SIMULATE SPLASH DELAY
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setShowSplash(false);
 
-      // If user hasn't seen onboarding, show it
+      // 4️⃣ SHOW ONBOARDING IF FIRST TIME
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
     } catch (error) {
-      console.error("Error checking app state:", error);
-      setShowSplash(false);
+      console.error("Error initializing app:", error);
     } finally {
-      setIsLoading(false);
+      setIsChecking(false);
     }
   };
 
+  // 🔹 WHEN USER COMPLETES ONBOARDING
   const handleOnboardingComplete = async () => {
     try {
       await AsyncStorage.setItem("hasSeenOnboarding", "true");
       setShowOnboarding(false);
     } catch (error) {
       console.error("Error saving onboarding status:", error);
-      setShowOnboarding(false);
     }
   };
 
-  // Splash Screen
+  // 🔹 SHOW SPLASH SCREEN FIRST
   if (showSplash) {
     return <SplashScreen />;
   }
 
-  // Onboarding Screen
+  // 🔹 SHOW ONBOARDING IF FIRST TIME
   if (showOnboarding) {
     return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
 
+  // 🔹 SHOW AUTH SCREENS OR MAIN APP
   return (
     <React.Fragment>
       {!isAuthenticated ? (
@@ -115,9 +133,7 @@ export default function TabLayout() {
                       <View
                         style={[
                           styles.linkButton,
-                          {
-                            backgroundColor: theme.bottomNav,
-                          },
+                          { backgroundColor: theme.bottomNav },
                         ]}
                       >
                         {name === "index" ? (
@@ -127,9 +143,7 @@ export default function TabLayout() {
                             size={18}
                             style={{ marginLeft: 40 }}
                           />
-                        ) : name === "bookings" ? (
-                          null
-                        ) : (
+                        ) : name === "bookings" ? null : (
                           <Ionicons
                             name="chevron-forward"
                             color={theme.background}
@@ -159,7 +173,6 @@ const styles = StyleSheet.create({
     height: Platform.select({ ios: 72, android: 80 }),
     borderTopWidth: 0,
   },
-
   iconContainer: {
     width: 70,
     height: 70,
@@ -169,7 +182,6 @@ const styles = StyleSheet.create({
     marginTop: 40,
     borderWidth: 1,
   },
-
   linkButton: {
     position: "absolute",
     right: -40,
