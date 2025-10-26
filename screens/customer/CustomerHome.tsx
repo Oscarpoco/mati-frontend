@@ -12,7 +12,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
@@ -20,6 +20,7 @@ import { StatusBar } from "expo-status-bar";
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { fetchUserById } from "@/redux/slice/authSlice";
 
 export default function CustomerHomeScreen() {
   // GET CURRENT COLOR SCHEME
@@ -28,25 +29,29 @@ export default function CustomerHomeScreen() {
   const dispatch = useAppDispatch();
 
   // 🔹 REDUX AUTH STATE
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, token } = useAppSelector((state) => state.auth);
   const { selectedLocation } = useAppSelector((state) => state.location);
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
-  const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [addressModalInitialView, setAddressModalInitialView] = useState<
-    "list" | "search"
-  >("list");
   const loadingAnim = useRef(new Animated.Value(0)).current;
   const notifications = 0;
+  // console.log("token STATE:", { token });
+  // console.log("user STATE:", user);
+
+  useEffect(() => {
+      if (user?.uid && token) {
+        dispatch(fetchUserById({ uid: user.uid, token }));
+      }
+    }, [dispatch, user?.uid, token]);
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
-    if (isLoading || !selectedAddress || !selectedDate) {
+    if (isLoading || !selectedLocation || !selectedDate) {
       alert("Please select an address and delivery date");
       return;
     }
@@ -62,8 +67,7 @@ export default function CustomerHomeScreen() {
     });
   };
 
-  const handleOpenAddressModal = (view: "list" | "search" = "list") => {
-    setAddressModalInitialView(view);
+  const handleOpenAddressModal = (view: "list") => {
     setAddressModalVisible(true);
   };
 
@@ -190,7 +194,7 @@ export default function CustomerHomeScreen() {
                 styles.locationButtonText,
                 {
                   width: "80%",
-                  fontSize: selectedAddress?.length > 0 ? 8 : 10,
+                  fontSize: 10,
                 },
               ]}
               numberOfLines={2}

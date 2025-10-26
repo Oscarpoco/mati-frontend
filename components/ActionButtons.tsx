@@ -1,5 +1,10 @@
 // components/profile/ActionButtons.tsx
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -9,6 +14,7 @@ import LoadingBanner from "@/components/ui/LoadingBanner";
 import { logoutUser } from "../redux/slice/authSlice";
 import { RootState, AppDispatch } from "@/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchUserDetails } from "../redux/slice/updateUserDetailsSlice";
 
 interface ActionButtonsProps {
   colors: any;
@@ -27,10 +33,27 @@ export default function ActionButtons({
   onTerms,
 }: ActionButtonsProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading } = useSelector((state: RootState) => state.auth);
+  const uid = useSelector((state: RootState) => state.auth.user?.uid);
+  const token = useSelector((state: RootState) => state.auth?.token);
+  const loading = useSelector((state: RootState) => state.auth?.loading);
+  const dataLoading = useSelector(
+    (state: RootState) => state.userDetails?.loading
+  );
 
   const handleLogout = () => {
     dispatch(logoutUser());
+  };
+
+  const handleOpenDetails = () => {
+    if (!token || !uid) {
+      console.warn("Missing token or user UID");
+      return;
+    }
+
+    dispatch(fetchUserDetails({ uid: uid, token }))
+      .unwrap()
+      .then(() => onEditDetails())
+      .catch((err) => console.error("Fetch user details error:", err));
   };
 
   return (
@@ -41,7 +64,7 @@ export default function ActionButtons({
           styles.actionButton,
           { backgroundColor: colors.background, borderColor: colors.border },
         ]}
-        onPress={onEditDetails}
+        onPress={() => handleOpenDetails()}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View
@@ -54,7 +77,11 @@ export default function ActionButtons({
               alignItems: "center",
             }}
           >
-            <Ionicons name="create" size={28} color={colors.background} />
+            {dataLoading ? (
+              <ActivityIndicator size={"small"} color={colors.background} />
+            ) : (
+              <Ionicons name="create" size={28} color={colors.background} />
+            )}
           </View>
           <View>
             <ThemedText style={styles.actionButtonText}>

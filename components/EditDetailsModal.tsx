@@ -11,7 +11,18 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
+// REDUX
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateUserDetails,
+  clearError,
+  clearSuccess,
+  fetchUserDetails,
+} from "../redux/slice/updateUserDetailsSlice";
+import { RootState, AppDispatch } from "@/redux/store/store";
+import { fetchUserById } from "@/redux/slice/authSlice";
 
 import LoadingBanner from "./ui/LoadingBanner";
 
@@ -20,26 +31,89 @@ const { height: screenHeight } = Dimensions.get("window");
 interface EditDetailsModalProps {
   visible: boolean;
   onClose: () => void;
-  user: any;
   colors: any;
-  onSave: (details: any) => void;
 }
 
 export default function EditDetailsModal({
   visible,
   onClose,
-  user,
   colors,
-  onSave,
 }: EditDetailsModalProps) {
+  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const dispatch = useDispatch<AppDispatch>();
+
+  // ✅ Get uid and token from auth state
+  const uid = useSelector((state: RootState) => state.auth.user?.uid);
+  const token = useSelector((state: RootState) => state.auth?.token);
+
+  const { user, loading, error, success } = useSelector(
+    (state: RootState) => state.userDetails
+  );
+
+  // ✅ Local form state
   const [editForm, setEditForm] = useState({
-    name: user?.name || "",
-    phone: user?.phoneNumber || "",
+    name: "",
+    phone: "",
   });
 
-  const slideAnim = useRef(new Animated.Value(screenHeight)).current;
-  const loading = false;
-  const error = null;
+  // ✅ POPULATE FORM WITH FETCHED USER DATA
+  useEffect(() => {
+    if (user?.name || user?.phoneNumber) {
+      setEditForm({
+        name: user.name || "",
+        phone: user.phoneNumber || "",
+      });
+    }
+  }, [user]);
+
+  // ✅ REFETCH USER DETAILS AFTER SUCCESSFUL UPDATE
+  useEffect(() => {
+    if (success && uid && token) {
+      setTimeout(() => {
+        dispatch(fetchUserDetails({ uid, token }));
+        dispatch(fetchUserById({ uid, token }));
+      }, 500);
+    }
+  }, [success, uid, token, dispatch]);
+
+  // ✅ CLOSE MODAL AFTER SUCCESS
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        slideOut();
+        dispatch(clearSuccess());
+      }, 2000);
+    }
+  }, [success, dispatch]);
+
+  const handleChange = (name: string, value: string) => {
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ✅ Dispatch Redux action to update user details
+  const handleSubmit = () => {
+    if (!uid || !token) {
+      console.error("❌ Missing uid or token");
+      return;
+    }
+
+    if (!editForm.name.trim() || !editForm.phone.trim()) {
+      alert("Please fill in all fields");
+      return;
+    }
+    
+    dispatch(
+      updateUserDetails({
+        uid,
+        name: editForm.name.trim(),
+        phoneNumber: editForm.phone.trim(),
+        token,
+      })
+    );
+  };
 
   const slideIn = () => {
     Animated.timing(slideAnim, {
@@ -57,19 +131,16 @@ export default function EditDetailsModal({
     }).start(() => onClose());
   };
 
-  const handleOpen = () => {
-    slideIn();
-  };
-
-  const handleClose = () => {
-    slideOut();
-  };
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
-      handleOpen();
+      slideIn();
     }
   }, [visible]);
+
+  const handleClose = () => {
+    dispatch(clearError());
+    slideOut();
+  };
 
   return (
     <Modal
@@ -131,6 +202,59 @@ export default function EditDetailsModal({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.modalContent}
         >
+          {/* ✅ Success Message */}
+          {success && (
+            <View
+              style={{
+                padding: 12,
+                alignItems: "center",
+                width: "100%",
+                justifyContent: "center",
+                backgroundColor: "#4CAF50",
+                borderRadius: 12,
+                marginBottom: 20,
+              }}
+            >
+              <ThemedText
+                style={{
+                  color: "#fff",
+                  fontSize: 14,
+                  textAlign: "center",
+                  fontWeight: "600",
+                }}
+              >
+                ✓ Profile updated successfully!
+              </ThemedText>
+            </View>
+          )}
+
+          {/* ✅ Error Message */}
+          {error && (
+            <View
+              style={{
+                padding: 12,
+                alignItems: "center",
+                width: "100%",
+                justifyContent: "center",
+                backgroundColor: "#f44336",
+                borderRadius: 12,
+                marginBottom: 20,
+              }}
+            >
+              <ThemedText
+                style={{
+                  color: "#fff",
+                  fontSize: 12,
+                  textAlign: "center",
+                  fontWeight: "600",
+                  textTransform: "uppercase",
+                }}
+              >
+                {typeof error === "string" ? error : "Something went wrong"}
+              </ThemedText>
+            </View>
+          )}
+
           <View style={styles.formGroup}>
             <ThemedText style={styles.formLabel}>Full Name</ThemedText>
             <TextInput
@@ -145,7 +269,8 @@ export default function EditDetailsModal({
               placeholder="Enter your name"
               placeholderTextColor={colors.textSecondary}
               value={editForm.name}
-              onChangeText={(text) => setEditForm({ ...editForm, name: text })}
+              onChangeText={(text) => handleChange("name", text)}
+              editable={!loading}
             />
           </View>
 
@@ -163,90 +288,65 @@ export default function EditDetailsModal({
               placeholder="Enter your phone number"
               placeholderTextColor={colors.textSecondary}
               value={editForm.phone}
-              onChangeText={(text) => setEditForm({ ...editForm, phone: text })}
+              onChangeText={(text) => handleChange("phone", text)}
+              editable={!loading}
+              keyboardType="phone-pad"
             />
           </View>
 
-          <React.Fragment>
-            {error && (
+          {/* ✅ Loading Banner OR Save Button */}
+          {loading ? (
+            <LoadingBanner
+              loading={loading}
+              error={null}
+              onPress={() => console.log("Button pressed")}
+            />
+          ) : (
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: colors.button }]}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
               <View
                 style={{
-                  padding: 10,
-                  alignItems: "center",
-                  width: "100%",
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.tint,
                   justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <ThemedText
-                  style={{
-                    color: colors.warningRed,
-                    fontSize: 12,
-                    textAlign: "center",
-                    textTransform: "uppercase",
-                    width: "100%",
-                  }}
-                >
-                  {typeof error === "string" ? error : "Something went wrong"}
-                </ThemedText>
+                <Ionicons
+                  name="checkmark-outline"
+                  size={24}
+                  color={colors.background}
+                />
               </View>
-            )}
-          </React.Fragment>
 
-          {loading ? (
-            <React.Fragment>
-              <LoadingBanner
-                loading={loading}
-                error={null}
-                onPress={() => console.log("Button pressed")}
-              />
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <View
-                style={[styles.saveButton, { backgroundColor: colors.button }]}
+              <ThemedText
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: colors.textSecondary,
+                  textTransform: "uppercase",
+                }}
               >
-                <TouchableOpacity
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 28,
-                    backgroundColor: colors.tint,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  onPress={() => onSave(editForm)}
-                >
+                SAVE CHANGES
+              </ThemedText>
+
+              <View style={{ flexDirection: "row", gap: 0 }}>
+                {[...Array(3)].map((_, i) => (
                   <Ionicons
-                    name="checkmark-outline"
-                    size={24}
-                    color={colors.tint}
+                    key={i}
+                    name="chevron-forward"
+                    size={16}
+                    color={colors.textSecondary}
+                    style={{ marginTop: 4 }}
                   />
-                </TouchableOpacity>
-
-                <ThemedText
-                  style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    color: colors.textSecondary,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  SAVE CHANGES
-                </ThemedText>
-
-                <View style={{ flexDirection: "row", gap: 0 }}>
-                  {[...Array(3)].map((_, i) => (
-                    <Ionicons
-                      key={i}
-                      name="chevron-forward"
-                      size={16}
-                      color={colors.textSecondary}
-                      style={{ marginTop: 4 }}
-                    />
-                  ))}
-                </View>
+                ))}
               </View>
-            </React.Fragment>
+            </TouchableOpacity>
           )}
         </ScrollView>
       </Animated.View>

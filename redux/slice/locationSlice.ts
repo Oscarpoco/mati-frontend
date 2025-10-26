@@ -89,7 +89,6 @@ export const addLocationToUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("📍 Adding location:", location);
 
       // Step 1: Add location
       await axios.put(
@@ -113,7 +112,6 @@ export const addLocationToUser = createAsyncThunk(
         }
       );
 
-      console.log("✅ Location added successfully");
       return userResponse.data;
     } catch (error: any) {
       console.error("❌ Add location error:", {
@@ -136,7 +134,6 @@ export const fetchUserById = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("📍 Fetching user locations...");
 
       const response = await axios.get(
         API_ENDPOINTS.fetchUser(uid),
@@ -146,8 +143,7 @@ export const fetchUserById = createAsyncThunk(
           },
         }
       );
-
-      console.log("✅ User fetched successfully");
+ 
       return response.data;
     } catch (error: any) {
       console.error("❌ Fetch user error:", {
@@ -174,7 +170,6 @@ export const removeLocationFromUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("📍 Removing location:", locationId);
 
       // Step 1: Remove location
       await axios.delete(
@@ -196,7 +191,6 @@ export const removeLocationFromUser = createAsyncThunk(
         }
       );
 
-      console.log("✅ Location removed successfully");
       return userResponse.data;
     } catch (error: any) {
       console.error("❌ Remove location error:", {
@@ -223,7 +217,6 @@ export const setDefaultLocation = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("📍 Setting default location:", locationId);
 
       // Step 1: Set as default
       await axios.put(
@@ -246,7 +239,6 @@ export const setDefaultLocation = createAsyncThunk(
         }
       );
 
-      console.log("✅ Default location set successfully");
       return userResponse.data;
     } catch (error: any) {
       console.error("❌ Set default location error:", {

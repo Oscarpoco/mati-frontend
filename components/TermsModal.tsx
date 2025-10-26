@@ -106,6 +106,7 @@ export default function TermsModal({
           {
             transform: [{ translateY: slideAnim }],
             backgroundColor: colors.background,
+            maxHeight: screenHeight * 0.7,
           },
         ]}
       >
@@ -126,11 +127,7 @@ export default function TermsModal({
               backgroundColor: colors.tint,
             }}
           >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color={colors.background}
-            />
+            <Ionicons name="chevron-back" size={28} color={colors.background} />
           </TouchableOpacity>
           <ThemedText
             style={{
@@ -180,7 +177,6 @@ const styles = {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    paddingTop: 70,
   },
   modalContent: {
     paddingHorizontal: 16,

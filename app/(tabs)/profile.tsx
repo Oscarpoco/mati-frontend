@@ -11,7 +11,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Fonts } from "@/constants/theme";
 import React, { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { useAppSelector } from "@/redux/store/hooks";
 
 import UserInfoCard from "@/components/UserInfoCard";
 import ActionButtons from "@/components/ActionButtons";
@@ -44,7 +44,6 @@ interface ProfileScreenProps {
 export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
-  const dispatch = useAppDispatch();
 
   // 🔹 REDUX AUTH STATE
   const { user } = useAppSelector((state) => state.auth);
@@ -70,11 +69,7 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
       uploadDate: "2024-10-18",
     },
   ];
-  
-  const addresses: string[] = [
-    "123 Main Street, Downtown",
-    "456 Oak Avenue, Midtown",
-  ];
+
 
   // STATE FOR MODALS
   const [editDetailsModalVisible, setEditDetailsModalVisible] = useState(false);
@@ -131,12 +126,7 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
       <EditDetailsModal
         visible={editDetailsModalVisible}
         onClose={handleCloseEditDetails}
-        user={user}
         colors={colors}
-        onSave={(details) => {
-          dispatchFunctions.onUpdateUserDetails?.(details);
-          handleCloseEditDetails();
-        }}
       />
 
       <DocumentsModal

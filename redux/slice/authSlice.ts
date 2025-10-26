@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { API_URL } from "@/constants/api";
 
 export type User = {
   uid: string;
@@ -7,6 +9,7 @@ export type User = {
   email: string;
   role: string;
   phoneNumber?: string | null;
+  token: null;
 };
 
 export type AuthState = {
@@ -32,8 +35,41 @@ export const restoreSession = createAsyncThunk(
       if (!userData) return null;
       return JSON.parse(userData);
     } catch (error: any) {
-        console.error('Error Occured', error)
+      console.error("Error Occured", error);
       return rejectWithValue("Failed to restore session");
+    }
+  }
+);
+
+// 🔹 FETCH USER BY ID
+export const fetchUserById = createAsyncThunk(
+  "auth/fetchUserById",
+  async (
+    { uid, token }: { uid: string; token: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axios.get(`${API_URL}/auth/user/${uid}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userWithUid = {
+        ...response.data.user, 
+        uid, 
+      };
+
+      return { user: userWithUid };
+    } catch (error: any) {
+      console.error("❌ Fetch user error:", {
+        message: error?.message,
+        status: error?.response?.status,
+        data: error?.response?.data,
+      });
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to fetch user"
+      );
     }
   }
 );
@@ -42,7 +78,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthData: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    setAuthData: (
+      state,
+      action: PayloadAction<{ user: User; token: string }>
+    ) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
@@ -70,9 +109,18 @@ const authSlice = createSlice({
       })
       .addCase(restoreSession.rejected, (state) => {
         state.loading = false;
+      })
+      .addCase(fetchUserById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUserById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(fetchUserById.rejected, (state) => {
+        state.loading = false;
       });
   },
-  
 });
 
 export const { setAuthData, logoutUser } = authSlice.actions;
