@@ -13,6 +13,8 @@ import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef } from "react";
 
+import LoadingBanner from "./ui/LoadingBanner";
+
 const { height: screenHeight } = Dimensions.get("window");
 
 interface EditDetailsModalProps {
@@ -36,6 +38,8 @@ export default function EditDetailsModal({
   });
 
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+  const loading = false;
+  const error = null;
 
   const slideIn = () => {
     Animated.timing(slideAnim, {
@@ -108,11 +112,7 @@ export default function EditDetailsModal({
               backgroundColor: colors.tint,
             }}
           >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color={colors.background}
-            />
+            <Ionicons name="chevron-back" size={28} color={colors.background} />
           </TouchableOpacity>
           <ThemedText
             style={{
@@ -145,9 +145,7 @@ export default function EditDetailsModal({
               placeholder="Enter your name"
               placeholderTextColor={colors.textSecondary}
               value={editForm.name}
-              onChangeText={(text) =>
-                setEditForm({ ...editForm, name: text })
-              }
+              onChangeText={(text) => setEditForm({ ...editForm, name: text })}
             />
           </View>
 
@@ -165,52 +163,91 @@ export default function EditDetailsModal({
               placeholder="Enter your phone number"
               placeholderTextColor={colors.textSecondary}
               value={editForm.phone}
-              onChangeText={(text) =>
-                setEditForm({ ...editForm, phone: text })
-              }
+              onChangeText={(text) => setEditForm({ ...editForm, phone: text })}
             />
           </View>
 
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.button }]}
-            onPress={() => onSave(editForm)}
-          >
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: colors.background,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="checkmark" size={24} color={colors.tint} />
-            </View>
+          <React.Fragment>
+            {error && (
+              <View
+                style={{
+                  padding: 10,
+                  alignItems: "center",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                <ThemedText
+                  style={{
+                    color: colors.warningRed,
+                    fontSize: 12,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    width: "100%",
+                  }}
+                >
+                  {typeof error === "string" ? error : "Something went wrong"}
+                </ThemedText>
+              </View>
+            )}
+          </React.Fragment>
 
-            <ThemedText
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: colors.text,
-                textTransform: "uppercase",
-              }}
-            >
-              Save Changes
-            </ThemedText>
+          {loading ? (
+            <React.Fragment>
+              <LoadingBanner
+                loading={loading}
+                error={null}
+                onPress={() => console.log("Button pressed")}
+              />
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <View
+                style={[styles.saveButton, { backgroundColor: colors.button }]}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: colors.tint,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => onSave(editForm)}
+                >
+                  <Ionicons
+                    name="checkmark-outline"
+                    size={24}
+                    color={colors.tint}
+                  />
+                </TouchableOpacity>
 
-            <View style={{ flexDirection: "row", gap: 0 }}>
-              {[...Array(3)].map((_, i) => (
-                <Ionicons
-                  key={i}
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.text}
-                  style={{ marginTop: 4 }}
-                />
-              ))}
-            </View>
-          </TouchableOpacity>
+                <ThemedText
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: colors.textSecondary,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  SAVE CHANGES
+                </ThemedText>
+
+                <View style={{ flexDirection: "row", gap: 0 }}>
+                  {[...Array(3)].map((_, i) => (
+                    <Ionicons
+                      key={i}
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textSecondary}
+                      style={{ marginTop: 4 }}
+                    />
+                  ))}
+                </View>
+              </View>
+            </React.Fragment>
+          )}
         </ScrollView>
       </Animated.View>
     </Modal>
