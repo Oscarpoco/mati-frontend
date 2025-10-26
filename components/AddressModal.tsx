@@ -396,7 +396,7 @@ export default function AddressModal({
                 inputIOS: {
                   color: colors.text,
                   fontSize: 16,
-                  paddingVertical: 12,
+                  paddingVertical: 16,
                 },
                 inputAndroid: {
                   color: colors.text,
@@ -406,7 +406,7 @@ export default function AddressModal({
               }}
               useNativeAndroidPickerStyle={false}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}} />
               )}
             />
           </View>
@@ -460,7 +460,7 @@ export default function AddressModal({
                 loadingGeo ? (
                   <ActivityIndicator size="small" color={colors.tint} />
                 ) : (
-                  <Ionicons name="chevron-down" size={20} color={colors.tint} />
+                  <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
                 )
               }
             />
@@ -505,7 +505,7 @@ export default function AddressModal({
                 borderColor: colors.border,
               }}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
               )}
             />
           </View>
@@ -611,7 +611,7 @@ export default function AddressModal({
                 borderColor: colors.border,
               }}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
               )}
             />
           </View>
@@ -820,6 +820,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 14,
     justifyContent: "center",
+    height: 50
   },
   textInput: {
     borderRadius: 28,
