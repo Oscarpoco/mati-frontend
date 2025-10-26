@@ -3,6 +3,12 @@ import { StyleSheet, View, TouchableOpacity } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import LoadingBanner from "@/components/ui/LoadingBanner";
+
+// REDUX
+import { logoutUser } from "../redux/slice/authSlice";
+import { RootState, AppDispatch } from "@/redux/store/store";
+import { useDispatch, useSelector } from "react-redux";
 
 interface ActionButtonsProps {
   colors: any;
@@ -19,8 +25,14 @@ export default function ActionButtons({
   onManageAddresses,
   onDocuments,
   onTerms,
-  onLogout,
 }: ActionButtonsProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
+
   return (
     <View>
       {/* EDIT DETAILS */}
@@ -174,46 +186,57 @@ export default function ActionButtons({
       </TouchableOpacity>
 
       {/* LOGOUT */}
-      <TouchableOpacity
-        style={[styles.saveButton, { backgroundColor: colors.button  }]}
-        onPress={onLogout}
-      >
-        <View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: colors.warningRed,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Ionicons name="log-out" size={24} color={colors.tint} />
-        </View>
 
-        <ThemedText
-          style={{
-            fontSize: 14,
-            fontWeight: "600",
-            color: colors.textSecondary,
-            textTransform: "uppercase",
-          }}
-        >
-          LOGOUT
-        </ThemedText>
+      {loading ? (
+        <React.Fragment>
+          <LoadingBanner
+            loading={loading}
+            error={null}
+            onPress={() => console.log("Button pressed")}
+          />
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <View style={[styles.saveButton, { backgroundColor: colors.button }]}>
+            <TouchableOpacity
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: colors.warningRed,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={handleLogout}
+            >
+              <Ionicons name="log-out" size={24} color={colors.tint} />
+            </TouchableOpacity>
 
-        <View style={{ flexDirection: "row", gap: 0 }}>
-          {[...Array(3)].map((_, i) => (
-            <Ionicons
-              key={i}
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-              style={{ marginTop: 4 }}
-            />
-          ))}
-        </View>
-      </TouchableOpacity>
+            <ThemedText
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: colors.textSecondary,
+                textTransform: "uppercase",
+              }}
+            >
+              LOGOUT
+            </ThemedText>
+
+            <View style={{ flexDirection: "row", gap: 0 }}>
+              {[...Array(3)].map((_, i) => (
+                <Ionicons
+                  key={i}
+                  name="chevron-forward"
+                  size={16}
+                  color={colors.textSecondary}
+                  style={{ marginTop: 4 }}
+                />
+              ))}
+            </View>
+          </View>
+        </React.Fragment>
+      )}
     </View>
   );
 }

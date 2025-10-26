@@ -156,9 +156,6 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
       <AddressModal
         visible={addressModalVisible}
         onClose={handleCloseAddresses}
-        onSelectAddress={(addr) => dispatchFunctions.onSelectAddress?.(addr)}
-        savedAddresses={addresses}
-        onAddAddress={(addr) => dispatchFunctions.onAddAddress?.(addr)}
         initialView="list"
       />
     </ThemedView>

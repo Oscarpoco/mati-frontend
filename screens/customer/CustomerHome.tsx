@@ -152,6 +152,7 @@ export default function CustomerHomeScreen() {
             styles.title,
             {
               fontFamily: Fonts.sans,
+              textTransform: "capitalize"
             },
           ]}
         >
@@ -166,7 +167,7 @@ export default function CustomerHomeScreen() {
       <View
         style={[
           styles.quickCard,
-          { backgroundColor: colors.card, borderColor: colors.border },
+          { backgroundColor: colors.background, borderColor: colors.border },
         ]}
       >
         <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
@@ -199,8 +200,8 @@ export default function CustomerHomeScreen() {
             style={[
               styles.locationButton,
               {
-                backgroundColor: colors.background,
-                width: "50%",
+                backgroundColor: colors.card,
+                width: "48%",
               },
             ]}
             onPress={() => handleOpenAddressModal("list")}
@@ -208,45 +209,24 @@ export default function CustomerHomeScreen() {
             <ThemedText style={[styles.locationButtonText, { width: "80%" }]}>
               {selectedAddress || "Select Address"}
             </ThemedText>
-            {/* <Ionicons
-              name="location"
-              size={20}
-              color={colors.tint}
-              style={{ marginRight: 15, width: "20%" }}
-            /> */}
+         
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.dateButton,
               {
-                backgroundColor: colors.background,
-                width: "50%",
-                borderLeftColor: colors.button
+                backgroundColor: colors.card,
+                width: "48%",
               },
             ]}
             onPress={() => setDatePickerVisible(true)}
           >
-            {/* <Ionicons name="calendar" size={20} color={colors.tint} /> */}
             <ThemedText style={styles.dateButtonText}>
               {formatDate(selectedDate)}
             </ThemedText>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.newButton, { backgroundColor: colors.card }]}
-            onPress={() => handleOpenAddressModal("search")}
-          >
-            <ThemedText
-              style={{
-                color: colors.tint,
-                fontWeight: "600",
-                fontSize: 12,
-              }}
-            >
-              + NEW ADDRESS
-            </ThemedText>
-          </TouchableOpacity>
+          
         </View>
 
         {/* QUANTITY CONTROLS */}
@@ -290,11 +270,12 @@ export default function CustomerHomeScreen() {
           </TouchableOpacity>
         </View>
 
+      </View>
         {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
         <View
           style={[
             styles.confirmContainer,
-            { backgroundColor: colors.background },
+            { backgroundColor: colors.button },
           ]}
         >
           <TouchableOpacity
@@ -314,7 +295,7 @@ export default function CustomerHomeScreen() {
           <View
             style={{
               alignItems: "center",
-              backgroundColor: colors.background,
+              backgroundColor: "transparent",
               flexDirection: "row",
             }}
           >
@@ -335,16 +316,12 @@ export default function CustomerHomeScreen() {
             />
           </View>
         </View>
-      </View>
 
       {/* ADDRESS MODAL */}
       <AddressModal
         visible={addressModalVisible}
         onClose={() => setAddressModalVisible(false)}
-        onSelectAddress={handleSelectAddress}
-        savedAddresses={savedAddresses}
-        onAddAddress={handleAddAddress}
-        initialView={addressModalInitialView}
+        initialView="list"
       />
 
       {/* CALENDAR MODAL */}
@@ -462,15 +439,15 @@ const styles = StyleSheet.create({
   },
 
   quickCard: {
-    borderRadius: 38,
-    paddingHorizontal: 10,
-    paddingVertical: 30,
+    borderRadius: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
     borderWidth: 1,
     marginBottom: 20,
   },
 
   quickTitle: {
-    fontSize: 22,
+    fontSize: 32,
     fontWeight: "600",
     marginBottom: 4,
     lineHeight: 50,
@@ -487,43 +464,41 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    width: 30,
-    height: 30,
-    borderTopRightRadius: 38,
-    borderBottomLeftRadius: 18,
+    width: 25,
+    height: 25,
+  
   },
   stylingDotTwo: {
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 30,
-    height: 30,
-    borderBottomRightRadius: 38,
-    borderTopLeftRadius: 18,
+    width: 25,
+    height: 25,
+  
   },
   stylingDotThree: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: 30,
-    height: 30,
-    borderTopLeftRadius: 38,
-    borderBottomRightRadius: 18,
+    width: 25,
+    height: 25,
+   
   },
   stylingDotFour: {
     position: "absolute",
     bottom: 0,
     left: 0,
-    width: 30,
-    height: 30,
-    borderBottomLeftRadius: 38,
-    borderTopRightRadius: 18,
+    width: 25,
+    height: 25,
+   
   },
 
   locationRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
-    marginHorizontal: -11,
+    marginHorizontal: -16,
   },
 
   locationButton: {
@@ -531,15 +506,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    gap: 8,
+    justifyContent: "center",
   },
 
   locationButtonText: {
     fontSize: 12,
     fontWeight: "500",
     textTransform: "uppercase",
-    textAlign: "left",
+    textAlign: "center",
   },
 
   dateButton: {
@@ -548,27 +522,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 8,
+    justifyContent: "center",
   },
 
   dateButtonText: {
     fontSize: 12,
     fontWeight: "500",
     textTransform: "uppercase",
-    textAlign: "right",
+    textAlign: "center",
   },
 
-  newButton: {
-    paddingHorizontal: 0,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    height: 35,
-    position: "absolute",
-    top: -85,
-    right: 16,
-  },
 
   quantityRow: {
     flexDirection: "row",
@@ -580,7 +543,7 @@ const styles = StyleSheet.create({
   quantityButton: {
     width: 60,
     height: 60,
-    borderRadius: 24,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -589,7 +552,7 @@ const styles = StyleSheet.create({
   quantityDisplay: {
     width: 150,
     height: 60,
-    borderRadius: 24,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -601,9 +564,10 @@ const styles = StyleSheet.create({
   },
 
   confirmContainer: {
+    width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 28,
     borderRadius: 32,
     flexDirection: "row",
     padding: 4,

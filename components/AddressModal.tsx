@@ -1,711 +1,879 @@
 // AddressModal.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   Platform,
   FlatList,
   useColorScheme,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import RNPickerSelect from "react-native-picker-select";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store/store";
+import {
+  addLocationToUser,
+  Location,
+  selectLocation,
+  fetchUserById,
+} from "../redux/slice/locationSlice";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
+import LoadingBanner from "./ui/LoadingBanner";
 
 interface AddressModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelectAddress: (address: string) => void;
-  savedAddresses: string[];
-  onAddAddress: (address: string) => void;
-  initialView?: "list" | "search";
+  initialView?: "list" | "form";
 }
+
+interface GeoLocation {
+  province: string;
+  city: string;
+  suburb: string;
+}
+
+const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"; // Add your key here
+
+const PROVINCES = [
+  { label: "Western Cape", value: "western_cape" },
+  { label: "Eastern Cape", value: "eastern_cape" },
+  { label: "Northern Cape", value: "northern_cape" },
+  { label: "Free State", value: "free_state" },
+  { label: "KwaZulu-Natal", value: "kwazulu_natal" },
+  { label: "Gauteng", value: "gauteng" },
+  { label: "Limpopo", value: "limpopo" },
+  { label: "Mpumalanga", value: "mpumalanga" },
+  { label: "North West", value: "north_west" },
+];
 
 export default function AddressModal({
   visible,
   onClose,
-  onSelectAddress,
-  savedAddresses,
-  onAddAddress,
   initialView = "list",
 }: AddressModalProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [currentView, setCurrentView] = useState<"list" | "search" | "confirm">(
-    initialView
+  const { user, token } = useSelector((state: RootState) => state.auth);
+  const { locations, selectedLocation, loading } = useSelector(
+    (state: RootState) => state.location
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [confirmingAddress, setConfirmingAddress] = useState("");
 
-  // Mock search results - replace with real API
-  const searchResults = [
-    "123 Main Street, Downtown",
-    "456 Oak Avenue, Midtown",
-    "789 Pine Road, Uptown",
-    "321 Elm Street, Suburbs",
-    "654 Maple Drive, Countryside",
-  ].filter((addr) => addr.toLowerCase().includes(searchQuery.toLowerCase()));
+  const [currentView, setCurrentView] = useState<"list" | "form">(initialView);
+  const [formData, setFormData] = useState({
+    province: "",
+    city: "",
+    suburb: "",
+    streetName: "",
+    streetNumber: "",
+    postalCode: "",
+    label: "Home",
+  });
 
-  const handleAddressSelect = (address: string) => {
-    setConfirmingAddress(address);
-    setCurrentView("confirm");
+  const [provinces, setProvinces] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [cities, setCities] = useState<{ label: string; value: string }[]>([]);
+  const [suburbs, setSuburbs] = useState<{ label: string; value: string }[]>(
+    []
+  );
+  const [loadingGeo, setLoadingGeo] = useState(false);
+
+  useEffect(() => {
+    if (user?.uid && token) {
+      dispatch(fetchUserById({ uid: user.uid, token }));
+    }
+    fetchProvinces();
+  }, [dispatch, user?.uid, token]);
+
+  const fetchProvinces = () => {
+    setProvinces(PROVINCES);
   };
 
-  const handleConfirmAddress = () => {
-    onAddAddress(confirmingAddress);
-    onSelectAddress(confirmingAddress);
-    resetModal();
+  const fetchCities = async (province: string) => {
+    setCities([]);
+    setSuburbs([]);
+    setLoadingGeo(true);
+
+    const provinceLabel =
+      PROVINCES.find((p) => p.value === province)?.label || "";
+    const query = `cities in ${provinceLabel}, South Africa`;
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+          query
+        )}&key=${GOOGLE_MAPS_API_KEY}&region=za`
+      );
+      const data = await response.json();
+
+      const cityList = (data.results || []).slice(0, 10).map((item: any) => ({
+        label: item.name,
+        value: item.place_id,
+      }));
+
+      setCities(cityList);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      Alert.alert("Error", "Failed to load cities. Check your Google API key.");
+    } finally {
+      setLoadingGeo(false);
+    }
   };
 
-  const handleSelectSavedAddress = (address: string) => {
-    onSelectAddress(address);
-    resetModal();
+  const fetchSuburbs = async (cityPlaceId: string, cityName: string) => {
+    setLoadingGeo(true);
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=suburbs+in+${encodeURIComponent(
+          cityName
+        )},+South+Africa&key=${GOOGLE_MAPS_API_KEY}&region=za`
+      );
+      const data = await response.json();
+
+      const suburbList = (data.results || []).slice(0, 10).map((item: any) => ({
+        label: item.name,
+        value: item.place_id,
+      }));
+
+      setSuburbs(suburbList);
+    } catch (error) {
+      console.error("Error fetching suburbs:", error);
+    } finally {
+      setLoadingGeo(false);
+    }
   };
 
-  const resetModal = () => {
-    setCurrentView(initialView);
-    setSearchQuery("");
-    setConfirmingAddress("");
+  const buildFullAddress = () => {
+    const parts = [
+      formData.streetNumber,
+      formData.streetName,
+      formData.suburb,
+      formData.city,
+      formData.postalCode,
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
+
+  const validateForm = () => {
+    if (!formData.province || !formData.city || !formData.streetName) {
+      Alert.alert("Validation Error", "Please fill in all required fields");
+      return false;
+    }
+    return true;
+  };
+
+  const getCoordinates = async (address: string) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address
+        )}&key=${GOOGLE_MAPS_API_KEY}&region=za`
+      );
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const location = data.results[0].geometry.location;
+        return { latitude: location.lat, longitude: location.lng };
+      }
+    } catch (error) {
+      console.error("Error getting coordinates:", error);
+    }
+    return { latitude: 0, longitude: 0 };
+  };
+
+  const handleAddAddress = async () => {
+    if (!validateForm() || !user || !token) return;
+
+    const fullAddress = buildFullAddress();
+    const coords = await getCoordinates(fullAddress);
+
+    const newLocation: Location = {
+      id: `${Date.now()}`,
+      address: fullAddress,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      label: formData.label,
+      isDefault: locations.length === 0,
+      createdAt: Date.now(),
+    };
+
+    try {
+      await dispatch(
+        addLocationToUser({
+          uid: user.uid,
+          location: newLocation,
+          token,
+        })
+      ).unwrap();
+
+      resetForm();
+      Alert.alert("Success", "Address added successfully");
+    } catch (err: any) {
+      Alert.alert("Error", err || "Failed to add address. Please try again.");
+    }
+  };
+
+  const handleSelectAddress = (location: Location) => {
+    dispatch(selectLocation(location));
     onClose();
   };
 
+  const resetForm = () => {
+    setFormData({
+      province: "",
+      city: "",
+      suburb: "",
+      streetName: "",
+      streetNumber: "",
+      postalCode: "",
+      label: "Home",
+    });
+    setCurrentView("list");
+  };
+
   const renderListView = () => (
-    <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
-      {/* HEADER */}
-      <View style={styles.modalHeader}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
         <TouchableOpacity
-          onPress={resetModal}
-          style={[styles.closeButton, { backgroundColor: colors.tint }]}
-        >
-          <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </TouchableOpacity>
-        <ThemedText style={styles.modalTitle}>My Addresses</ThemedText>
-        <View style={{ width: 28 }} />
-      </View>
-
-      {/* DIVIDER */}
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* SAVED ADDRESSES LIST */}
-      <ThemedText
-        style={[styles.sectionLabel, { color: colors.textSecondary }]}
-      >
-        SAVED ADDRESSES
-      </ThemedText>
-
-      <FlatList
-        data={savedAddresses}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            style={[
-              styles.addressItem,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => handleSelectSavedAddress(item)}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                styles.addressIconContainer,
-                { backgroundColor: colors.tint + "15" },
-              ]}
-            >
-              <Ionicons name="location" size={20} color={colors.tint} />
-            </View>
-            <View style={styles.addressInfo}>
-              <ThemedText style={styles.addressLabel}>
-                Address {index + 1}
-              </ThemedText>
-              <ThemedText style={styles.addressText}>{item}</ThemedText>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.tint} />
-          </TouchableOpacity>
-        )}
-        scrollEnabled={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons
-              name="location-outline"
-              size={48}
-              color={colors.textSecondary}
-            />
-            <ThemedText
-              style={[styles.emptyText, { color: colors.textSecondary }]}
-            >
-              No saved addresses yet
-            </ThemedText>
-            <ThemedText
-              style={[styles.emptySubtext, { color: colors.textSecondary }]}
-            >
-              Add one to get started
-            </ThemedText>
-          </View>
-        }
-      />
-
-      {/* ADD NEW ADDRESS BUTTON */}
-
-      <View
-        style={[styles.confirmContainer, { backgroundColor: colors.bottomNav }]}
-      >
-        <TouchableOpacity
-          onPress={() => setCurrentView("search")}
-          // disabled={isLoading}
-          style={[styles.confirmButton, { backgroundColor: colors.tint }]}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={32}
-            color={colors.background}
-          />
-        </TouchableOpacity>
-
-        <ThemedText style={[styles.confirmText, { color: colors.background }]}>
-          ADD NEW ADDRESS
-        </ThemedText>
-
-        <View
-          style={{
-            alignItems: "center",
-            backgroundColor: colors.bottomNav,
-            flexDirection: "row",
+          onPress={() => {
+            resetForm();
+            onClose();
           }}
+          style={[styles.backButton, { backgroundColor: colors.tint }]}
         >
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.background}
-          />
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.background}
-          />
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.background}
-          />
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderSearchView = () => (
-    <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
-      {/* HEADER */}
-      <View style={styles.modalHeader}>
-        <TouchableOpacity
-          onPress={() => setCurrentView("list")}
-          style={[styles.closeButton, { backgroundColor: colors.tint }]}
-        >
-          <Ionicons name="chevron-back" size={28} color={colors.text} />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <ThemedText style={styles.modalTitle}>Search Address</ThemedText>
+        <ThemedText style={styles.headerTitle}>Addresses</ThemedText>
+        <View style={{ width: 50 }} />
       </View>
-
-      {/* DIVIDER */}
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* SEARCH INPUT */}
-      <View
-        style={[
-          styles.searchWrapper,
-          {
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-          },
-        ]}
-      >
-        <Ionicons name="search" size={24} color={colors.textSecondary} />
-        <TextInput
-          style={[
-            styles.searchInput,
-            {
-              color: colors.text,
-            },
-          ]}
-          placeholder="Search address or location"
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons
-              name="close-circle"
-              size={20}
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
-      {/* SEARCH RESULTS */}
-      <ThemedText
-        style={[
-          styles.sectionLabel,
-          { color: colors.textSecondary, marginTop: 20 },
-        ]}
-      >
-        SEARCH RESULTS
-      </ThemedText>
 
       <FlatList
-        data={searchResults}
-        keyExtractor={(item, index) => index.toString()}
+        data={locations}
+        keyExtractor={(item) => item.id}
+        scrollEnabled={true}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 12,
+          paddingBottom: 100,
+        }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[
-              styles.searchResultItem,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => handleAddressSelect(item)}
-            activeOpacity={0.7}
+            onPress={() => handleSelectAddress(item)}
+            activeOpacity={0.6}
           >
             <View
               style={[
-                styles.resultIconContainer,
+                styles.addressCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor:
+                    selectedLocation?.id === item.id
+                      ? colors.tint
+                      : colors.border,
+                  borderWidth: selectedLocation?.id === item.id ? 2 : 1,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: colors.tint + "20" },
+                ]}
+              >
+                <Ionicons name="location" size={20} color={colors.tint} />
+              </View>
+
+              <View style={styles.addressDetails}>
+                <ThemedText style={styles.addressLabel}>
+                  {item.label}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.addressText, { color: colors.textSecondary }]}
+                  numberOfLines={2}
+                >
+                  {item.address}
+                </ThemedText>
+              </View>
+
+              {selectedLocation?.id === item.id && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={24}
+                  color={colors.tint}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <View
+              style={[
+                styles.emptyIconBox,
                 { backgroundColor: colors.tint + "15" },
               ]}
             >
-              <Ionicons name="location-outline" size={18} color={colors.tint} />
+              <Ionicons name="location-outline" size={40} color={colors.tint} />
             </View>
-            <ThemedText style={styles.resultText}>{item}</ThemedText>
-            <Ionicons name="chevron-forward" size={18} color={colors.tint} />
-          </TouchableOpacity>
-        )}
-        scrollEnabled={true}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons
-              name={searchQuery ? "search-outline" : "location-outline"}
-              size={48}
-              color={colors.textSecondary}
-            />
-            <ThemedText
-              style={[styles.emptyText, { color: colors.textSecondary }]}
-            >
-              {searchQuery ? "No results found" : "Start typing to search"}
-            </ThemedText>
+            <ThemedText style={styles.emptyText}>No addresses yet</ThemedText>
             <ThemedText
               style={[styles.emptySubtext, { color: colors.textSecondary }]}
             >
-              {searchQuery
-                ? "Try a different search term"
-                : "Enter street name or location"}
+              Add your first address to get started
             </ThemedText>
           </View>
         }
       />
-    </View>
-  );
 
-  const renderConfirmView = () => (
-    <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
-      {/* HEADER */}
-      <View style={styles.modalHeader}>
-        <TouchableOpacity
-          onPress={() => setCurrentView("search")}
-          style={[styles.closeButton, { backgroundColor: colors.tint }]}
-        >
-          <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </TouchableOpacity>
-        <ThemedText style={styles.modalTitle}>Confirm Address</ThemedText>
-        <View style={{ width: 28 }} />
-      </View>
-
-      {/* DIVIDER */}
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-      {/* CONFIRMATION CARD */}
-      <View
+      <TouchableOpacity
+        onPress={() => setCurrentView("form")}
+        disabled={loading}
         style={[
-          styles.confirmationCard,
+          styles.fab,
           {
-            backgroundColor: colors.card,
-            borderColor: colors.tint + "30",
-            shadowColor: colors.tint,
+            backgroundColor: colors.tint,
+            opacity: loading ? 0.6 : 1,
           },
         ]}
       >
-        <View
-          style={[
-            styles.confirmIconCircle,
-            { backgroundColor: colors.tint + "15" },
-          ]}
-        >
-          <Ionicons name="location" size={40} color={colors.tint} />
-        </View>
-
-        <ThemedText style={styles.confirmLabel}>Delivery Address</ThemedText>
-        <ThemedText style={styles.confirmAddress}>
-          {confirmingAddress}
-        </ThemedText>
-
-        {/* CONFIRMATION DOTS STYLING */}
-        <View
-          style={[styles.confirmDotOne, { backgroundColor: colors.background }]}
-        />
-        <View
-          style={[styles.confirmDotTwo, { backgroundColor: colors.background }]}
-        />
-      </View>
-
-      {/* CONFIRMATION MESSAGE */}
-      <ThemedText style={[styles.confirmQuestion, { color: colors.text }]}>
-        Are you sure you want to add this as your delivery address?
-      </ThemedText>
-
-      {/* ACTION BUTTONS ROW */}
-      <View style={styles.confirmButtonRow}>
-        <TouchableOpacity
-          style={[
-            styles.confirmCancelButton,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-            },
-          ]}
-          onPress={() => setCurrentView("search")}
-          activeOpacity={0.7}
-        >
-          <ThemedText style={[styles.cancelButtonText, { color: colors.text }]}>
-            Cancel
-          </ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.confirmYesButton, { backgroundColor: colors.tint }]}
-          onPress={handleConfirmAddress}
-          activeOpacity={0.8}
-        >
-          <Ionicons
-            name="checkmark"
-            size={24}
-            color={colors.background}
-            style={{ marginRight: 6 }}
-          />
-          <ThemedText
-            style={[styles.yesButtonText, { color: colors.background }]}
-          >
-            Confirm
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
+        <Ionicons name="add" size={28} color={colors.background} />
+      </TouchableOpacity>
     </View>
   );
 
-  const currentContent =
-    currentView === "list"
-      ? renderListView()
-      : currentView === "search"
-      ? renderSearchView()
-      : renderConfirmView();
+  const renderFormView = () => (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => setCurrentView("list")}
+          style={[styles.backButton, { backgroundColor: colors.tint }]}
+        >
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Add Address</ThemedText>
+        <View style={{ width: 50 }} />
+      </View>
+
+      <ScrollView
+        style={styles.formContainer}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>
+            Province <ThemedText style={{ color: "#FF6B6B" }}>*</ThemedText>
+          </ThemedText>
+          <View
+            style={[
+              styles.dropdownContainer,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <RNPickerSelect
+              items={provinces}
+              onValueChange={(value) => {
+                setFormData({
+                  ...formData,
+                  province: value,
+                  city: "",
+                  suburb: "",
+                });
+                fetchCities(value);
+              }}
+              value={formData.province}
+              placeholder={{ label: "Select Province", value: null }}
+              style={{
+                inputIOS: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+                inputAndroid: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+              }}
+              useNativeAndroidPickerStyle={false}
+              Icon={() => (
+                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+              )}
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>
+            City <ThemedText style={{ color: "#FF6B6B" }}>*</ThemedText>
+          </ThemedText>
+          <View
+            style={[
+              styles.dropdownContainer,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                opacity: formData.province ? 1 : 0.5,
+              },
+            ]}
+          >
+            <RNPickerSelect
+              items={cities}
+              onValueChange={(value, index) => {
+                const cityName = cities[index]?.label || "";
+                setFormData({ ...formData, city: value, suburb: "" });
+                fetchSuburbs(value, cityName);
+              }}
+              value={formData.city}
+              placeholder={{
+                label: loadingGeo ? "Loading..." : "Select City",
+                value: null,
+              }}
+              enabled={!!formData.province && !loadingGeo}
+              style={{
+                inputIOS: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+                inputAndroid: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+              }}
+              useNativeAndroidPickerStyle={false}
+              pickerStyleIOS={{
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+              }}
+              Icon={() =>
+                loadingGeo ? (
+                  <ActivityIndicator size="small" color={colors.tint} />
+                ) : (
+                  <Ionicons name="chevron-down" size={20} color={colors.tint} />
+                )
+              }
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>Suburb</ThemedText>
+          <View
+            style={[
+              styles.dropdownContainer,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                opacity: formData.city ? 1 : 0.5,
+              },
+            ]}
+          >
+            <RNPickerSelect
+              items={suburbs}
+              onValueChange={(value) =>
+                setFormData({ ...formData, suburb: value })
+              }
+              value={formData.suburb}
+              placeholder={{ label: "Select Suburb (Optional)", value: null }}
+              enabled={!!formData.city && !loadingGeo}
+              style={{
+                inputIOS: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+                inputAndroid: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+              }}
+              useNativeAndroidPickerStyle={false}
+              pickerStyleIOS={{
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+              }}
+              Icon={() => (
+                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+              )}
+            />
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>Street Number</ThemedText>
+          <TextInput
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: colors.card,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholder="123"
+            placeholderTextColor={colors.textSecondary}
+            value={formData.streetNumber}
+            onChangeText={(text) =>
+              setFormData({ ...formData, streetNumber: text })
+            }
+            keyboardType="number-pad"
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>
+            Street Name <ThemedText style={{ color: "#FF6B6B" }}>*</ThemedText>
+          </ThemedText>
+          <TextInput
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: colors.card,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholder="Main Street"
+            placeholderTextColor={colors.textSecondary}
+            value={formData.streetName}
+            onChangeText={(text) =>
+              setFormData({ ...formData, streetName: text })
+            }
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>Postal Code</ThemedText>
+          <TextInput
+            style={[
+              styles.textInput,
+              {
+                backgroundColor: colors.card,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholder="4001"
+            placeholderTextColor={colors.textSecondary}
+            value={formData.postalCode}
+            onChangeText={(text) =>
+              setFormData({ ...formData, postalCode: text })
+            }
+            keyboardType="number-pad"
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <ThemedText style={styles.label}>Label</ThemedText>
+          <View
+            style={[
+              styles.dropdownContainer,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <RNPickerSelect
+              items={[
+                { label: "Home", value: "Home" },
+                { label: "Work", value: "Work" },
+                { label: "Other", value: "Other" },
+              ]}
+              onValueChange={(value) =>
+                setFormData({ ...formData, label: value })
+              }
+              value={formData.label}
+              style={{
+                inputIOS: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+                inputAndroid: {
+                  color: colors.text,
+                  fontSize: 16,
+                  paddingVertical: 12,
+                },
+              }}
+              useNativeAndroidPickerStyle={false}
+              pickerStyleIOS={{
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+              }}
+              Icon={() => (
+                <Ionicons name="chevron-down" size={20} color={colors.tint} />
+              )}
+            />
+          </View>
+        </View>
+
+        {buildFullAddress() && (
+          <View
+            style={[
+              styles.previewContainer,
+              { backgroundColor: colors.tint + "10", borderColor: colors.tint },
+            ]}
+          >
+            <Ionicons name="information-circle" size={18} color={colors.tint} />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <ThemedText style={[styles.previewLabel, { color: colors.tint }]}>
+                Preview
+              </ThemedText>
+              <ThemedText style={styles.previewText}>
+                {buildFullAddress()}
+              </ThemedText>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+
+      <View style={styles.buttonGroup}>
+        {!loading && (
+          <TouchableOpacity
+            onPress={() => setCurrentView("list")}
+            style={[
+              styles.cancelButton,
+              {
+                backgroundColor: colors.warningRed,
+                borderColor: colors.border,
+              },
+            ]}
+            disabled={loading}
+          >
+            <Ionicons name="log-out" size={24} color={colors.tint} />
+          </TouchableOpacity>
+        )}
+
+        {loading ? (
+          <React.Fragment>
+            <LoadingBanner
+              loading={loading}
+              error={null}
+              onPress={() => console.log("Button pressed")}
+            />
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <View
+              style={[styles.saveButton, { backgroundColor: colors.button }]}
+            >
+              <TouchableOpacity
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.tint,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={handleAddAddress}
+              >
+                <Ionicons name="save" size={24} color={colors.background} />
+              </TouchableOpacity>
+
+              <ThemedText
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: colors.textSecondary,
+                  textTransform: "uppercase",
+                }}
+              >
+                save
+              </ThemedText>
+
+              <View style={{ flexDirection: "row", gap: 0 }}>
+                {[...Array(3)].map((_, i) => (
+                  <Ionicons
+                    key={i}
+                    name="chevron-forward"
+                    size={16}
+                    color={colors.textSecondary}
+                    style={{ marginTop: 4 }}
+                  />
+                ))}
+              </View>
+            </View>
+          </React.Fragment>
+        )}
+      </View>
+    </View>
+  );
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
-      <View
-        style={[styles.modalOverlay, { backgroundColor: colors.background }]}
-      >
-        {currentContent}
-      </View>
+      {currentView === "list" ? renderListView() : renderFormView()}
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  container: {
     flex: 1,
     paddingTop: Platform.OS === "ios" ? 60 : 20,
   },
-
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingBottom: 40,
-  },
-
-  modalHeader: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-
-  closeButton: {
+  backButton: {
     width: 50,
     height: 50,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 25,
   },
-
-  modalTitle: {
-    fontSize: 26,
+  headerTitle: {
+    fontSize: 24,
     fontWeight: "700",
     flex: 1,
     textAlign: "center",
-    letterSpacing: -0.5,
-    marginLeft: -8,
   },
-
-  divider: {
-    height: 1,
-    marginBottom: 20,
-    opacity: 0.5,
-  },
-
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
-    marginBottom: 12,
-    opacity: 0.7,
-  },
-
-  addressItem: {
+  addressCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 38,
+    padding: 14,
     marginBottom: 12,
+    borderRadius: 38,
     borderWidth: 1,
     gap: 12,
   },
-
-  addressIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  addressInfo: {
+  addressDetails: {
     flex: 1,
     gap: 4,
   },
-
   addressLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    opacity: 0.6,
-    textTransform: "uppercase",
-  },
-
-  addressText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
   },
-
-  searchWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    height: 60,
-    borderRadius: 28,
-    borderWidth: 1,
-    gap: 8,
-  },
-
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
+  addressText: {
+    fontSize: 12,
     fontWeight: "400",
   },
-
-  searchResultItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 6,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-    marginBottom: 12,
-    borderWidth: 1,
-    gap: 12,
-  },
-
-  resultIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  resultText: {
-    fontSize: 14,
-    fontWeight: "500",
-    flex: 1,
-  },
-
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 60,
+    paddingVertical: 80,
   },
-
+  emptyIconBox: {
+    width: 80,
+    height: 80,
+    borderRadius: 38,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   emptyText: {
     fontSize: 16,
     fontWeight: "600",
-    marginTop: 16,
+    marginBottom: 8,
   },
-
   emptySubtext: {
     fontSize: 13,
     opacity: 0.6,
-    marginTop: 6,
   },
-
-  addButton: {
-    flexDirection: "row",
-    height: 56,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 24,
-  },
-
-  addButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  confirmationCard: {
-    alignItems: "center",
-    padding: 28,
-    borderRadius: 28,
-    marginVertical: 32,
-    borderWidth: 1.5,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-    gap: 12,
-    position: "relative",
-    overflow: "hidden",
-  },
-
-  confirmDotOne: {
+  fab: {
     position: "absolute",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    top: -15,
-    right: -20,
-    opacity: 0.5,
-  },
-
-  confirmDotTwo: {
-    position: "absolute",
+    bottom: 24,
+    right: 16,
     width: 60,
     height: 60,
     borderRadius: 30,
-    bottom: -25,
-    left: -25,
-    opacity: 0.3,
-  },
-
-  confirmIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  confirmLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    opacity: 0.6,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-
-  confirmAddress: {
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-
-  confirmQuestion: {
-    fontSize: 15,
-    textAlign: "center",
-    opacity: 0.7,
-    marginBottom: 28,
-    lineHeight: 22,
-  },
-
-  confirmButtonRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: "auto",
-  },
-
-  confirmCancelButton: {
+  formContainer: {
     flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  dropdownContainer: {
+    borderRadius: 28,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    justifyContent: "center",
+  },
+  textInput: {
+    borderRadius: 28,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    fontWeight: "400",
+  },
+  previewContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 14,
+    borderRadius: 28,
+    borderWidth: 1,
+    marginBottom: 24,
+  },
+  previewLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  previewText: {
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cancelButton: {
     height: 56,
-    borderRadius: 18,
+    width: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
   },
-
-  cancelButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  confirmYesButton: {
-    flex: 1,
-    height: 56,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-
-  yesButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  confirmContainer: {
+  saveButton: {
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
     borderRadius: 32,
     flexDirection: "row",
     padding: 4,
-    paddingRight: 20,
-  },
-
-  confirmButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-start",
-  },
-
-  confirmText: {
-    fontSize: 14,
-    textAlign: "center",
-    opacity: 0.7,
-    letterSpacing: 1.2,
+    paddingRight: 25,
+    marginBottom: 0,
+    flex: 1,
   },
 });
