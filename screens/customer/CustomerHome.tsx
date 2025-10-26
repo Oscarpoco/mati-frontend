@@ -389,7 +389,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
     lineHeight: 60,
-    // textAlign: "center",
   },
 
   locationText: {

@@ -54,7 +54,7 @@ export default function ActionButtons({
               alignItems: "center",
             }}
           >
-            <Ionicons name="create" size={28} color={colors.textSecondary} />
+            <Ionicons name="create" size={28} color={colors.background} />
           </View>
           <View>
             <ThemedText style={styles.actionButtonText}>
@@ -85,7 +85,7 @@ export default function ActionButtons({
             style={{
               height: 50,
               width: 50,
-              backgroundColor: colors.tint,
+              backgroundColor: colors.background,
               borderRadius: 18,
               justifyContent: "center",
               alignItems: "center",
@@ -157,7 +157,7 @@ export default function ActionButtons({
             style={{
               height: 50,
               width: 50,
-              backgroundColor: colors.tint,
+              backgroundColor: colors.background,
               borderRadius: 18,
               justifyContent: "center",
               alignItems: "center",
@@ -166,7 +166,7 @@ export default function ActionButtons({
             <Ionicons
               name="document-text"
               size={28}
-              color={colors.background}
+              color={colors.textSecondary}
             />
           </View>
           <View>
