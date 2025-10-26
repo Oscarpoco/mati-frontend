@@ -112,7 +112,7 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
       </View>
 
       {/* MAIN CONTENT */}
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 110}}>
         {/* USER INFO CARD */}
         <UserInfoCard user={user} colors={colors} />
 
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 60,
-    paddingBottom: 120,
   },
   header: {
     marginBottom: 24,

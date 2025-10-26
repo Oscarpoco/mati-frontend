@@ -64,10 +64,10 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
           <ThemedText
             style={{
               color: isVerified ? "#10B981" : "#EF4444",
-              fontWeight: "600",
+              fontWeight: "400",
             }}
           >
-            {isVerified ? "Verified" : "Not Verified"}
+            {isVerified ? "VERIFIED" : "NOT VERIFIED"}
           </ThemedText>
         </View>
       </View>
@@ -77,9 +77,10 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
 
 const styles = StyleSheet.create({
   infoCard: {
-    borderRadius: 38,
+    borderRadius: 0,
     padding: 26,
     paddingHorizontal: 30,
+    marginHorizontal: -25,
     marginBottom: 24,
     borderWidth: 1,
   },
@@ -110,8 +111,6 @@ const styles = StyleSheet.create({
     right: 0,
     width: 30,
     height: 30,
-    borderTopRightRadius: 38,
-    borderBottomLeftRadius: 18,
   },
   stylingDotTwo: {
     position: "absolute",
@@ -119,8 +118,8 @@ const styles = StyleSheet.create({
     right: 0,
     width: 30,
     height: 30,
-    borderBottomRightRadius: 38,
-    borderTopLeftRadius: 18,
+    // borderBottomRightRadius: 38,
+    // borderTopLeftRadius: 18,
   },
   stylingDotThree: {
     position: "absolute",
@@ -128,8 +127,8 @@ const styles = StyleSheet.create({
     left: 0,
     width: 30,
     height: 30,
-    borderTopLeftRadius: 38,
-    borderBottomRightRadius: 18,
+    // borderTopLeftRadius: 38,
+    // borderBottomRightRadius: 18,
   },
   stylingDotFour: {
     position: "absolute",
@@ -137,7 +136,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: 30,
     height: 30,
-    borderBottomLeftRadius: 38,
-    borderTopRightRadius: 18,
+    // borderBottomLeftRadius: 38,
+    // borderTopRightRadius: 18,
   },
 });

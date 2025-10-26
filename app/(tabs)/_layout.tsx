@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 import AuthWrapper from "@/auth/authWrapper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur";
 
 // SCREENS
 import OnboardingScreen from "@/onBoarding/OnBoardingScreen";
@@ -13,7 +14,6 @@ import SplashScreen from "@/components/ui/SplashScreen";
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { restoreSession } from "../../redux/slice/authSlice";
-
 
 type TabConfig = {
   name: string;
@@ -102,9 +102,14 @@ export default function TabLayout() {
             tabBarHideOnKeyboard: true,
             tabBarActiveTintColor: theme.tint,
             tabBarInactiveTintColor: theme.textSecondary,
+            tabBarBackground: () => (
+              <BlurView intensity={10} tint="dark" style={StyleSheet.absoluteFill} />
+            ),
             tabBarStyle: [
               styles.tabBar,
-              { backgroundColor: "rgba(0, 0, 0, .7)" },
+              {
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+              },
             ],
           }}
         >

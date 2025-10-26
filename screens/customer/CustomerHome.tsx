@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   Text,
-  Modal
+  Modal,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -16,8 +16,7 @@ import React, { useState, useRef } from "react";
 import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
-import { StatusBar } from 'expo-status-bar';
-
+import { StatusBar } from "expo-status-bar";
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
@@ -30,6 +29,7 @@ export default function CustomerHomeScreen() {
 
   // 🔹 REDUX AUTH STATE
   const { user } = useAppSelector((state) => state.auth);
+  const { selectedLocation } = useAppSelector((state) => state.location);
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
@@ -43,12 +43,6 @@ export default function CustomerHomeScreen() {
   >("list");
   const loadingAnim = useRef(new Animated.Value(0)).current;
   const notifications = 0;
-
-  // MOCK SAVED ADDRESSES
-  const [savedAddresses, setSavedAddresses] = useState([
-    "123 Main Street, Downtown",
-    "456 Oak Avenue, Midtown",
-  ]);
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
@@ -73,14 +67,6 @@ export default function CustomerHomeScreen() {
     setAddressModalVisible(true);
   };
 
-  const handleAddAddress = (address: string) => {
-    setSavedAddresses([...savedAddresses, address]);
-  };
-
-  const handleSelectAddress = (address: string) => {
-    setSelectedAddress(address);
-  };
-
   const handleDateSelect = (day: any) => {
     setSelectedDate(day.dateString);
     setDatePickerVisible(false);
@@ -101,9 +87,8 @@ export default function CustomerHomeScreen() {
     <ThemedView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
+      <StatusBar style="light" />
 
-              <StatusBar style="light" />
-      
       {/* HEADER SECTION WITH TITLE AND BUTTONS */}
       <View style={styles.header}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -152,7 +137,7 @@ export default function CustomerHomeScreen() {
             styles.title,
             {
               fontFamily: Fonts.sans,
-              textTransform: "capitalize"
+              textTransform: "capitalize",
             },
           ]}
         >
@@ -182,16 +167,10 @@ export default function CustomerHomeScreen() {
           style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]}
         />
         <View
-          style={[
-            styles.stylingDotThree,
-            { backgroundColor: colors.tint },
-          ]}
+          style={[styles.stylingDotThree, { backgroundColor: colors.tint }]}
         />
         <View
-          style={[
-            styles.stylingDotFour,
-            { backgroundColor: colors.tint },
-          ]}
+          style={[styles.stylingDotFour, { backgroundColor: colors.tint }]}
         />
 
         {/* LOCATION AND DATE BUTTONS ROW */}
@@ -206,10 +185,19 @@ export default function CustomerHomeScreen() {
             ]}
             onPress={() => handleOpenAddressModal("list")}
           >
-            <ThemedText style={[styles.locationButtonText, { width: "80%" }]}>
-              {selectedAddress || "Select Address"}
+            <ThemedText
+              style={[
+                styles.locationButtonText,
+                {
+                  width: "80%",
+                  fontSize: selectedAddress?.length > 0 ? 8 : 10,
+                },
+              ]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {selectedLocation?.address || "Select Address"}
             </ThemedText>
-         
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -226,7 +214,6 @@ export default function CustomerHomeScreen() {
               {formatDate(selectedDate)}
             </ThemedText>
           </TouchableOpacity>
-          
         </View>
 
         {/* QUANTITY CONTROLS */}
@@ -269,53 +256,49 @@ export default function CustomerHomeScreen() {
             <Ionicons name="add" size={32} color={colors.background} />
           </TouchableOpacity>
         </View>
-
       </View>
-        {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
-        <View
-          style={[
-            styles.confirmContainer,
-            { backgroundColor: colors.button },
-          ]}
+      {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
+      <View
+        style={[styles.confirmContainer, { backgroundColor: colors.button }]}
+      >
+        <TouchableOpacity
+          onPress={handleConfirm}
+          disabled={isLoading}
+          style={[styles.confirmButton, { backgroundColor: colors.tint }]}
         >
-          <TouchableOpacity
-            onPress={handleConfirm}
-            disabled={isLoading}
-            style={[styles.confirmButton, { backgroundColor: colors.tint }]}
-          >
-            <Ionicons
-              name="chevron-forward"
-              size={32}
-              color={colors.background}
-            />
-          </TouchableOpacity>
+          <Ionicons
+            name="chevron-forward"
+            size={32}
+            color={colors.background}
+          />
+        </TouchableOpacity>
 
-          <ThemedText style={styles.confirmText}>CONFIRM</ThemedText>
+        <ThemedText style={styles.confirmText}>CONFIRM</ThemedText>
 
-          <View
-            style={{
-              alignItems: "center",
-              backgroundColor: "transparent",
-              flexDirection: "row",
-            }}
-          >
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-            <Ionicons
-              name="chevron-forward"
-              size={16}
-              color={colors.textSecondary}
-            />
-          </View>
+        <View
+          style={{
+            alignItems: "center",
+            backgroundColor: "transparent",
+            flexDirection: "row",
+          }}
+        >
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.textSecondary}
+          />
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.textSecondary}
+          />
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color={colors.textSecondary}
+          />
         </View>
+      </View>
 
       {/* ADDRESS MODAL */}
       <AddressModal
@@ -406,6 +389,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
     lineHeight: 60,
+    // textAlign: "center",
   },
 
   locationText: {
@@ -441,8 +425,6 @@ const styles = StyleSheet.create({
   quickCard: {
     borderRadius: 0,
     paddingHorizontal: 16,
-    paddingVertical: 18,
-    borderWidth: 1,
     marginBottom: 20,
   },
 
@@ -451,6 +433,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
     lineHeight: 50,
+    textTransform: "uppercase",
+    textAlign: "center",
+
   },
 
   quickSubtitle: {
@@ -458,39 +443,37 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     marginBottom: 16,
     fontWeight: "400",
+    textAlign: "center",
+
   },
 
   stylingDotOne: {
     position: "absolute",
     top: 0,
     right: 0,
-    width: 25,
+    width: 5,
     height: 25,
-  
   },
   stylingDotTwo: {
     position: "absolute",
     bottom: 0,
     right: 0,
-    width: 25,
+    width: 5,
     height: 25,
-  
   },
   stylingDotThree: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: 25,
+    width: 5,
     height: 25,
-   
   },
   stylingDotFour: {
     position: "absolute",
     bottom: 0,
     left: 0,
-    width: 25,
+    width: 5,
     height: 25,
-   
   },
 
   locationRow: {
@@ -498,7 +481,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-    marginHorizontal: -16,
+    // marginHorizontal: -16,
   },
 
   locationButton: {
@@ -510,7 +493,6 @@ const styles = StyleSheet.create({
   },
 
   locationButtonText: {
-    fontSize: 12,
     fontWeight: "500",
     textTransform: "uppercase",
     textAlign: "center",
@@ -531,7 +513,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     textAlign: "center",
   },
-
 
   quantityRow: {
     flexDirection: "row",

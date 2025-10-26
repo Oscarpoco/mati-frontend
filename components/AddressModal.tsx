@@ -33,13 +33,7 @@ interface AddressModalProps {
   initialView?: "list" | "form";
 }
 
-interface GeoLocation {
-  province: string;
-  city: string;
-  suburb: string;
-}
-
-const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"; // Add your key here
+const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const PROVINCES = [
   { label: "Western Cape", value: "western_cape" },
@@ -115,9 +109,9 @@ export default function AddressModal({
       );
       const data = await response.json();
 
-      const cityList = (data.results || []).slice(0, 10).map((item: any) => ({
+      const cityList = (data.results || []).slice(0, 200).map((item: any) => ({
         label: item.name,
-        value: item.place_id,
+        value: item.name,
       }));
 
       setCities(cityList);
@@ -129,7 +123,7 @@ export default function AddressModal({
     }
   };
 
-  const fetchSuburbs = async (cityPlaceId: string, cityName: string) => {
+  const fetchSuburbs = async (cityName: string) => {
     setLoadingGeo(true);
 
     try {
@@ -140,9 +134,9 @@ export default function AddressModal({
       );
       const data = await response.json();
 
-      const suburbList = (data.results || []).slice(0, 10).map((item: any) => ({
+      const suburbList = (data.results || []).slice(0, 200).map((item: any) => ({
         label: item.name,
-        value: item.place_id,
+        value: item.name,
       }));
 
       setSuburbs(suburbList);
@@ -287,10 +281,10 @@ export default function AddressModal({
               <View
                 style={[
                   styles.iconContainer,
-                  { backgroundColor: colors.tint + "20" },
+                  { backgroundColor: colors.button },
                 ]}
               >
-                <Ionicons name="location" size={20} color={colors.tint} />
+                <Ionicons name="location" size={20} color={colors.warningRed} />
               </View>
 
               <View style={styles.addressDetails}>
@@ -406,7 +400,12 @@ export default function AddressModal({
               }}
               useNativeAndroidPickerStyle={false}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}} />
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={colors.tint}
+                  style={{ marginTop: 13 }}
+                />
               )}
             />
           </View>
@@ -428,10 +427,9 @@ export default function AddressModal({
           >
             <RNPickerSelect
               items={cities}
-              onValueChange={(value, index) => {
-                const cityName = cities[index]?.label || "";
+              onValueChange={(value) => {
                 setFormData({ ...formData, city: value, suburb: "" });
-                fetchSuburbs(value, cityName);
+                fetchSuburbs(value);
               }}
               value={formData.city}
               placeholder={{
@@ -458,9 +456,14 @@ export default function AddressModal({
               }}
               Icon={() =>
                 loadingGeo ? (
-                  <ActivityIndicator size="small" color={colors.tint} />
+                  <ActivityIndicator size="small" color={colors.tint} style={{ marginTop: 13 }} />
                 ) : (
-                  <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
+                  <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={colors.tint}
+                    style={{ marginTop: 13 }}
+                  />
                 )
               }
             />
@@ -468,7 +471,7 @@ export default function AddressModal({
         </View>
 
         <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Suburb</ThemedText>
+          <ThemedText style={styles.label}>Suburb (Optional)</ThemedText>
           <View
             style={[
               styles.dropdownContainer,
@@ -505,7 +508,12 @@ export default function AddressModal({
                 borderColor: colors.border,
               }}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={colors.tint}
+                  style={{ marginTop: 13 }}
+                />
               )}
             />
           </View>
@@ -611,7 +619,12 @@ export default function AddressModal({
                 borderColor: colors.border,
               }}
               Icon={() => (
-                <Ionicons name="chevron-down" size={20} color={colors.tint} style={{marginTop:13}}/>
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={colors.tint}
+                  style={{ marginTop: 13 }}
+                />
               )}
             />
           </View>
@@ -732,7 +745,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 50,
     height: 50,
-    borderRadius: 28,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -747,14 +760,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 14,
     marginBottom: 12,
-    borderRadius: 38,
+    borderRadius: 28,
     borderWidth: 1,
     gap: 12,
   },
   iconContainer: {
     width: 50,
     height: 50,
-    borderRadius: 28,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -820,7 +833,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 14,
     justifyContent: "center",
-    height: 50
+    height: 50,
   },
   textInput: {
     borderRadius: 28,

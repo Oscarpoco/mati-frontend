@@ -172,7 +172,7 @@ export default function EditDetailsModal({
           </View>
 
           <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.tint }]}
+            style={[styles.saveButton, { backgroundColor: colors.button }]}
             onPress={() => onSave(editForm)}
           >
             <View
@@ -192,7 +192,7 @@ export default function EditDetailsModal({
               style={{
                 fontSize: 14,
                 fontWeight: "600",
-                color: colors.background,
+                color: colors.text,
                 textTransform: "uppercase",
               }}
             >
@@ -205,7 +205,7 @@ export default function EditDetailsModal({
                   key={i}
                   name="chevron-forward"
                   size={16}
-                  color={colors.background}
+                  color={colors.text}
                   style={{ marginTop: 4 }}
                 />
               ))}
@@ -253,7 +253,7 @@ const styles = {
   },
   formLabel: {
     fontSize: 14,
-    fontWeight: "600" as const,
+    fontWeight: "400" as const,
     marginBottom: 8,
     opacity: 0.7,
   },
