@@ -2,7 +2,6 @@ import {
   Platform,
   StyleSheet,
   View,
-  Animated,
   TouchableOpacity,
   useColorScheme,
   Text,
@@ -12,7 +11,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
@@ -33,7 +32,7 @@ export default function CustomerHomeScreen() {
   // 🔹 REDUX AUTH STATE
   const { user, token } = useAppSelector((state) => state.auth);
   const { selectedLocation } = useAppSelector((state) => state.location);
-  const { loading, error } = useAppSelector((state) => state.request);
+  const { loading, error, success } = useAppSelector((state) => state.request);
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
@@ -41,7 +40,19 @@ export default function CustomerHomeScreen() {
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const notifications = 0;
-  console.log(selectedLocation);
+  const [timeLeft, setTimeLeft] = useState(720);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  // Convert seconds to minutes:seconds
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
 
   useEffect(() => {
     if (user?.uid && token) {
@@ -289,6 +300,43 @@ export default function CustomerHomeScreen() {
               }}
             >
               {typeof error === "string" ? error : "Something went wrong"}
+            </ThemedText>
+          </View>
+        )}
+      </React.Fragment>
+
+      {/* SUCCESS HANDLING */}
+      <React.Fragment>
+        {success === true && (
+          <View
+            style={{
+              paddingVertical: 10,
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "center",
+            }}
+          >
+            <ThemedText
+              style={{
+                color: colors.successGreen,
+                fontSize: 12,
+                textAlign: "center",
+                textTransform: "uppercase",
+                width: "100%",
+              }}
+            >
+              SUCCESS! PLEASE WAIT FOR AVAILABLE PROVIDER.
+            </ThemedText>
+            <ThemedText
+              style={{
+                color: colors.warningRed,
+                fontSize: 16,
+                textAlign: "center",
+                textTransform: "uppercase",
+                width: "100%",
+              }}
+            >
+              {`Waiting minutes are ${minutes}:${seconds.toString().padStart(2, "0")}`}
             </ThemedText>
           </View>
         )}
