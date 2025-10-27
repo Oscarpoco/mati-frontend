@@ -4,6 +4,7 @@ import authReducer   from "../slice/authSlice";
 import registerReducer from "../slice/registerSlice"
 import locationSlice from "../slice/locationSlice"
 import userDetailsReducer from "../slice/updateUserDetailsSlice"
+import requestSlice from './../slice/requestSlice';
 
 
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
     register: registerReducer,
     auth: authReducer,
     location: locationSlice,
-    userDetails: userDetailsReducer 
+    userDetails: userDetailsReducer,
+    request: requestSlice
   },
 });
 

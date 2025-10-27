@@ -17,10 +17,12 @@ import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
 import { StatusBar } from "expo-status-bar";
+import LoadingBanner from "@/components/ui/LoadingBanner";
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { fetchUserById } from "@/redux/slice/authSlice";
+import { createRequest } from "@/redux/slice/requestSlice";
 
 export default function CustomerHomeScreen() {
   // GET CURRENT COLOR SCHEME
@@ -31,6 +33,7 @@ export default function CustomerHomeScreen() {
   // 🔹 REDUX AUTH STATE
   const { user, token } = useAppSelector((state) => state.auth);
   const { selectedLocation } = useAppSelector((state) => state.location);
+  const { loading, error } = useAppSelector((state) => state.request);
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
@@ -40,14 +43,13 @@ export default function CustomerHomeScreen() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const loadingAnim = useRef(new Animated.Value(0)).current;
   const notifications = 0;
-  // console.log("token STATE:", { token });
-  // console.log("user STATE:", user);
+  console.log(selectedLocation);
 
   useEffect(() => {
-      if (user?.uid && token) {
-        dispatch(fetchUserById({ uid: user.uid, token }));
-      }
-    }, [dispatch, user?.uid, token]);
+    if (user?.uid && token) {
+      dispatch(fetchUserById({ uid: user.uid, token }));
+    }
+  }, [dispatch, user?.uid, token]);
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
@@ -148,9 +150,6 @@ export default function CustomerHomeScreen() {
           {user?.name}
         </ThemedText>
       </View>
-
-      {/* ONGOING DELIVERY CARD - PLACEHOLDER */}
-      <View>{/* Ongoing delivery card would go here */}</View>
 
       {/* QUICK REQUEST SECTION */}
       <View
@@ -261,48 +260,93 @@ export default function CustomerHomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* ERROR HANDLING */}
+      <React.Fragment>
+        {error && (
+          <View
+            style={{
+              padding: 10,
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "center",
+            }}
+          >
+            <ThemedText
+              style={{
+                color: colors.warningRed,
+                fontSize: 12,
+                textAlign: "center",
+                textTransform: "uppercase",
+                width: "100%",
+              }}
+            >
+              {typeof error === "string" ? error : "Something went wrong"}
+            </ThemedText>
+          </View>
+        )}
+      </React.Fragment>
+      
       {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
-      <View
-        style={[styles.confirmContainer, { backgroundColor: colors.button }]}
-      >
-        <TouchableOpacity
-          onPress={handleConfirm}
-          disabled={isLoading}
-          style={[styles.confirmButton, { backgroundColor: colors.tint }]}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={32}
-            color={colors.background}
+      {loading ? (
+        <React.Fragment>
+          <LoadingBanner
+            loading={loading}
+            error={null}
+            onPress={() => console.log("Button pressed")}
           />
-        </TouchableOpacity>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          <View
+            style={[
+              styles.confirmContainer,
+              { backgroundColor: colors.button },
+            ]}
+          >
+            <TouchableOpacity
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: colors.tint,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={handleConfirm}
+            >
+              <Ionicons
+                name="chevron-forward"
+                size={28}
+                color={colors.background}
+              />
+            </TouchableOpacity>
 
-        <ThemedText style={styles.confirmText}>CONFIRM</ThemedText>
+            <ThemedText
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: colors.textSecondary,
+                textTransform: "uppercase",
+              }}
+            >
+              CONFIRM REQUEST
+            </ThemedText>
 
-        <View
-          style={{
-            alignItems: "center",
-            backgroundColor: "transparent",
-            flexDirection: "row",
-          }}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.textSecondary}
-          />
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.textSecondary}
-          />
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color={colors.textSecondary}
-          />
-        </View>
-      </View>
+            <View style={{ flexDirection: "row", gap: 0 }}>
+              {[...Array(3)].map((_, i) => (
+                <Ionicons
+                  key={i}
+                  name="chevron-forward"
+                  size={16}
+                  color={colors.textSecondary}
+                  style={{ marginTop: 4 }}
+                />
+              ))}
+            </View>
+          </View>
+        </React.Fragment>
+      )}
 
       {/* ADDRESS MODAL */}
       <AddressModal
@@ -315,22 +359,38 @@ export default function CustomerHomeScreen() {
       <Modal
         visible={datePickerVisible}
         animationType="slide"
-        transparent={true}
+        transparent={false}
         onRequestClose={() => setDatePickerVisible(false)}
       >
         <View
           style={[
             styles.calendarOverlay,
-            { backgroundColor: colors.background },
+            {
+              backgroundColor: colors.background,
+            },
           ]}
         >
           <View style={styles.calendarHeader}>
+            <TouchableOpacity
+              onPress={() => setDatePickerVisible(false)}
+              style={{
+                width: 50,
+                height: 50,
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 18,
+                backgroundColor: colors.tint,
+              }}
+            >
+              <Ionicons
+                name="chevron-back"
+                size={28}
+                color={colors.background}
+              />
+            </TouchableOpacity>
             <ThemedText style={styles.calendarTitle}>
               Select Delivery Date
             </ThemedText>
-            <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
-              <Ionicons name="close" size={28} color={colors.text} />
-            </TouchableOpacity>
           </View>
 
           <View
@@ -438,7 +498,6 @@ const styles = StyleSheet.create({
     lineHeight: 50,
     textTransform: "uppercase",
     textAlign: "center",
-
   },
 
   quickSubtitle: {
@@ -447,7 +506,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontWeight: "400",
     textAlign: "center",
-
   },
 
   stylingDotOne: {
@@ -577,6 +635,8 @@ const styles = StyleSheet.create({
   calendarOverlay: {
     flex: 1,
     paddingTop: Platform.OS === "ios" ? 60 : 40,
+    justifyContent: "flex-start",
+    flexDirection: "column",
   },
 
   calendarHeader: {
@@ -585,6 +645,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 24,
+    gap: 20,
   },
 
   calendarTitle: {
