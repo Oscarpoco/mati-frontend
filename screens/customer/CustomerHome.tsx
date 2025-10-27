@@ -38,10 +38,8 @@ export default function CustomerHomeScreen() {
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
   const [selectedDate, setSelectedDate] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const loadingAnim = useRef(new Animated.Value(0)).current;
   const notifications = 0;
   console.log(selectedLocation);
 
@@ -53,20 +51,29 @@ export default function CustomerHomeScreen() {
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
-    if (isLoading || !selectedLocation || !selectedDate) {
+    if (!selectedLocation || !selectedDate) {
       alert("Please select an address and delivery date");
       return;
     }
 
-    setIsLoading(true);
-    Animated.timing(loadingAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: false,
-    }).start(() => {
-      setIsLoading(false);
-      loadingAnim.setValue(0);
-    });
+    if (!token || !user?.uid || !selectedLocation) {
+      console.warn("TOKEN OR UID NOT AVAILABLE");
+      return;
+    }
+
+    dispatch(
+      createRequest({
+        litres: quantity,
+        location: {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          address: selectedLocation.address,
+        },
+        token,
+        uid: user.uid,
+        date: selectedDate
+      })
+    );
   };
 
   const handleOpenAddressModal = (view: "list") => {
@@ -286,7 +293,7 @@ export default function CustomerHomeScreen() {
           </View>
         )}
       </React.Fragment>
-      
+
       {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
       {loading ? (
         <React.Fragment>

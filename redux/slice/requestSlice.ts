@@ -3,18 +3,20 @@ import axios from "axios";
 import { API_URL } from "@/constants/api";
 
 export type Location = {
-  lat: number;
-  long: number;
+  latitude: number;
+  longitude: number;
   address: string;
 };
 
 export type Request = {
   id: string;
+  uid: string;
   customerId: string;
   litres: number;
   location: Location;
   price: number;
   distance: number;
+  date: string;
   status: "pending" | "confirmed" | "delivered";
   createdAt: number;
   deliveredAt?: number;
@@ -40,13 +42,13 @@ const initialState: RequestState = {
 export const createRequest = createAsyncThunk(
   "requests/createRequest",
   async (
-    { litres, location, token }: { litres: number; location: string; token: string },
+    { litres, location, token, uid, date }: { litres: number; location: Location; token: string; uid: string, date: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(
-        `${API_URL}/customer/requests`,
-        { litres, location },
+        `${API_URL}/customer/request/${uid}`,
+        { litres, location, date },
         {
           headers: {
             Authorization: `Bearer ${token}`,
