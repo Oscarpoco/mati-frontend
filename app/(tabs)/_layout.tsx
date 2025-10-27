@@ -41,6 +41,7 @@ export default function TabLayout() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
+  
   // 🔹 RUN ON APP START
   useEffect(() => {
     initializeApp();
@@ -103,7 +104,11 @@ export default function TabLayout() {
             tabBarActiveTintColor: theme.tint,
             tabBarInactiveTintColor: theme.textSecondary,
             tabBarBackground: () => (
-              <BlurView intensity={10} tint="dark" style={StyleSheet.absoluteFill} />
+              <BlurView
+                intensity={10}
+                tint="dark"
+                style={StyleSheet.absoluteFill}
+              />
             ),
             tabBarStyle: [
               styles.tabBar,

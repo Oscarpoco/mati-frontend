@@ -11,6 +11,8 @@ export type Location = {
 export type Request = {
   id: string;
   uid: string;
+  phoneNumber: string;
+  name: string;
   customerId: string;
   litres: number;
   location: Location;
@@ -79,7 +81,7 @@ export const getRequestById = createAsyncThunk(
   ) => {
     try {
       const response = await axios.get(
-        `${API_URL}/customer/requests/${requestId}`,
+        `${API_URL}/customer/request/${requestId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -105,18 +107,20 @@ export const getRequestById = createAsyncThunk(
 export const getCustomerRequests = createAsyncThunk(
   "requests/getCustomerRequests",
   async (
-    { token }: { token: string },
+    { token, uid }: { token: string, uid: string },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.get(
-        `${API_URL}/requests/customer`,
+        `${API_URL}/customer/requests/${uid}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
+      console.log("MY REQUESTS DATA", response.data)
 
       return response.data;
     } catch (error: any) {

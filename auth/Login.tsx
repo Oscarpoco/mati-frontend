@@ -12,7 +12,8 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors, Fonts } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // REACT NAV
 import { useNavigation } from "@react-navigation/native";
@@ -27,6 +28,7 @@ import { RootState, AppDispatch } from "@/redux/store/store";
 // STYLES
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
 import LoadingBanner from "@/components/ui/LoadingBanner";
+import { AnnouncementBanner } from "@/components/ui/AnnouncementBanner";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -43,6 +45,32 @@ export function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+
+  useEffect(() => {
+    const checkAnnouncement = async () => {
+      try {
+        const isRead = await AsyncStorage.getItem("announcement_v1_isRead");
+        if (!isRead) {
+          setShowAnnouncement(true);
+        }
+      } catch (error) {
+        console.log("Error reading announcement:", error);
+      }
+    };
+
+    checkAnnouncement();
+  }, []);
+
+  const handleDismissAnnouncement = async () => {
+    try {
+      await AsyncStorage.setItem("announcement_v1_isRead", "true");
+      setShowAnnouncement(false);
+    } catch (error) {
+      console.log("Error saving announcement state:", error);
+    }
+  };
 
   // Handle login
   const handleLogin = () => {
@@ -447,6 +475,32 @@ export function LoginScreen() {
             </View>
           </View>
         </ScrollView>
+
+        <>
+      {showAnnouncement && (
+        <AnnouncementBanner
+          title="IMPORTANT ANNOUNCEMENT"
+          message="The wait is over! MATI BETA Version is finally here. Create your Account as a Customer to experience great work made by GAMEFUXION-ZA Developers. NOTE: This app does not feature any payment method in Beta. Expect the first full version on 22 November."
+          fields={[
+            {
+              label: "Email",
+              value: "oscarkylepoco@gmail.com",
+              type: "email",
+              icon: "mail",
+            },
+            {
+              label: "WhatsApp",
+              value: "+27 (0)660 850 741",
+              type: "phone",
+              icon: "logo-whatsapp",
+            },
+          ]}
+          type="success"
+          onDismiss={handleDismissAnnouncement}
+        />
+      )}
+      {/* Rest of your layout */}
+    </>
       </KeyboardAvoidingView>
     </ThemedView>
   );

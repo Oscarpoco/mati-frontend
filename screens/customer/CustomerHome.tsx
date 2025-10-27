@@ -40,7 +40,7 @@ export default function CustomerHomeScreen() {
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const notifications = 0;
-  const [timeLeft, setTimeLeft] = useState(720);
+  const [timeLeft, setTimeLeft] = useState(180);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -50,7 +50,6 @@ export default function CustomerHomeScreen() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Convert seconds to minutes:seconds
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 

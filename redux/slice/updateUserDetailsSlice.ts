@@ -92,8 +92,6 @@ export const updateUserDetails = createAsyncThunk(
         }
       );
 
-      console.log("📦 Update API Response:", updateResponse.data);
-
       // Step 2: Fetch updated user data
       const userResponse = await axios.get(
         API_ENDPOINTS.fetchUser(uid),
@@ -127,7 +125,6 @@ export const fetchUserDetails = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("📝 Fetching user details for uid:", uid);
 
       const response = await axios.get(
         API_ENDPOINTS.fetchUser(uid),

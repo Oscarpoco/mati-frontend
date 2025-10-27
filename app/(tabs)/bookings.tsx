@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -16,7 +17,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { BookingDetailsModal } from "@/components/booking-details-modal";
 import { TimelineTracker } from "@/components/timeline-tracker";
 
+// REDUX
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { getCustomerRequests } from "@/redux/slice/requestSlice";
+
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
+
+interface Provider {
+  name: string;
+  phone: string;
+  email: string;
+  rating: number;
+  reviews: number;
+  avatar: string;
+}
 
 interface Booking {
   id: string;
@@ -25,93 +39,111 @@ interface Booking {
   bookedDate: string;
   bookedTime: string;
   expectedDelivery: string;
-  provider: {
-    name: string;
-    phone: string;
-    email: string;
-    rating: number;
-    reviews: number;
-    avatar: string;
-  };
-  status: "active" | "completed" | "cancelled";
+  provider: Provider | null;
+  status: "pending" | "delivery" | "delivered" | "cancelled";
   location: string;
   fromLocation: string;
   toLocation: string;
   mapCoords: { lat: number; lng: number };
+  distance?: number;
+  price?: number;
 }
 
-const mockBookings: Booking[] = [
-  {
-    id: "1",
-    bookingId: "E-F4RH996N",
-    litres: 20,
-    bookedDate: "Jun 30, 2024",
-    bookedTime: "2:30 PM",
-    expectedDelivery: "Jul 2, 2024",
-    provider: {
-      name: "Tianga Schleifer",
-      phone: "+1 234 567 8900",
-      email: "tianga@waterpro.com",
-      rating: 4.8,
-      reviews: 245,
-      avatar: "TS",
-    },
-    status: "active",
-    location: "Yogyakarta, 9876+HN",
-    fromLocation: "Yogyakarta, 9876+HN",
-    toLocation: "Jakarta, 6889YER",
-    mapCoords: { lat: -7.797068, lng: 110.370529 },
-  },
-  {
-    id: "2",
-    bookingId: "E-F4RH997M",
-    litres: 50,
-    bookedDate: "Jun 28, 2024",
-    bookedTime: "10:15 AM",
-    expectedDelivery: "Jun 30, 2024",
-    provider: {
-      name: "John Aqua",
-      phone: "+1 234 567 8901",
-      email: "john@waterpro.com",
-      rating: 4.6,
-      reviews: 189,
-      avatar: "JA",
-    },
-    status: "active",
-    location: "Jakarta, 6889YER",
-    fromLocation: "Jakarta, 6889YER",
-    toLocation: "Bandung, 4055KL",
-    mapCoords: { lat: -6.2088, lng: 106.8456 },
-  },
-  {
-    id: "3",
-    bookingId: "E-F4RH995K",
-    litres: 30,
-    bookedDate: "Jun 20, 2024",
-    bookedTime: "5:00 PM",
-    expectedDelivery: "Jun 22, 2024",
-    provider: {
-      name: "Sarah Water",
-      phone: "+1 234 567 8902",
-      email: "sarah@waterpro.com",
-      rating: 4.9,
-      reviews: 312,
-      avatar: "SW",
-    },
-    status: "completed",
-    location: "Bandung, 4055KL",
-    fromLocation: "Bandung, 4055KL",
-    toLocation: "Yogyakarta, 9876+HN",
-    mapCoords: { lat: -6.9175, lng: 107.6123 },
-  },
-];
+interface BackendRequest {
+  id: string;
+  litres: number;
+  createdAt: number;
+  date: string;
+  status: "pending" | "delivery" | "delivered" | "cancelled";
+  location: {
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+    lat?: number;
+    lng?: number;
+  };
+  distance?: number;
+  price?: number;
+  deliveredAt?: number;
+  customerId: string;
+}
+
+// Transform backend data to Booking format
+const transformBackendRequest = (request: BackendRequest): Booking => {
+  const createdDate = new Date(request.createdAt);
+  const bookedDate = createdDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const bookedTime = createdDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  // Calculate expected delivery (add 2 days)
+  const deliveryDate = new Date(createdDate);
+  deliveryDate.setDate(deliveryDate.getDate() + 2);
+  const expectedDelivery = deliveryDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const lat =
+    request.location?.latitude ?? request.location?.lat ?? -26.2220863;
+  const lng =
+    request.location?.longitude ?? request.location?.lng ?? 27.9371643;
+
+  return {
+    id: request.id,
+    bookingId: `E-${request.id.substring(0, 8).toUpperCase()}`,
+    litres: request.litres,
+    bookedDate,
+    bookedTime,
+    expectedDelivery,
+    provider: null,
+    status: request.status,
+    location: request.location?.address || "Soweto, Johannesburg",
+    fromLocation: request.location?.address || "Soweto, Johannesburg",
+    toLocation: request.location?.address || "Soweto, Johannesburg",
+    mapCoords: { lat, lng },
+    distance: request.distance,
+    price: request.price,
+  };
+};
 
 export default function BookingsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "past">("active");
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+
+  const dispatch = useAppDispatch();
+
+  // 🔹 REDUX AUTH STATE
+  const { user, token } = useAppSelector((state) => state.auth);
+  const { loading, customerRequests } = useAppSelector(
+    (state) => state.request
+  );
+
+  useEffect(() => {
+    if (user?.uid && token) {
+      dispatch(getCustomerRequests({ uid: user.uid, token }));
+    }
+  }, [dispatch, user?.uid, token]);
+
+  // Transform backend customerRequests to bookings
+  useEffect(() => {
+    if (customerRequests && Array.isArray(customerRequests)) {
+      const transformedBookings = customerRequests.map((req) =>
+        transformBackendRequest(req)
+      );
+      setBookings(transformedBookings);
+    }
+  }, [customerRequests]);
 
   const showDetails = (booking: Booking) => {
     setSelectedBooking(booking);
@@ -132,13 +164,74 @@ export default function BookingsScreen() {
     });
   };
 
-  const activeBookings = mockBookings.filter((b) => b.status === "active");
-  const pastBookings = mockBookings.filter(
-    (b) => b.status === "completed" || b.status === "cancelled"
+  // Filter bookings based on status
+  const activeBookings = bookings.filter(
+    (b) => b.status === "pending" || b.status === "delivery"
+  );
+  const pastBookings = bookings.filter(
+    (b) => b.status === "delivered" || b.status === "cancelled"
   );
 
   const displayBookings =
     activeTab === "active" ? activeBookings : pastBookings;
+
+  const getTimelineSteps = (status: string) => {
+    if (status === "pending") {
+      return [
+        {
+          label: "Requested",
+          icon: "checkmark-circle",
+          status: "completed" as const,
+        },
+        {
+          label: "Awaiting Provider",
+          icon: "car",
+          status: "in-progress" as const,
+        },
+        {
+          label: "Delivery",
+          icon: "home",
+          status: "pending" as const,
+        },
+      ];
+    } else if (status === "delivery") {
+      return [
+        {
+          label: "Picked",
+          icon: "checkmark-circle",
+          status: "completed" as const,
+        },
+        {
+          label: "In Transit",
+          icon: "car",
+          status: "in-progress" as const,
+        },
+        {
+          label: "Delivery",
+          icon: "home",
+          status: "pending" as const,
+        },
+      ];
+    } else {
+      return [
+        {
+          label: "Picked",
+          icon: "checkmark-circle",
+          status: "completed" as const,
+        },
+        {
+          label: "Delivery",
+          icon: "car",
+          status: "completed" as const,
+        },
+        {
+          label: "Delivered",
+          icon: "home",
+          status: "completed" as const,
+        },
+      ];
+    }
+  };
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
     <TouchableOpacity
@@ -152,48 +245,61 @@ export default function BookingsScreen() {
       ]}
       activeOpacity={0.7}
     >
-      <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
-
       <View
-        style={[
-          styles.statusBadge,
-          {
-            backgroundColor:
-              booking.status === "active" ? colors.tint : colors.textSecondary,
-          },
-        ]}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
-        <ThemedText
-          style={{
-            fontSize: 12,
-            fontWeight: "700",
-            color: colors.background,
-            textTransform: "uppercase",
-          }}
+        <View
+          style={[
+            styles.statusBadge,
+            {
+              backgroundColor:
+                booking.status === "pending"
+                  ? colors.textSecondary
+                  : booking.status === "delivery"
+                  ? colors.tint
+                  : booking.status === "delivered"
+                  ? "#4CAF50"
+                  : "#FF6B6B",
+            },
+          ]}
         >
-          {booking.status}
-        </ThemedText>
-      </View>
+          <ThemedText
+            style={{
+              fontSize: 12,
+              fontWeight: "700",
+              color: colors.background,
+              textTransform: "capitalize",
+            }}
+          >
+            {booking.status}
+          </ThemedText>
+        </View>
 
-      {/* Booking ID */}
-      <ThemedText
-        style={[
-          styles.bookingId,
-          { color: colors.tint, fontFamily: Fonts.sans },
-        ]}
-      >
-        {booking.bookingId}
-      </ThemedText>
+        {/* Booking ID */}
+        <ThemedText
+          style={[
+            styles.bookingId,
+            { color: colors.tint, fontFamily: Fonts.sans },
+          ]}
+        >
+          {booking.bookingId}
+        </ThemedText>
       </View>
 
       {/* Timeline Tracker */}
       <TimelineTracker
-        steps={[
-          { label: "Picked", icon: "checkmark-circle", status: booking.status === "completed" ? "completed" : "completed" },
-          { label: "Delivery", icon: "car", status: booking.status === "active" ? "in-progress" : "completed" },
-          { label: "Delivered", icon: "home", status: booking.status === "completed" ? "completed" : "pending" },
-        ]}
-        currentStep={booking.status === "completed" ? 2 : 1}
+        steps={getTimelineSteps(booking.status)}
+        currentStep={
+          booking.status === "pending"
+            ? 0
+            : booking.status === "delivery"
+            ? 1
+            : 2
+        }
       />
 
       {/* Location Info */}
@@ -202,38 +308,73 @@ export default function BookingsScreen() {
           <Ionicons name="location" size={16} color={colors.textSecondary} />
           <ThemedText
             style={[styles.locationText, { color: colors.textSecondary }]}
-          >
-            {booking.fromLocation}
-          </ThemedText>
-        </View>
-
-        <View style={styles.locationItem}>
-          <Ionicons name="location" size={16} color={colors.warningRed} />
-          <ThemedText
-            style={[styles.locationText, { color: colors.textSecondary }]}
+            numberOfLines={1}
           >
             {booking.toLocation}
           </ThemedText>
         </View>
       </View>
 
-      {/* Footer with Date and Provider */}
-      <View style={styles.cardFooter}>
-        <View style={{width: "60%"}}>
+      {/* Provider Info or Pending Message */}
+      {booking.provider ? (
+        <View
+          style={[
+            styles.providerSection,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.providerAvatar}>
+            <ThemedText style={{ fontWeight: "700", fontSize: 14 }}>
+              {booking.provider.avatar}
+            </ThemedText>
+          </View>
+          <View style={{ flex: 1 }}>
+            <ThemedText style={[styles.providerName, { color: colors.text }]}>
+              {booking.provider.name}
+            </ThemedText>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={12} color="#FFD700" />
+              <ThemedText
+                style={[styles.ratingText, { color: colors.textSecondary }]}
+              >
+                {booking.provider.rating} ({booking.provider.reviews} reviews)
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+      ) : booking.status === "pending" ? (
+        <View
+          style={[
+            styles.pendingSection,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
+        >
+          <Ionicons name="time" size={16} color={colors.tint} />
           <ThemedText
-            style={[styles.footerLabel, { color: colors.textSecondary }]}
+            style={[styles.pendingText, { color: colors.textSecondary }]}
           >
-            From
-          </ThemedText>
-          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
-            {booking.bookedDate}
+            Waiting for a provider to accept your request
           </ThemedText>
         </View>
-        <View style={{width: "40%"}}>
+      ) : null}
+
+      {/* Footer with Date and Details */}
+      <View style={styles.cardFooter}>
+        <View style={{ width: "50%" }}>
           <ThemedText
             style={[styles.footerLabel, { color: colors.textSecondary }]}
           >
-            To
+            Litres
+          </ThemedText>
+          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
+            {booking.litres}L
+          </ThemedText>
+        </View>
+        <View style={{ width: "50%" }}>
+          <ThemedText
+            style={[styles.footerLabel, { color: colors.textSecondary }]}
+          >
+            Expected Delivery
           </ThemedText>
           <ThemedText style={[styles.footerValue, { color: colors.text }]}>
             {booking.expectedDelivery}
@@ -242,38 +383,64 @@ export default function BookingsScreen() {
       </View>
 
       {/* Action Buttons */}
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: colors.bottomNav }]}
-        >
-          <Ionicons name="call" size={32} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            {
-              backgroundColor: colors.warningRed,
-              borderWidth: 1,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <Ionicons name="close" size={32} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            {
-              backgroundColor: colors.button,
-              borderWidth: 1,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <Ionicons name="chatbox" size={32} color={colors.textSecondary} />
-        </TouchableOpacity>
-      </View>
+      {booking.provider || booking.status !== "pending" ? (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: colors.bottomNav }]}
+          >
+            <Ionicons name="call" size={32} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                backgroundColor: colors.warningRed,
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Ionicons name="close" size={32} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                backgroundColor: colors.button,
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Ionicons name="chatbox" size={32} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </TouchableOpacity>
+  );
+
+  const EmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <View
+        style={[styles.emptyIconContainer, { backgroundColor: colors.card }]}
+      >
+        <Ionicons
+          name="document-text-outline"
+          size={64}
+          color={colors.textSecondary}
+        />
+      </View>
+      <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
+        {activeTab === "active" ? "No Active Bookings" : "No Past Bookings"}
+      </ThemedText>
+      <ThemedText
+        style={[styles.emptySubtitle, { color: colors.textSecondary }]}
+      >
+        {activeTab === "active"
+          ? "You don't have any active water deliveries right now"
+          : "Your past delivery history will appear here"}
+      </ThemedText>
+    </View>
   );
 
   return (
@@ -369,14 +536,40 @@ export default function BookingsScreen() {
       </View>
 
       {/* Bookings List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {displayBookings.map((booking) => (
-          <BookingCard key={booking.id} booking={booking} />
-        ))}
-      </ScrollView>
+      {displayBookings.length > 0 ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {displayBookings.map((booking) => (
+            <BookingCard key={booking.id} booking={booking} />
+          ))}
+        </ScrollView>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.emptyScrollContent}
+        >
+          <EmptyState />
+        </ScrollView>
+      )}
+
+      {loading && (
+        <React.Fragment>
+          <View
+            style={{
+              width: 120,
+              height: 120,
+              borderRadius: 28,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: colors.card,
+            }}
+          >
+            <ActivityIndicator size={"large"} color={colors.text} />
+          </View>
+        </React.Fragment>
+      )}
 
       {/* Details Modal */}
       <BookingDetailsModal
@@ -458,6 +651,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
 
+  emptyScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingBottom: 100,
+  },
+
   bookingCard: {
     borderRadius: 38,
     borderWidth: 1,
@@ -479,55 +678,78 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  timelineTracker: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 16,
-    justifyContent: "space-between",
-  },
-
-  timelineStep: {
-    alignItems: "center",
-  },
-
-  timelineCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 2,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-
-  timelineLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-  },
-
   locationSection: {
     marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
 
   locationItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    flex: 1,
   },
 
   locationText: {
     fontSize: 12,
     fontWeight: "500",
     marginLeft: 6,
+    flex: 1,
   },
 
-  locationDivider: {
-    textAlign: "center",
+  providerSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 10,
+  },
+
+  providerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  providerName: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  ratingText: {
+    fontSize: 10,
+    fontWeight: "500",
+  },
+
+  pendingSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  pendingText: {
     fontSize: 12,
-    marginVertical: 4,
+    fontWeight: "500",
+    flex: 1,
+    textTransform: "uppercase",
   },
 
   cardFooter: {
@@ -560,5 +782,34 @@ const styles = StyleSheet.create({
     borderRadius: 38,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+  },
+
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+
+  emptySubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
