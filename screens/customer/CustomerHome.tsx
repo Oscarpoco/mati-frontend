@@ -6,6 +6,7 @@ import {
   useColorScheme,
   Text,
   Modal,
+  ScrollView,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -81,12 +82,12 @@ export default function CustomerHomeScreen() {
         },
         token,
         uid: user.uid,
-        date: selectedDate
+        date: selectedDate,
       })
     );
   };
 
-  const handleOpenAddressModal = (view: "list") => {
+  const handleOpenAddressModal = () => {
     setAddressModalVisible(true);
   };
 
@@ -149,258 +150,264 @@ export default function CustomerHomeScreen() {
         </View>
       </View>
 
-      {/* Header */}
-      <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
-          Welcome
-        </ThemedText>
-        <ThemedText
-          numberOfLines={1}
+      <ScrollView contentContainerStyle={{ paddingBottom: 100, gap: 20 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+            Welcome
+          </ThemedText>
+          <ThemedText
+            numberOfLines={1}
+            style={[
+              styles.title,
+              {
+                fontFamily: Fonts.sans,
+                textTransform: "capitalize",
+                fontSize: 48,
+                fontWeight: '200',
+              },
+            ]}
+          >
+            {user?.name}
+          </ThemedText>
+        </View>
+
+        {/* QUICK REQUEST SECTION */}
+        <View
           style={[
-            styles.title,
-            {
-              fontFamily: Fonts.sans,
-              textTransform: "capitalize",
-            },
+            styles.quickCard,
+            { backgroundColor: colors.background, borderColor: colors.border },
           ]}
         >
-          {user?.name}
-        </ThemedText>
-      </View>
+          <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
+          <ThemedText style={styles.quickSubtitle}>
+            Book your water from your nearest provider
+          </ThemedText>
 
-      {/* QUICK REQUEST SECTION */}
-      <View
-        style={[
-          styles.quickCard,
-          { backgroundColor: colors.background, borderColor: colors.border },
-        ]}
-      >
-        <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
-        <ThemedText style={styles.quickSubtitle}>
-          Book your water from your nearest provider
-        </ThemedText>
+          <View
+            style={[styles.stylingDotOne, { backgroundColor: colors.tint }]}
+          />
+          <View
+            style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]}
+          />
+          <View
+            style={[styles.stylingDotThree, { backgroundColor: colors.tint }]}
+          />
+          <View
+            style={[styles.stylingDotFour, { backgroundColor: colors.tint }]}
+          />
 
-        <View
-          style={[styles.stylingDotOne, { backgroundColor: colors.tint }]}
-        />
-        <View
-          style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]}
-        />
-        <View
-          style={[styles.stylingDotThree, { backgroundColor: colors.tint }]}
-        />
-        <View
-          style={[styles.stylingDotFour, { backgroundColor: colors.tint }]}
-        />
-
-        {/* LOCATION AND DATE BUTTONS ROW */}
-        <View style={styles.locationRow}>
-          <TouchableOpacity
-            style={[
-              styles.locationButton,
-              {
-                backgroundColor: colors.card,
-                width: "48%",
-              },
-            ]}
-            onPress={() => handleOpenAddressModal("list")}
-          >
-            <ThemedText
+          {/* LOCATION AND DATE BUTTONS ROW */}
+          <View style={styles.locationRow}>
+            <TouchableOpacity
               style={[
-                styles.locationButtonText,
+                styles.locationButton,
                 {
-                  width: "80%",
-                  fontSize: 10,
+                  backgroundColor: colors.button,
+                  width: "48%",
                 },
               ]}
-              numberOfLines={2}
-              ellipsizeMode="tail"
+              onPress={() => handleOpenAddressModal()}
             >
-              {selectedLocation?.address || "Select Address"}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.dateButton,
-              {
-                backgroundColor: colors.card,
-                width: "48%",
-              },
-            ]}
-            onPress={() => setDatePickerVisible(true)}
-          >
-            <ThemedText style={styles.dateButtonText}>
-              {formatDate(selectedDate)}
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
-
-        {/* QUANTITY CONTROLS */}
-        <View style={styles.quantityRow}>
-          <TouchableOpacity
-            onPress={() => quantity > 1 && setQuantity(quantity - 1)}
-            style={[
-              styles.quantityButton,
-              {
-                backgroundColor: colors.warningRed,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons name="remove" size={32} color={colors.background} />
-          </TouchableOpacity>
-
-          <View
-            style={[
-              styles.quantityDisplay,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <ThemedText style={styles.quantityText}>{quantity}</ThemedText>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => setQuantity(quantity + 1)}
-            style={[
-              styles.quantityButton,
-              {
-                backgroundColor: colors.tint,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Ionicons name="add" size={32} color={colors.background} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* ERROR HANDLING */}
-      <React.Fragment>
-        {error && (
-          <View
-            style={{
-              padding: 10,
-              alignItems: "center",
-              width: "100%",
-              justifyContent: "center",
-            }}
-          >
-            <ThemedText
-              style={{
-                color: colors.warningRed,
-                fontSize: 12,
-                textAlign: "center",
-                textTransform: "uppercase",
-                width: "100%",
-              }}
-            >
-              {typeof error === "string" ? error : "Something went wrong"}
-            </ThemedText>
-          </View>
-        )}
-      </React.Fragment>
-
-      {/* SUCCESS HANDLING */}
-      <React.Fragment>
-        {success === true && (
-          <View
-            style={{
-              paddingVertical: 10,
-              alignItems: "center",
-              width: "100%",
-              justifyContent: "center",
-            }}
-          >
-            <ThemedText
-              style={{
-                color: colors.successGreen,
-                fontSize: 12,
-                textAlign: "center",
-                textTransform: "uppercase",
-                width: "100%",
-              }}
-            >
-              SUCCESS! PLEASE WAIT FOR AVAILABLE PROVIDER.
-            </ThemedText>
-            <ThemedText
-              style={{
-                color: colors.warningRed,
-                fontSize: 16,
-                textAlign: "center",
-                textTransform: "uppercase",
-                width: "100%",
-              }}
-            >
-              {`Waiting minutes are ${minutes}:${seconds.toString().padStart(2, "0")}`}
-            </ThemedText>
-          </View>
-        )}
-      </React.Fragment>
-
-      {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
-      {loading ? (
-        <React.Fragment>
-          <LoadingBanner
-            loading={loading}
-            error={null}
-            onPress={() => console.log("Button pressed")}
-          />
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <View
-            style={[
-              styles.confirmContainer,
-              { backgroundColor: colors.button },
-            ]}
-          >
-            <TouchableOpacity
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: colors.tint,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={handleConfirm}
-            >
-              <Ionicons
-                name="chevron-forward"
-                size={28}
-                color={colors.background}
-              />
+              <ThemedText
+                style={[
+                  styles.locationButtonText,
+                  {
+                    width: "80%",
+                    fontSize: 10,
+                  },
+                ]}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {selectedLocation?.address || "Select Address"}
+              </ThemedText>
             </TouchableOpacity>
 
-            <ThemedText
+            <TouchableOpacity
+              style={[
+                styles.dateButton,
+                {
+                  backgroundColor: colors.button,
+                  width: "48%",
+                },
+              ]}
+              onPress={() => setDatePickerVisible(true)}
+            >
+              <ThemedText style={styles.dateButtonText}>
+                {formatDate(selectedDate)}
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          {/* QUANTITY CONTROLS */}
+          <View style={styles.quantityRow}>
+            <TouchableOpacity
+              onPress={() => quantity > 1 && setQuantity(quantity - 1)}
+              style={[
+                styles.quantityButton,
+                {
+                  backgroundColor: colors.warningRed,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Ionicons name="remove" size={32} color={colors.background} />
+            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.quantityDisplay,
+                {
+                  backgroundColor: colors.background,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <ThemedText style={styles.quantityText}>{quantity}</ThemedText>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setQuantity(quantity + 1)}
+              style={[
+                styles.quantityButton,
+                {
+                  backgroundColor: colors.tint,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Ionicons name="add" size={32} color={colors.background} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* ERROR HANDLING */}
+        <React.Fragment>
+          {error && (
+            <View
               style={{
-                fontSize: 14,
-                fontWeight: "600",
-                color: colors.textSecondary,
-                textTransform: "uppercase",
+                padding: 10,
+                alignItems: "center",
+                width: "100%",
+                justifyContent: "center",
               }}
             >
-              CONFIRM REQUEST
-            </ThemedText>
-
-            <View style={{ flexDirection: "row", gap: 0 }}>
-              {[...Array(3)].map((_, i) => (
-                <Ionicons
-                  key={i}
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.textSecondary}
-                  style={{ marginTop: 4 }}
-                />
-              ))}
+              <ThemedText
+                style={{
+                  color: colors.warningRed,
+                  fontSize: 12,
+                  textAlign: "center",
+                  textTransform: "uppercase",
+                  width: "100%",
+                }}
+              >
+                {typeof error === "string" ? error : "Something went wrong"}
+              </ThemedText>
             </View>
-          </View>
+          )}
         </React.Fragment>
-      )}
+
+        {/* SUCCESS HANDLING */}
+        <React.Fragment>
+          {success === true && (
+            <View
+              style={{
+                paddingVertical: 10,
+                alignItems: "center",
+                width: "100%",
+                justifyContent: "center",
+              }}
+            >
+              <ThemedText
+                style={{
+                  color: colors.successGreen,
+                  fontSize: 12,
+                  textAlign: "center",
+                  textTransform: "uppercase",
+                  width: "100%",
+                }}
+              >
+                SUCCESS! PLEASE WAIT FOR AVAILABLE PROVIDER.
+              </ThemedText>
+              <ThemedText
+                style={{
+                  color: colors.warningRed,
+                  fontSize: 16,
+                  textAlign: "center",
+                  textTransform: "uppercase",
+                  width: "100%",
+                }}
+              >
+                {`Waiting minutes are ${minutes}:${seconds
+                  .toString()
+                  .padStart(2, "0")}`}
+              </ThemedText>
+            </View>
+          )}
+        </React.Fragment>
+
+        {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
+        {loading ? (
+          <React.Fragment>
+            <LoadingBanner
+              loading={loading}
+              error={null}
+              onPress={() => console.log("Button pressed")}
+            />
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <View
+              style={[
+                styles.confirmContainer,
+                { backgroundColor: colors.button },
+              ]}
+            >
+              <TouchableOpacity
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.tint,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={handleConfirm}
+              >
+                <Ionicons
+                  name="chevron-forward"
+                  size={28}
+                  color={colors.background}
+                />
+              </TouchableOpacity>
+
+              <ThemedText
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: colors.textSecondary,
+                  textTransform: "uppercase",
+                }}
+              >
+                CONFIRM REQUEST
+              </ThemedText>
+
+              <View style={{ flexDirection: "row", gap: 0 }}>
+                {[...Array(3)].map((_, i) => (
+                  <Ionicons
+                    key={i}
+                    name="chevron-forward"
+                    size={16}
+                    color={colors.textSecondary}
+                    style={{ marginTop: 4 }}
+                  />
+                ))}
+              </View>
+            </View>
+          </React.Fragment>
+        )}
+      </ScrollView>
 
       {/* ADDRESS MODAL */}
       <AddressModal
@@ -494,7 +501,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === "ios" ? 60 : 60,
-    paddingBottom: 100,
     justifyContent: "space-between",
   },
 
@@ -504,7 +510,7 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 52,
-    fontWeight: "600",
+    fontWeight: "200",
     marginBottom: 4,
     lineHeight: 60,
   },
@@ -541,7 +547,7 @@ const styles = StyleSheet.create({
 
   quickCard: {
     borderRadius: 0,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     marginBottom: 20,
   },
 
@@ -596,7 +602,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-    // marginHorizontal: -16,
   },
 
   locationButton: {
@@ -605,6 +610,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 0,
   },
 
   locationButtonText: {
@@ -620,6 +626,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 0,
   },
 
   dateButtonText: {
@@ -639,7 +646,7 @@ const styles = StyleSheet.create({
   quantityButton: {
     width: 60,
     height: 60,
-    borderRadius: 0,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -648,7 +655,7 @@ const styles = StyleSheet.create({
   quantityDisplay: {
     width: 150,
     height: 60,
-    borderRadius: 0,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,

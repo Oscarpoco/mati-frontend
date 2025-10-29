@@ -10,6 +10,7 @@ const textSecondary = '#9BA1A6';
 const borderGray = '#1F1F1F';     
 const warningRed = '#b34d4dff';     
 const successGreen = '#22C55E'; 
+const logo = '#41F4DA'
 
 export const Colors = {
   light: {
@@ -26,7 +27,8 @@ export const Colors = {
     warningRed: warningRed,
     successGreen: successGreen,
     bottomNav: bottomNav,
-    button: button
+    button: button,
+    logo: logo
   },
   dark: {
     text: textPrimary,
@@ -42,7 +44,8 @@ export const Colors = {
     warningRed: warningRed,
     successGreen: successGreen,
     bottomNav: bottomNav,
-    button: button
+    button: button,
+    logo: logo
   },
 };
 

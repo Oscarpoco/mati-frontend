@@ -32,8 +32,8 @@ interface Booking {
   bookedDate: string;
   bookedTime: string;
   expectedDelivery: string;
-  provider: Provider | null;
-  status: "pending" | "delivery" | "delivered" | "cancelled";
+  provider?: Provider | null;
+  status: "pending" | "confirmed" | "delivered" | "cancelled";
   location: string;
   fromLocation: string;
   toLocation: string;
@@ -42,10 +42,81 @@ interface Booking {
   price?: number;
 }
 
+interface RawBooking {
+  id: string;
+  date: string;
+  litres: number;
+  location: any;
+  provider?: {
+    name: string;
+    phoneNumber: string;
+    email: string;
+    rating: number;
+    totalReviews: number;
+  };
+  name?: string;
+  phoneNumber?: string;
+  email?: string;
+  rating?: number;
+  totalReviews?: number;
+  providerId?: string;
+  price?: number;
+  distance?: number;
+  status: string;
+}
+
 interface BookingDetailsModalProps {
   selectedBooking: Booking | null;
   slideAnim: Animated.Value;
   onClose: () => void;
+}
+
+// Transform raw booking data to match component interface
+export function transformBooking(rawBooking: RawBooking): Booking {
+  // Determine provider object
+  let provider: Provider | null = null;
+
+  if (rawBooking.provider) {
+    // If provider exists in the nested object
+    provider = {
+      name: rawBooking.provider.name,
+      phone: rawBooking.provider.phoneNumber,
+      email: rawBooking.provider.email,
+      rating: rawBooking.provider.rating || 0,
+      reviews: rawBooking.provider.totalReviews || 0,
+      avatar: rawBooking.provider.name?.charAt(0).toUpperCase() || "?",
+    };
+  } else if (rawBooking.name && rawBooking.phoneNumber && rawBooking.email) {
+    // If provider info is at top level
+    provider = {
+      name: rawBooking.name,
+      phone: rawBooking.phoneNumber,
+      email: rawBooking.email,
+      rating: rawBooking.rating || 0,
+      reviews: rawBooking.totalReviews || 0,
+      avatar: rawBooking.name?.charAt(0).toUpperCase() || "?",
+    };
+  }
+
+  return {
+    id: rawBooking.id,
+    bookingId: rawBooking.id,
+    litres: rawBooking.litres,
+    bookedDate: rawBooking.date,
+    bookedTime: "N/A",
+    expectedDelivery: "N/A",
+    provider,
+    status: (rawBooking.status as any) || "pending",
+    location: rawBooking.location?.address || "",
+    fromLocation: "Your Location",
+    toLocation: rawBooking.location?.address || "",
+    mapCoords: {
+      lat: rawBooking.location?.latitude || 0,
+      lng: rawBooking.location?.longitude || 0,
+    },
+    distance: rawBooking.distance,
+    price: rawBooking.price,
+  };
 }
 
 export function BookingDetailsModal({
@@ -62,7 +133,7 @@ export function BookingDetailsModal({
     switch (status) {
       case "pending":
         return colors.textSecondary;
-      case "delivery":
+      case "confirmed":
         return colors.tint;
       case "delivered":
         return "#4CAF50";
@@ -80,7 +151,7 @@ export function BookingDetailsModal({
         { label: "Awaiting Provider", completed: false },
         { label: "Delivery", completed: false },
       ];
-    } else if (status === "delivery") {
+    } else if (status === "confirmed") {
       return [
         { label: "Picked", completed: true },
         { label: "In Transit", completed: true },
@@ -131,8 +202,8 @@ export function BookingDetailsModal({
           <TouchableOpacity
             onPress={onClose}
             style={{
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 18,
@@ -156,8 +227,8 @@ export function BookingDetailsModal({
           <TouchableOpacity
             onPress={onClose}
             style={{
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 18,
@@ -231,7 +302,6 @@ export function BookingDetailsModal({
                       />
                     )}
                   </View>
-                 
                 </View>
               ))}
             </View>
@@ -272,7 +342,7 @@ export function BookingDetailsModal({
           </View>
 
           {/* Provider Card or Pending Message */}
-          {selectedBooking.provider ? (
+          {selectedBooking.provider && selectedBooking.provider !== null ? (
             <View
               style={[
                 styles.modalSection,
@@ -474,7 +544,7 @@ export function BookingDetailsModal({
             </View>
           )}
 
-          {selectedBooking.provider && (
+          {selectedBooking.status !== "pending" && (
             <TouchableOpacity
               style={[
                 styles.liveTrackingButton,
@@ -502,7 +572,7 @@ export function BookingDetailsModal({
                   textTransform: "uppercase",
                 }}
               >
-                Live Tracking
+                REVIEW PROVIDER
               </ThemedText>
 
               <View style={{ flexDirection: "row", gap: 0 }}>

@@ -44,7 +44,19 @@ const initialState: RequestState = {
 export const createRequest = createAsyncThunk(
   "requests/createRequest",
   async (
-    { litres, location, token, uid, date }: { litres: number; location: Location; token: string; uid: string, date: string },
+    {
+      litres,
+      location,
+      token,
+      uid,
+      date,
+    }: {
+      litres: number;
+      location: Location;
+      token: string;
+      uid: string;
+      date: string;
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -104,33 +116,41 @@ export const getRequestById = createAsyncThunk(
 );
 
 // 🔹 GET CUSTOMER REQUESTS
-export const getCustomerRequests = createAsyncThunk(
-  "requests/getCustomerRequests",
+// 🔹 GET CUSTOMER REQUESTS
+export const getRequests = createAsyncThunk(
+  "requests/getRequests",
   async (
-    { token, uid }: { token: string, uid: string },
+    { token, uid, role }: { token: string; uid: string; role: "customer" | "provider" },
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/customer/requests/${uid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let endpoint: string;
 
-      console.log("MY REQUESTS DATA", response.data)
+      if (role === "provider") {
+        endpoint = `/provider/provider-requests/${uid}`;
+      } else if (role === "customer") {
+        endpoint = `/customer/requests/${uid}`;
+      } else {
+        throw new Error("Unknown user role");
+      }
+
+      const response = await axios.get(`${API_URL}${endpoint}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("MY REQUESTS DATA", response.data);
 
       return response.data;
     } catch (error: any) {
-      console.error("❌ Get customer requests error:", {
+      console.error("❌ Get requests error:", {
         message: error?.message,
         status: error?.response?.status,
         data: error?.response?.data,
       });
       return rejectWithValue(
-        error?.response?.data?.message || "Failed to fetch customer requests"
+        error?.response?.data?.message || "Failed to fetch requests"
       );
     }
   }
@@ -218,15 +238,15 @@ const requestSlice = createSlice({
 
     // GET CUSTOMER REQUESTS
     builder
-      .addCase(getCustomerRequests.pending, (state) => {
+      .addCase(getRequests.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getCustomerRequests.fulfilled, (state, action) => {
+      .addCase(getRequests.fulfilled, (state, action) => {
         state.loading = false;
         state.customerRequests = action.payload;
       })
-      .addCase(getCustomerRequests.rejected, (state, action) => {
+      .addCase(getRequests.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
@@ -252,5 +272,6 @@ const requestSlice = createSlice({
   },
 });
 
-export const { clearError, clearSuccess, resetCurrentRequest } = requestSlice.actions;
+export const { clearError, clearSuccess, resetCurrentRequest } =
+  requestSlice.actions;
 export default requestSlice.reducer;

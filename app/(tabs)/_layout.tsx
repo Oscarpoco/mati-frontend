@@ -41,7 +41,6 @@ export default function TabLayout() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
-  
   // 🔹 RUN ON APP START
   useEffect(() => {
     initializeApp();
@@ -113,7 +112,7 @@ export default function TabLayout() {
             tabBarStyle: [
               styles.tabBar,
               {
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
               },
             ],
           }}
@@ -145,23 +144,7 @@ export default function TabLayout() {
                           styles.linkButton,
                           { backgroundColor: theme.bottomNav },
                         ]}
-                      >
-                        {name === "index" ? (
-                          <Ionicons
-                            name="chevron-back"
-                            color={theme.background}
-                            size={18}
-                            style={{ marginLeft: 40 }}
-                          />
-                        ) : name === "bookings" ? null : (
-                          <Ionicons
-                            name="chevron-forward"
-                            color={theme.background}
-                            size={18}
-                            style={{ marginLeft: 40 }}
-                          />
-                        )}
-                      </View>
+                      />
                     )}
                   </View>
                 ),

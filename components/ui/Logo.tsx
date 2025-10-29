@@ -3,16 +3,19 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, Fonts } from "@/constants/theme";
 
+// REDUX
+import { useAppSelector } from "@/redux/store/hooks";
+
 type MatiLogoProps = {
-  size?: number; // optional: allows resizing (default 56)
-  showText?: boolean; // optional: show or hide "Mati Pure Water"
+  size?: number;
+  showText?: boolean;
 };
 
-const MatiLogo: React.FC<MatiLogoProps> = ({
-  size = 56,
-  showText = true,
-}) => {
-  const colors = Colors.dark; // or Colors.light depending on theme
+const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
+  const colors = Colors.dark;
+  const { user } = useAppSelector((state) => state.auth);
+
+  const userType = user?.role;
 
   const innerSize = size * 0.7;
   const outerSize = size * 0.85;
@@ -42,7 +45,7 @@ const MatiLogo: React.FC<MatiLogoProps> = ({
             width: innerSize,
             height: innerSize,
             borderRadius: innerSize / 2,
-            backgroundColor: colors.tint,
+            backgroundColor: colors.logo,
             justifyContent: "center",
             alignItems: "center",
             top: (size - innerSize) / 2,
@@ -52,34 +55,37 @@ const MatiLogo: React.FC<MatiLogoProps> = ({
             shadowOpacity: 0.3,
             shadowRadius: 8,
             elevation: 8,
+            zIndex:1
           }}
         >
-          <Ionicons name="water" size={innerSize * 0.7} color={colors.background} />
+          <Ionicons
+            name="water"
+            size={innerSize * 0.7}
+            color={colors.background}
+          />
         </View>
 
         {/* ACCENT DOTS */}
         <View
           style={{
             position: "absolute",
-            width: 6,
-            height: 6,
+            width: 7,
+            height: 17,
             borderRadius: 3,
-            backgroundColor: colors.tint,
-            top: -3,
-            right: 8,
-            opacity: 0.6,
+            backgroundColor: colors.logo,
+            top: 10,
+            right: 8
           }}
         />
         <View
           style={{
             position: "absolute",
             width: 6,
-            height: 6,
+            height: 17,
             borderRadius: 3,
-            backgroundColor: colors.tint,
-            bottom: -2,
-            left: 8,
-            opacity: 0.4,
+            backgroundColor: colors.logo,
+            bottom: 10,
+            left: 8
           }}
         />
       </View>
@@ -91,27 +97,27 @@ const MatiLogo: React.FC<MatiLogoProps> = ({
             style={{
               fontFamily: Fonts.sans,
               color: colors.text,
-              fontSize: 24,
+              fontSize: 16,
               fontWeight: "800",
-              letterSpacing: -0.8,
+              letterSpacing: -2,
               lineHeight: 38,
             }}
           >
-            MATI
+            {userType === 'customer' ? 'CUSTOMER' : 'PROVIDER'}
           </Text>
           <Text
             style={{
               fontFamily: Fonts.sans,
               color: colors.tint,
               fontSize: 8,
-              fontWeight: "600",
+              fontWeight: "400",
               letterSpacing: 1.2,
               textTransform: "uppercase",
               opacity: 0.8,
               marginBottom: 8,
             }}
           >
-            Pure Water
+           Of Pure Water
           </Text>
         </View>
       )}

@@ -81,8 +81,7 @@ const styles = StyleSheet.create({
     padding: 26,
     paddingHorizontal: 30,
     marginHorizontal: -25,
-    marginBottom: 24,
-    borderWidth: 1,
+    marginBottom: 24
   },
   userInfoRow: {
     flexDirection: "row",
@@ -110,33 +109,27 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     width: 30,
-    height: 30,
+    height: 20,
   },
   stylingDotTwo: {
     position: "absolute",
     bottom: 0,
     right: 0,
     width: 30,
-    height: 30,
-    // borderBottomRightRadius: 38,
-    // borderTopLeftRadius: 18,
+    height: 20
   },
   stylingDotThree: {
     position: "absolute",
     top: 0,
     left: 0,
     width: 30,
-    height: 30,
-    // borderTopLeftRadius: 38,
-    // borderBottomRightRadius: 18,
+    height: 20
   },
   stylingDotFour: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: 30,
-    height: 30,
-    // borderBottomLeftRadius: 38,
-    // borderTopRightRadius: 18,
+    height: 20
   },
 });

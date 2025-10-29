@@ -86,27 +86,10 @@ export default function SplashScreen() {
             borderRadius: 80,
             borderWidth: 2,
             borderColor: colors.tint + '20',
-            top: -10,
-            left: -10,
+            top: 10,
+            left: 10,
           }}
         />
-
-        {/* Main Circle with Shadow */}
-        <View
-          style={[
-            styles.iconCircle,
-            {
-              backgroundColor: colors.tint,
-              shadowColor: colors.tint,
-              shadowOffset: { width: 0, height: 10 },
-              shadowOpacity: 0.4,
-              shadowRadius: 20,
-              elevation: 15,
-            },
-          ]}
-        >
-          <Ionicons name="water" size={80} color={colors.background} />
-        </View>
 
         {/* App Name with Subtitle */}
         <View style={{ alignItems: 'center', marginTop: 24 }}>
@@ -119,7 +102,7 @@ export default function SplashScreen() {
               },
             ]}
           >
-            MATI
+            Mati
           </ThemedText>
           <ThemedText
             style={{

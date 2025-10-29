@@ -192,7 +192,6 @@ export default function NewsScreen() {
         <View style={styles.loaderContainer}>
           <View style={[styles.loaderBackground, { backgroundColor: colors.card }]}>
             <ActivityIndicator size={50} color={colors.tint} />
-            <ThemedText style={styles.loaderText}>Loading News...</ThemedText>
           </View>
         </View>
       </ThemedView>
@@ -244,7 +243,7 @@ const styles = StyleSheet.create({
   loaderBackground: {
     width: 140,
     height: 140,
-    borderRadius: 38,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",

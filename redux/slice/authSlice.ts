@@ -7,9 +7,12 @@ export type User = {
   uid: string;
   name: string;
   email: string;
-  role: string;
-  phoneNumber?: string | null;
+  role: any;
+  phoneNumber: string;
   token: null;
+  totalReviews: number;
+  rating: number;
+  avatar: string
 };
 
 export type AuthState = {
