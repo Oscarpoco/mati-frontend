@@ -42,7 +42,7 @@ export default function SplashScreen() {
           {
             backgroundColor: colors.tint,
             top: '10%',
-            right: '-10%',
+            right: '10%',
             opacity: fadeInAnim.interpolate({
               inputRange: [0, 1],
               outputRange: [0, 0.1],
@@ -55,8 +55,8 @@ export default function SplashScreen() {
           styles.backgroundDot,
           {
             backgroundColor: colors.tint,
-            bottom: '15%',
-            left: '-8%',
+            bottom: '25%',
+            left: '8%',
             width: 80,
             height: 80,
             opacity: fadeInAnim.interpolate({
@@ -66,58 +66,6 @@ export default function SplashScreen() {
           },
         ]}
       />
-
-      {/* Logo Section with Enhanced Design */}
-      <Animated.View
-        style={[
-          styles.logoContainer,
-          {
-            opacity: fadeInAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {/* Outer Glow Ring */}
-        <View
-          style={{
-            position: 'absolute',
-            width: 160,
-            height: 160,
-            borderRadius: 80,
-            borderWidth: 2,
-            borderColor: colors.tint + '20',
-            top: 10,
-            left: 10,
-          }}
-        />
-
-        {/* App Name with Subtitle */}
-        <View style={{ alignItems: 'center', marginTop: 24 }}>
-          <ThemedText
-            style={[
-              styles.appName,
-              {
-                color: colors.text,
-                fontFamily: Fonts.sans,
-              },
-            ]}
-          >
-            Mati
-          </ThemedText>
-          <ThemedText
-            style={{
-              fontSize: 12,
-              fontWeight: '600',
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              color: colors.tint,
-              marginTop: 6,
-            }}
-          >
-            Pure Water
-          </ThemedText>
-        </View>
-      </Animated.View>
 
       {/* Loader Animation */}
       <Animated.View
@@ -226,7 +174,7 @@ const styles = {
     height: 250,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 40,
+    marginBottom: 40,
   } as any,
 
   loader: {
@@ -241,11 +189,12 @@ const styles = {
   } as any,
 
   tagline: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '400',
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    marginBottom: 12,
+    textTransform: 'capitalize',
+    marginBottom: 16,
+    textAlign: 'center',
   } as any,
 
   dotsContainer: {

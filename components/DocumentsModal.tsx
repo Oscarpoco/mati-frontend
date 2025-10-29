@@ -128,19 +128,15 @@ export default function DocumentsModal({
           <TouchableOpacity
             onPress={handleClose}
             style={{
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 18,
               backgroundColor: colors.tint,
             }}
           >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color={colors.background}
-            />
+            <Ionicons name="chevron-back" size={28} color={colors.background} />
           </TouchableOpacity>
           <ThemedText
             style={{
@@ -172,9 +168,11 @@ export default function DocumentsModal({
             </ThemedText>
           </TouchableOpacity>
 
-          <ThemedText style={styles.sectionTitle}>
-            Uploaded Documents
-          </ThemedText>
+          {documents && documents.length > 0 && (
+            <ThemedText style={styles.sectionTitle}>
+              Uploaded Documents
+            </ThemedText>
+          )}
 
           {documents && documents.length > 0 ? (
             documents.map((doc) => (
@@ -237,9 +235,29 @@ export default function DocumentsModal({
               </View>
             ))
           ) : (
-            <ThemedText style={{ textAlign: "center", opacity: 0.6 }}>
-              No documents uploaded
-            </ThemedText>
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <ThemedText
+                style={{
+                  textAlign: "center",
+                  opacity: 0.6,
+                  fontSize: 18,
+                  textTransform: "capitalize",
+                }}
+              >
+                No documents uploaded
+              </ThemedText>
+              <Ionicons
+                name="document"
+                size={80}
+                color={colors.textSecondary}
+              />
+            </View>
           )}
         </ScrollView>
       </Animated.View>
@@ -284,7 +302,7 @@ const styles = {
     justifyContent: "center" as const,
     gap: 12,
     padding: 16,
-    borderRadius: 28,
+    borderRadius: 24,
     borderWidth: 2,
     borderStyle: "dashed" as const,
     marginBottom: 24,
@@ -300,7 +318,7 @@ const styles = {
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     padding: 16,
-    borderRadius: 38,
+    borderRadius: 28,
     marginBottom: 12,
     borderWidth: 1,
   },

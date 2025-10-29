@@ -119,8 +119,8 @@ export default function TermsModal({
           <TouchableOpacity
             onPress={handleClose}
             style={{
-              width: 50,
-              height: 50,
+              width: 45,
+              height: 45,
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 18,

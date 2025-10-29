@@ -48,24 +48,21 @@ export default function TabLayout() {
 
   const initializeApp = async () => {
     try {
-      // 1️⃣ CHECK ONBOARDING STATUS
       const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
 
-      // 2️⃣ RESTORE USER SESSION (FROM REDUX THUNK)
       await dispatch(restoreSession());
 
-      // 3️⃣ SIMULATE SPLASH DELAY
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (!isChecking) {
+        setShowSplash(false);
+      }
 
-      setShowSplash(false);
-
-      // 4️⃣ SHOW ONBOARDING IF FIRST TIME
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
     } catch (error) {
       console.error("Error initializing app:", error);
     } finally {
+      setShowSplash(false)
       setIsChecking(false);
     }
   };

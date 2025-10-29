@@ -241,7 +241,7 @@ export default function CustomerHomeScreen() {
           </View>
 
           {/* QUANTITY CONTROLS */}
-          <View style={styles.quantityRow}>
+          <View style={[styles.quantityRow, {backgroundColor: colors.button, borderColor: colors.border}]}>
             <TouchableOpacity
               onPress={() => quantity > 1 && setQuantity(quantity - 1)}
               style={[
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
   locationButtonText: {
     fontWeight: "500",
     textTransform: "uppercase",
-    textAlign: "center",
+    textAlign: "left",
   },
 
   dateButton: {
@@ -640,13 +640,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginBottom: 16,
-    justifyContent: "center",
+    justifyContent: "space-between",
+    borderRadius: 32,
+    padding: 4,
+    borderWidth: .7,
+    alignItems: "center",
   },
 
   quantityButton: {
     width: 60,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -655,7 +659,7 @@ const styles = StyleSheet.create({
   quantityDisplay: {
     width: 150,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,

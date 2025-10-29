@@ -50,24 +50,24 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
   
   // MOCK DATA
   const documents: Document[] = [
-    {
-      id: "1",
-      name: "ID Document",
-      status: "approved",
-      uploadDate: "2024-10-15",
-    },
-    {
-      id: "2",
-      name: "Proof of Address",
-      status: "pending",
-      uploadDate: "2024-10-20",
-    },
-    {
-      id: "3",
-      name: "Business License",
-      status: "rejected",
-      uploadDate: "2024-10-18",
-    },
+    // {
+    //   id: "1",
+    //   name: "ID Document",
+    //   status: "approved",
+    //   uploadDate: "2024-10-15",
+    // },
+    // {
+    //   id: "2",
+    //   name: "Proof of Address",
+    //   status: "pending",
+    //   uploadDate: "2024-10-20",
+    // },
+    // {
+    //   id: "3",
+    //   name: "Business License",
+    //   status: "rejected",
+    //   uploadDate: "2024-10-18",
+    // },
   ];
 
 

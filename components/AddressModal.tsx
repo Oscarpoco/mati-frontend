@@ -303,7 +303,7 @@ export default function AddressModal({
               {selectedLocation?.id === item.id && (
                 <Ionicons
                   name="checkmark-circle"
-                  size={24}
+                  size={38}
                   color={colors.tint}
                 />
               )}
@@ -437,7 +437,7 @@ export default function AddressModal({
                 label: loadingGeo ? "Loading..." : "Select City",
                 value: null,
               }}
-              enabled={!!formData.province && !loadingGeo}
+     
               style={{
                 inputIOS: {
                   color: colors.text,
@@ -451,10 +451,7 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-              pickerStyleIOS={{
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              }}
+        
               Icon={() =>
                 loadingGeo ? (
                   <ActivityIndicator size="small" color={colors.tint} style={{ marginTop: 13 }} />
@@ -490,7 +487,7 @@ export default function AddressModal({
               }
               value={formData.suburb}
               placeholder={{ label: "Select Suburb (Optional)", value: null }}
-              enabled={!!formData.city && !loadingGeo}
+        
               style={{
                 inputIOS: {
                   color: colors.text,
@@ -504,10 +501,7 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-              pickerStyleIOS={{
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              }}
+          
               Icon={() => (
                 <Ionicons
                   name="chevron-down"
@@ -615,10 +609,7 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-              pickerStyleIOS={{
-                backgroundColor: colors.card,
-                borderColor: colors.border,
-              }}
+       
               Icon={() => (
                 <Ionicons
                   name="chevron-down"
@@ -664,7 +655,7 @@ export default function AddressModal({
             ]}
             disabled={loading}
           >
-            <Ionicons name="log-out" size={24} color={colors.tint} />
+            <Ionicons name="close" size={24} color={colors.tint} />
           </TouchableOpacity>
         )}
 
@@ -744,8 +735,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backButton: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -812,7 +803,7 @@ const styles = StyleSheet.create({
     right: 16,
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
   },
