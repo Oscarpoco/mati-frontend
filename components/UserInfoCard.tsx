@@ -12,6 +12,8 @@ interface UserInfoCardProps {
 export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
   const isVerified = user?.isVerified ?? true;
 
+  const userType = user?.role;
+
   return (
     <View
       style={[
@@ -22,7 +24,9 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
       {/* STYLING DOTS */}
       <View style={[styles.stylingDotOne, { backgroundColor: colors.tint }]} />
       <View style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]} />
-      <View style={[styles.stylingDotThree, { backgroundColor: colors.tint }]} />
+      <View
+        style={[styles.stylingDotThree, { backgroundColor: colors.tint }]}
+      />
       <View style={[styles.stylingDotFour, { backgroundColor: colors.tint }]} />
 
       {/* NAME */}
@@ -53,24 +57,26 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
       <View style={styles.divider} />
 
       {/* VERIFICATION */}
-      <View style={styles.userInfoRow}>
-        <ThemedText style={styles.userInfoLabel}>Verification</ThemedText>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons
-            name={isVerified ? "checkmark-circle" : "close-circle"}
-            size={18}
-            color={isVerified ? "#10B981" : "#EF4444"}
-          />
-          <ThemedText
-            style={{
-              color: isVerified ? "#10B981" : "#EF4444",
-              fontWeight: "400",
-            }}
-          >
-            {isVerified ? "VERIFIED" : "NOT VERIFIED"}
-          </ThemedText>
+      {userType === "provider" && (
+        <View style={styles.userInfoRow}>
+          <ThemedText style={styles.userInfoLabel}>Verification</ThemedText>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Ionicons
+              name={isVerified ? "checkmark-circle" : "close-circle"}
+              size={18}
+              color={isVerified ? "#10B981" : "#EF4444"}
+            />
+            <ThemedText
+              style={{
+                color: isVerified ? "#10B981" : "#EF4444",
+                fontWeight: "400",
+              }}
+            >
+              {isVerified ? "VERIFIED" : "NOT VERIFIED"}
+            </ThemedText>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -81,7 +87,7 @@ const styles = StyleSheet.create({
     padding: 26,
     paddingHorizontal: 30,
     marginHorizontal: -25,
-    marginBottom: 24
+    marginBottom: 24,
   },
   userInfoRow: {
     flexDirection: "row",
@@ -116,20 +122,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     width: 30,
-    height: 20
+    height: 20,
   },
   stylingDotThree: {
     position: "absolute",
     top: 0,
     left: 0,
     width: 30,
-    height: 20
+    height: 20,
   },
   stylingDotFour: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: 30,
-    height: 20
+    height: 20,
   },
 });

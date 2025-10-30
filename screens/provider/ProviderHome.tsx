@@ -399,8 +399,8 @@ export default function ProviderHomeScreen() {
             {
               fontFamily: Fonts.sans,
               textTransform: "capitalize",
-              fontSize: 38,
-              fontWeight: "900",
+              fontSize: 48,
+              fontWeight: "200",
             },
           ]}
         >

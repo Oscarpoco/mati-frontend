@@ -19,6 +19,7 @@ import EditDetailsModal from "@/components/EditDetailsModal";
 import DocumentsModal from "@/components/DocumentsModal";
 import TermsModal from "@/components/TermsModal";
 import AddressModal from "@/components/AddressModal";
+import BiometricToggle from "@/components/ui/BiometricToggle";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -41,13 +42,15 @@ interface ProfileScreenProps {
   dispatchFunctions?: DispatchFunctions;
 }
 
-export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenProps) {
+export default function ProfileScreen({
+  dispatchFunctions = {},
+}: ProfileScreenProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
   // 🔹 REDUX AUTH STATE
   const { user } = useAppSelector((state) => state.auth);
-  
+
   // MOCK DATA
   const documents: Document[] = [
     // {
@@ -69,7 +72,6 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
     //   uploadDate: "2024-10-18",
     // },
   ];
-
 
   // STATE FOR MODALS
   const [editDetailsModalVisible, setEditDetailsModalVisible] = useState(false);
@@ -105,9 +107,19 @@ export default function ProfileScreen({ dispatchFunctions = {} }: ProfileScreenP
           Your Profile
         </ThemedText>
       </View>
+      <BiometricToggle
+        theme={Colors.dark}
+        onStateChange={(isEnabled) => {
+          console.log("Biometric:", isEnabled);
+        }}
+        showLabel={true}
+      />
 
       {/* MAIN CONTENT */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 110}}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 110 }}
+      >
         {/* USER INFO CARD */}
         <UserInfoCard user={user} colors={colors} />
 

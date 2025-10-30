@@ -15,6 +15,7 @@ import { logoutUser } from "../redux/slice/authSlice";
 import { RootState, AppDispatch } from "@/redux/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserDetails } from "../redux/slice/updateUserDetailsSlice";
+import { useAppSelector } from "@/redux/store/hooks";
 
 interface ActionButtonsProps {
   colors: any;
@@ -39,6 +40,10 @@ export default function ActionButtons({
   const dataLoading = useSelector(
     (state: RootState) => state.userDetails?.loading
   );
+
+  const { user } = useAppSelector((state) => state.auth);
+
+  const userType = user?.role;
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -137,45 +142,52 @@ export default function ActionButtons({
       </TouchableOpacity>
 
       {/* DOCUMENTS */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          { backgroundColor: colors.background, borderColor: colors.border },
-        ]}
-        onPress={onDocuments}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View
-            style={{
-              height: 50,
-              width: 50,
-              backgroundColor: colors.tint,
-              borderRadius: 18,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Ionicons name="document" size={28} color={colors.successGreen} />
+
+      {userType === "provider" && (
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            { backgroundColor: colors.background, borderColor: colors.border },
+          ]}
+          onPress={onDocuments}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View
+              style={{
+                height: 50,
+                width: 50,
+                backgroundColor: colors.tint,
+                borderRadius: 18,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Ionicons name="document" size={28} color={colors.successGreen} />
+            </View>
+            <View>
+              <ThemedText style={styles.actionButtonText}>Documents</ThemedText>
+              <ThemedText style={styles.actionButtonSubtext}>
+                View document verification status
+              </ThemedText>
+            </View>
           </View>
-          <View>
-            <ThemedText style={styles.actionButtonText}>Documents</ThemedText>
-            <ThemedText style={styles.actionButtonSubtext}>
-              View document verification status
-            </ThemedText>
-          </View>
-        </View>
-        <Ionicons
-          name="chevron-forward"
-          size={24}
-          color={colors.textSecondary}
-        />
-      </TouchableOpacity>
+          <Ionicons
+            name="chevron-forward"
+            size={24}
+            color={colors.textSecondary}
+          />
+        </TouchableOpacity>
+      )}
 
       {/* TERMS & CONDITIONS */}
       <TouchableOpacity
         style={[
           styles.actionButton,
-          { backgroundColor: colors.card, borderColor: colors.border },
+          {
+            backgroundColor:
+              userType === "provider" ? colors.card : colors.background,
+            borderColor: colors.border,
+          },
         ]}
         onPress={onTerms}
       >
