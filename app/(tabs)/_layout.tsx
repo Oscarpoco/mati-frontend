@@ -56,6 +56,8 @@ export default function TabLayout() {
   const lockScreenTimeRef = useRef<number>(0);
   // STORE REFERENCE TO LOCK SCREEN TIMEOUT - USE ReturnType FOR PROPER TYPING
   const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // TRACK IF BIOMETRIC LOCK HAS BEEN SHOWN DURING THIS SESSION
+  const biometricLockShownRef = useRef(false);
 
   useEffect(() => {
     if (hasInitialized.current) return;
@@ -72,7 +74,7 @@ export default function TabLayout() {
         );
         await AsyncStorage.getItem("biometricEnabled");
 
-        // Check biometric availability
+        // CHECK BIOMETRIC AVAILABILITY
         await checkBiometricAvailability();
 
         await dispatch(restoreSession());
@@ -107,7 +109,7 @@ export default function TabLayout() {
       if (compatible && enrolled) {
         setIsBiometricAvailable(true);
 
-        // Get the type of biometric available
+        // GET THE TYPE OF BIOMETRIC AVAILABLE
         const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
         if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
           setBiometricType("face");
@@ -119,6 +121,37 @@ export default function TabLayout() {
       console.error("Error checking biometric:", error);
     }
   };
+
+  // 🔹 SHOW BIOMETRIC LOCK IF ENABLED
+  useEffect(() => {
+    const checkAndShowBiometricLock = async () => {
+      // ONLY SHOW BIOMETRIC LOCK ON INITIAL APP LOAD IF NOT SHOWING SPLASH OR ONBOARDING
+      if (
+        !showSplash &&
+        !showOnboarding &&
+        isAuthenticated &&
+        isBiometricAvailable &&
+        !biometricLockShownRef.current
+      ) {
+        const isBiometricEnabled = await AsyncStorage.getItem("biometricEnabled");
+        if (isBiometricEnabled === "true") {
+          biometricLockShownRef.current = true;
+          lockScreenTimeRef.current = Date.now();
+          setShowBiometricLock(true);
+
+          // AUTO-DISMISS LOCK SCREEN AFTER 30 SECONDS OF INACTIVITY
+          lockTimerRef.current = setTimeout(() => {
+            const elapsedTime = Date.now() - lockScreenTimeRef.current;
+            if (elapsedTime >= BIOMETRIC_LOCK_DURATION) {
+              setShowBiometricLock(false);
+            }
+          }, BIOMETRIC_LOCK_DURATION);
+        }
+      }
+    };
+
+    checkAndShowBiometricLock();
+  }, [showSplash, showOnboarding, isAuthenticated, isBiometricAvailable]);
 
   // 🔹 APP STATE LISTENER
   useEffect(() => {
@@ -137,14 +170,14 @@ export default function TabLayout() {
       appState.current.match(/inactive|background/) &&
       nextAppState === "active"
     ) {
-      // App has come to foreground
+      // APP HAS COME TO FOREGROUND
       if (isAuthenticated && isBiometricAvailable) {
         const isBiometricEnabled = await AsyncStorage.getItem("biometricEnabled");
         if (isBiometricEnabled === "true") {
           lockScreenTimeRef.current = Date.now();
           setShowBiometricLock(true);
 
-          // Auto-dismiss lock screen after 30 seconds of inactivity
+          // AUTO-DISMISS LOCK SCREEN AFTER 30 SECONDS OF INACTIVITY
           lockTimerRef.current = setTimeout(() => {
             const elapsedTime = Date.now() - lockScreenTimeRef.current;
             if (elapsedTime >= BIOMETRIC_LOCK_DURATION) {
@@ -154,7 +187,7 @@ export default function TabLayout() {
         }
       }
     } else if (nextAppState.match(/inactive|background/)) {
-      // App is going to background - clear any pending lock timer
+      // APP IS GOING TO BACKGROUND - CLEAR ANY PENDING LOCK TIMER
       if (lockTimerRef.current) {
         clearTimeout(lockTimerRef.current);
         lockTimerRef.current = null;
