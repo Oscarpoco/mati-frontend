@@ -1,11 +1,10 @@
-// ProfileScreen.tsx
+
 import {
   StyleSheet,
   View,
   ScrollView,
   StatusBar,
   useColorScheme,
-  Dimensions,
 } from "react-native";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
@@ -20,8 +19,6 @@ import DocumentsModal from "@/components/DocumentsModal";
 import TermsModal from "@/components/TermsModal";
 import AddressModal from "@/components/AddressModal";
 import BiometricToggle from "@/components/ui/BiometricToggle";
-
-const { height: screenHeight } = Dimensions.get("window");
 
 interface DispatchFunctions {
   onUpdateUserDetails?: (details: any) => void;
@@ -100,10 +97,10 @@ export default function ProfileScreen({
 
       {/* HEADER */}
       <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight', }]}>
           Manage
         </ThemedText>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight',}]}>
           Your Profile
         </ThemedText>
       </View>

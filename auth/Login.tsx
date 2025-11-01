@@ -29,6 +29,7 @@ import { RootState, AppDispatch } from "@/redux/store/store";
 import { AuthStyles as styles } from "@/components/styledComponents/AuthStyle";
 import LoadingBanner from "@/components/ui/LoadingBanner";
 import { AnnouncementBanner } from "@/components/ui/AnnouncementBanner";
+import MatiLogo from "@/components/ui/Logo";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -100,131 +101,14 @@ export function LoginScreen() {
           {/* HEADER */}
           <View>
             <View style={{ height: 100 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
-                {/* Animated Water Circle Logo */}
-                <View
-                  style={{
-                    position: "relative",
-                    width: 56,
-                    height: 56,
-                  }}
-                >
-                  {/* Outer gradient circle effect */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: 56,
-                      height: 56,
-                      borderRadius: 28,
-                      backgroundColor: colors.tint + "15",
-                      borderWidth: 2,
-                      borderColor: colors.tint + "30",
-                    }}
-                  />
-
-                  {/* Inner circle with water drop */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: 48,
-                      height: 48,
-                      borderRadius: 24,
-                      backgroundColor: colors.tint,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      top: 4,
-                      left: 4,
-                      shadowColor: colors.tint,
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                      elevation: 8,
-                    }}
-                  >
-                    <Ionicons
-                      name="water"
-                      size={28}
-                      color={colors.background}
-                    />
-                  </View>
-
-                  {/* Top accent dot */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: 6,
-                      height: 6,
-                      borderRadius: 3,
-                      backgroundColor: colors.tint,
-                      top: 1,
-                      right: 0,
-                      opacity: 0.6,
-                    }}
-                  />
-
-                  {/* Bottom accent dot */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      width: 6,
-                      height: 6,
-                      borderRadius: 3,
-                      backgroundColor: colors.tint,
-                      bottom: -2,
-                      left: 2,
-                      opacity: 0.4,
-                    }}
-                  />
-                </View>
-
-                {/* Text Logo */}
-                <View
-                  style={{
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: Fonts.sans,
-                      color: colors.text,
-                      fontSize: 32,
-                      fontWeight: "800",
-                      letterSpacing: -0.8,
-                      lineHeight: 38,
-                      marginBottom: -2,
-                    }}
-                  >
-                    MATI
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: Fonts.sans,
-                      color: colors.tint,
-                      fontSize: 10,
-                      fontWeight: "600",
-                      letterSpacing: 1.2,
-                      textTransform: "uppercase",
-                      opacity: 0.8,
-                    }}
-                  >
-                    Pure Water
-                  </Text>
-                </View>
-              </View>
+              <MatiLogo size={53} />
             </View>
 
             {/* TITLE SECTION */}
             <View style={{ marginBottom: 40 }}>
-              <ThemedText style={styles.title}>Welcome Back</ThemedText>
+              <ThemedText style={[styles.title, {fontFamily: 'poppinsBlack'}]}>Ha ku amukela</ThemedText>
               <ThemedText
-                style={[styles.subtitle, { color: colors.textSecondary }]}
+                style={[styles.subtitle, { color: colors.textSecondary, fontFamily: 'poppinsBold', }]}
               >
                 Sign in to continue to your account
               </ThemedText>
@@ -351,6 +235,7 @@ export function LoginScreen() {
                     textAlign: "center",
                     textTransform: "uppercase",
                     width: "100%",
+                    fontFamily: 'poppinsMedium',
                   }}
                 >
                   {typeof error === "string" ? error : "Something went wrong"}
@@ -426,11 +311,12 @@ export function LoginScreen() {
               <ThemedText
                 style={{
                   color: colors.textSecondary,
-                  fontSize: 12,
+                  fontSize: 18,
                   position: "absolute",
                   left: "45%",
                   backgroundColor: colors.background,
                   paddingHorizontal: 10,
+                  fontFamily: 'poppinsBlack',
                 }}
               >
                 OR
@@ -447,9 +333,9 @@ export function LoginScreen() {
             >
               <Ionicons name="logo-google" size={24} color={colors.tint} />
               <ThemedText
-                style={{ fontSize: 16, fontWeight: "600", marginLeft: 10 }}
+                style={{ fontSize: 16, fontWeight: "600", marginLeft: 10, fontFamily: 'poppinsBlack',color: colors.textSecondary }}
               >
-                Continue with Google
+                CONTINUE WITH GOOGLE
               </ThemedText>
             </TouchableOpacity>
 
@@ -461,14 +347,14 @@ export function LoginScreen() {
                 marginTop: 20,
               }}
             >
-              <ThemedText style={{ color: colors.textSecondary }}>
+              <ThemedText style={{ color: colors.textSecondary, fontFamily: 'poppinsBlack', }}>
                 Do not have an account?{" "}
               </ThemedText>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Register")}
                 disabled={loading}
               >
-                <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
+                <ThemedText style={{ color: colors.tint, fontFamily: 'poppinsMedium', }}>
                   Sign up
                 </ThemedText>
               </TouchableOpacity>

@@ -103,7 +103,7 @@ export default function SplashScreen() {
         ]}
       >
         <ThemedText
-          style={[styles.tagline, { color: colors.textSecondary }]}
+          style={[styles.tagline, { color: colors.textSecondary, fontFamily: 'poppinsBlack', }]}
         >
           Water Delivery Made Simple
         </ThemedText>
@@ -190,7 +190,6 @@ const styles = {
 
   tagline: {
     fontSize: 18,
-    fontWeight: '400',
     letterSpacing: 0.5,
     textTransform: 'capitalize',
     marginBottom: 16,

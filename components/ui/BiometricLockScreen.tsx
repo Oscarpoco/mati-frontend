@@ -313,14 +313,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 48,
-    fontWeight: "800",
+    fontFamily: 'poppinsMedium',
     marginBottom: 10,
     letterSpacing: -0.5,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 15,
-    fontWeight: "400",
+    fontSize: 14,
+    fontFamily: 'poppinsMedium',
     lineHeight: 20,
     textAlign: "center",
   },
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   errorText: {
     flex: 1,
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: 'poppinsMedium',
     lineHeight: 20,
     textAlign: "center",
   },
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   },
   attemptsText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontFamily: 'poppinsMedium',
     textAlign: "center",
   },
   buttonContainer: {
@@ -421,12 +421,12 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: 'poppinsMedium',
     letterSpacing: -0.3,
   },
   infoText: {
     fontSize: 13,
-    fontWeight: "400",
+    fontFamily: 'poppinsMedium',
     textAlign: "center",
     lineHeight: 18,
   },

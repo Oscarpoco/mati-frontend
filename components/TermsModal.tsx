@@ -134,7 +134,7 @@ export default function TermsModal({
               color: colors.text,
               textAlign: "center",
               fontSize: 22,
-              fontWeight: "600",
+              fontFamily: 'poppinsBold',
             }}
           >
             Terms & Conditions
@@ -177,6 +177,7 @@ const styles = {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
+    gap: 20
   },
   modalContent: {
     paddingHorizontal: 16,
@@ -184,9 +185,10 @@ const styles = {
     paddingBottom: 40,
   },
   termsContent: {
-    fontSize: 14,
+    fontSize: 12,
     lineHeight: 24,
     opacity: 0.8,
     marginBottom: 0,
+    fontFamily: 'poppinsExtraLight',
   },
 };

@@ -1,4 +1,4 @@
-// components/profile/ActionButtons.tsx
+
 import {
   StyleSheet,
   View,
@@ -89,7 +89,7 @@ export default function ActionButtons({
             )}
           </View>
           <View>
-            <ThemedText style={styles.actionButtonText}>
+            <ThemedText style={[styles.actionButtonText, {color: colors.textSecondary}]}>
               Edit Personal Details
             </ThemedText>
             <ThemedText style={styles.actionButtonSubtext}>
@@ -126,7 +126,7 @@ export default function ActionButtons({
             <Ionicons name="location" size={28} color={colors.warningRed} />
           </View>
           <View>
-            <ThemedText style={styles.actionButtonText}>
+            <ThemedText style={[styles.actionButtonText, {color: colors.textSecondary}]}>
               Manage Addresses
             </ThemedText>
             <ThemedText style={styles.actionButtonSubtext}>
@@ -165,7 +165,7 @@ export default function ActionButtons({
               <Ionicons name="document" size={28} color={colors.successGreen} />
             </View>
             <View>
-              <ThemedText style={styles.actionButtonText}>Documents</ThemedText>
+              <ThemedText style={[styles.actionButtonText, {color: colors.textSecondary}]}>Documents</ThemedText>
               <ThemedText style={styles.actionButtonSubtext}>
                 View document verification status
               </ThemedText>
@@ -209,7 +209,7 @@ export default function ActionButtons({
             />
           </View>
           <View>
-            <ThemedText style={styles.actionButtonText}>
+            <ThemedText style={[styles.actionButtonText, {color: colors.textSecondary}]}>
               Terms & Conditions
             </ThemedText>
             <ThemedText style={styles.actionButtonSubtext}>
@@ -253,8 +253,8 @@ export default function ActionButtons({
 
             <ThemedText
               style={{
-                fontSize: 14,
-                fontWeight: "600",
+                fontSize: 18,
+                fontFamily: 'poppinsBold',
                 color: colors.textSecondary,
                 textTransform: "uppercase",
               }}
@@ -291,13 +291,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   actionButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontFamily: 'poppinsMedium',
   },
   actionButtonSubtext: {
     fontSize: 12,
     opacity: 0.6,
     marginTop: 4,
+    fontFamily: 'poppinsMedium',
   },
   saveButton: {
     alignItems: "center",

@@ -153,7 +153,7 @@ export default function CustomerHomeScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100, gap: 20 }}>
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+          <ThemedText style={[styles.title]}>
             Welcome
           </ThemedText>
           <ThemedText
@@ -161,10 +161,9 @@ export default function CustomerHomeScreen() {
             style={[
               styles.title,
               {
-                fontFamily: Fonts.sans,
+                fontFamily: 'poppinsMedium',
                 textTransform: "capitalize",
-                fontSize: 48,
-                fontWeight: '200',
+                fontSize: 46,
               },
             ]}
           >
@@ -176,7 +175,7 @@ export default function CustomerHomeScreen() {
         <View
           style={[
             styles.quickCard,
-            { backgroundColor: colors.background, borderColor: colors.border },
+            { backgroundColor: colors.button, borderColor: colors.border },
           ]}
         >
           <ThemedText style={styles.quickTitle}>Quick Request</ThemedText>
@@ -377,20 +376,20 @@ export default function CustomerHomeScreen() {
               >
                 <Ionicons
                   name="chevron-forward"
-                  size={28}
+                  size={38}
                   color={colors.background}
                 />
               </TouchableOpacity>
 
               <ThemedText
                 style={{
-                  fontSize: 14,
-                  fontWeight: "600",
+                  fontSize: 18,
+                  fontFamily: 'poppinsBold',
                   color: colors.textSecondary,
                   textTransform: "uppercase",
                 }}
               >
-                CONFIRM REQUEST
+                CONFIRM
               </ThemedText>
 
               <View style={{ flexDirection: "row", gap: 0 }}>
@@ -435,8 +434,8 @@ export default function CustomerHomeScreen() {
             <TouchableOpacity
               onPress={() => setDatePickerVisible(false)}
               style={{
-                width: 50,
-                height: 50,
+                width: 45,
+                height: 45,
                 justifyContent: "center",
                 alignItems: "center",
                 borderRadius: 18,
@@ -450,7 +449,7 @@ export default function CustomerHomeScreen() {
               />
             </TouchableOpacity>
             <ThemedText style={styles.calendarTitle}>
-              Select Delivery Date
+              Delivery Date
             </ThemedText>
           </View>
 
@@ -510,15 +509,11 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 52,
-    fontWeight: "200",
     marginBottom: 4,
     lineHeight: 60,
+    fontFamily: 'poppinsBold',
   },
 
-  locationText: {
-    fontSize: 14,
-    fontWeight: "800",
-  },
 
   headerButtons: {
     flexDirection: "row",
@@ -553,7 +548,7 @@ const styles = StyleSheet.create({
 
   quickTitle: {
     fontSize: 32,
-    fontWeight: "600",
+    fontFamily: 'poppinsLight',
     marginBottom: 4,
     lineHeight: 50,
     textTransform: "uppercase",
@@ -561,10 +556,10 @@ const styles = StyleSheet.create({
   },
 
   quickSubtitle: {
-    fontSize: 14.3,
+    fontSize: 14,
     opacity: 0.6,
     marginBottom: 16,
-    fontWeight: "400",
+    fontFamily: 'poppinsExtraLight',
     textAlign: "center",
   },
 
@@ -614,7 +609,7 @@ const styles = StyleSheet.create({
   },
 
   locationButtonText: {
-    fontWeight: "500",
+    fontFamily: 'poppinsLight',
     textTransform: "uppercase",
     textAlign: "left",
   },
@@ -631,7 +626,7 @@ const styles = StyleSheet.create({
 
   dateButtonText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontFamily: 'poppinsLight',
     textTransform: "uppercase",
     textAlign: "center",
   },
@@ -667,7 +662,7 @@ const styles = StyleSheet.create({
 
   quantityText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: 'poppinsMedium',
   },
 
   confirmContainer: {
@@ -714,14 +709,15 @@ const styles = StyleSheet.create({
   },
 
   calendarTitle: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 28,
+    fontFamily: 'poppinsBold',
     flex: 1,
+    lineHeight:50
   },
 
   calendarContainer: {
     marginHorizontal: 16,
-    borderRadius: 24,
+    borderRadius: 48,
     borderWidth: 1,
     padding: 16,
   },

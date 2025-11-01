@@ -22,12 +22,13 @@ type TabConfig = {
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
   iconSize?: number;
+  activeIcon?: number;
 };
 
 const TABS: TabConfig[] = [
   { name: "index", title: "Home", icon: "home", iconSize: 22 },
   { name: "bookings", title: "Bookings", icon: "calendar", iconSize: 22 },
-  { name: "news", title: "News", icon: "newspaper", iconSize: 22 },
+  { name: "shop", title: "Shop", icon: "cart", iconSize: 22 },
   { name: "profile", title: "Profile", icon: "person", iconSize: 22 },
 ] as const;
 
@@ -47,7 +48,6 @@ export default function TabLayout() {
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [biometricType, setBiometricType] = useState<string>("fingerprint");
 
-  // 🧩 Prevent double initialization (React 18 Strict Mode)
   // PREVENT DOUBLE INITIALIZATION IN REACT 18 STRICT MODE
   const hasInitialized = useRef(false);
   // TRACK CURRENT APP STATE (ACTIVE, BACKGROUND, INACTIVE)
@@ -184,16 +184,6 @@ export default function TabLayout() {
     }
   };
 
-  // DEBUG: FORCE BIOMETRIC LOCK SCREEN (REMOVE IN PRODUCTION)
-  const debugShowBiometricLock = () => {
-    lockScreenTimeRef.current = Date.now();
-    setShowBiometricLock(true);
-    console.log("DEBUG: BIOMETRIC LOCK SCREEN FORCED");
-  };
-
-  // useEffect(()=>{
-  //   debugShowBiometricLock()
-  // }, [])
 
   // 🔹 SPLASH SCREEN
   if (showSplash) {
@@ -243,13 +233,13 @@ export default function TabLayout() {
             ],
           }}
         >
-          {TABS.map(({ name, icon, iconSize = 26 }) => (
+          {TABS.map(({ name, icon, iconSize = 26, activeIcon = 32 }) => (
             <Tabs.Screen
               key={name}
               name={name}
               options={{
                 tabBarShowLabel: false,
-                tabBarIcon: ({ color, focused }) => (
+                tabBarIcon: ({ focused }) => (
                   <View
                     style={[
                       styles.iconContainer,
@@ -261,7 +251,7 @@ export default function TabLayout() {
                   >
                     <Ionicons
                       name={icon}
-                      size={iconSize}
+                      size={focused ? activeIcon : iconSize}
                       color={focused ? theme.background : theme.bottomNav}
                     />
                     {name !== "profile" && (

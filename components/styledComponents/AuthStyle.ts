@@ -23,16 +23,16 @@ export const AuthStyles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: 38,
     letterSpacing: -0.5,
-    lineHeight: 50
+    lineHeight: 50,
+    fontFamily: 'poppinsBold',
   },
 
   subtitle: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: "500",
+    fontFamily: 'poppinsMedium',
   },
 
   inputWrapper: {
@@ -41,7 +41,7 @@ export const AuthStyles = StyleSheet.create({
 
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: 'poppinsBold',
     marginBottom: 8,
     textTransform: "uppercase",
     opacity: 0.8,
@@ -60,13 +60,13 @@ export const AuthStyles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "500",
+    fontFamily: 'poppinsExtraLight',
     marginLeft: 10,
   },
 
   forgotLink: {
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: 'poppinsLight',
   },
 
   checkboxContainer: {
@@ -123,11 +123,11 @@ export const AuthStyles = StyleSheet.create({
   },
 
   confirmText: {
-    fontSize: 14,
+    fontSize: 18,
     textAlign: "center",
     opacity: 0.7,
     letterSpacing: 1.2,
-    fontWeight: "600",
+    fontFamily: 'poppinsBlack',
   },
 
   successIcon: {
@@ -140,7 +140,7 @@ export const AuthStyles = StyleSheet.create({
 
   successTitle: {
     fontSize: 28,
-    fontWeight: "700",
+    fontFamily: 'poppinsBold',
     textAlign: "center",
   },
 
@@ -148,5 +148,6 @@ export const AuthStyles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     lineHeight: 24,
+    fontFamily: 'poppinsMedium'
   },
 });

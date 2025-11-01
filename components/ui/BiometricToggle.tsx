@@ -175,9 +175,9 @@ export default function BiometricToggle({
     return null;
   }
 
-  const togglePosition = slideAnim.interpolate({
+   const togglePosition = slideAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [2, 28],
+    outputRange: [0, 18],
   });
 
   return (
@@ -186,6 +186,8 @@ export default function BiometricToggle({
         styles.container,
         {
           transform: [{ scale: scaleAnim }],
+          borderColor: theme.tint,
+          backgroundColor: theme.card
         },
       ]}
     >
@@ -194,7 +196,7 @@ export default function BiometricToggle({
           <Text
             style={[
               styles.labelText,
-              { color: isBiometricEnabled ? theme.tint : theme.textSecondary },
+              { color: isBiometricEnabled ? theme.tint : theme.textSecondary, fontFamily: 'poppinsBold', },
             ]}
           >
             Biometrics
@@ -256,7 +258,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: 15
+    paddingHorizontal: 10,
+    borderLeftWidth: 5,
+    borderRightWidth: 5,
   },
   toggleButton: {
     width: 60,
@@ -280,7 +284,7 @@ const styles = StyleSheet.create({
   },
   toggleSlider: {
     position: "absolute",
-    width: 30,
+    width: 38,
     height: 30,
     borderRadius: 15,
     justifyContent: "center",
@@ -300,7 +304,6 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontSize: 24,
-    fontWeight: "600",
     textTransform: 'uppercase',
     textAlign: 'left'
   }

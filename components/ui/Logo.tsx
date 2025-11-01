@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 
 // REDUX
 import { useAppSelector } from "@/redux/store/hooks";
@@ -19,6 +19,18 @@ const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
 
   const innerSize = size * 0.7;
   const outerSize = size * 0.85;
+
+  const getGreeting = () => {
+    const currentHour = new Date().getHours();
+
+    if (currentHour < 12) {
+      return "GOOD MORNING";
+    } else if (currentHour < 18) {
+      return "GOOD AFTERNOON";
+    } else {
+      return "GOOD EVENING";
+    }
+  };
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -55,7 +67,7 @@ const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
             shadowOpacity: 0.3,
             shadowRadius: 8,
             elevation: 8,
-            zIndex:1
+            zIndex: 1,
           }}
         >
           <Ionicons
@@ -69,23 +81,23 @@ const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
         <View
           style={{
             position: "absolute",
-            width: 7,
+            width: 16,
             height: 17,
             borderRadius: 3,
             backgroundColor: colors.logo,
             top: 10,
-            right: 8
+            right: 8,
           }}
         />
         <View
           style={{
             position: "absolute",
-            width: 6,
+            width: 16,
             height: 17,
             borderRadius: 3,
             backgroundColor: colors.logo,
             bottom: 10,
-            left: 8
+            left: 8,
           }}
         />
       </View>
@@ -95,21 +107,24 @@ const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
         <View style={{ flexDirection: "column", justifyContent: "center" }}>
           <Text
             style={{
-              fontFamily: Fonts.sans,
+              fontFamily: "poppinsMedium",
               color: colors.text,
               fontSize: 16,
               fontWeight: "800",
-              letterSpacing: -2,
-              lineHeight: 38,
+              lineHeight: 30,
             }}
           >
-            {userType === 'customer' ? 'CUSTOMER' : 'PROVIDER'}
+            {userType === "customer"
+              ? "CUSTOMER"
+              : userType === "provider"
+              ? "PROVIDER"
+              : getGreeting()}
           </Text>
           <Text
             style={{
-              fontFamily: Fonts.sans,
+              fontFamily: "poppinsMedium",
               color: colors.tint,
-              fontSize: 8,
+              fontSize: 10,
               fontWeight: "400",
               letterSpacing: 1.2,
               textTransform: "uppercase",
@@ -117,7 +132,9 @@ const MatiLogo: React.FC<MatiLogoProps> = ({ size = 56, showText = true }) => {
               marginBottom: 8,
             }}
           >
-           Of Pure Water
+            {userType !== "customer" && userType !== "provider"
+              ? "let's grow the community together"
+              : "Of Pure Water"}
           </Text>
         </View>
       )}

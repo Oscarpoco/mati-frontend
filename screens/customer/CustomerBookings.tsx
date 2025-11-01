@@ -314,7 +314,7 @@ export default function CustomerBookingsScreen() {
           <ThemedText
             style={{
               fontSize: 12,
-              fontWeight: "700",
+              fontFamily: 'poppinsMedium',
               color: colors.background,
               textTransform: "capitalize",
             }}
@@ -327,7 +327,7 @@ export default function CustomerBookingsScreen() {
         <ThemedText
           style={[
             styles.bookingId,
-            { color: colors.tint, fontFamily: Fonts.sans },
+            { color: colors.tint, fontFamily: 'poppinsBold' },
           ]}
         >
           {booking.bookingId}
@@ -370,8 +370,8 @@ export default function CustomerBookingsScreen() {
           <View style={styles.providerAvatar}>
             <ThemedText
               style={{
-                fontWeight: "700",
-                fontSize: 14,
+                fontFamily: 'poppinsBold',
+                fontSize: 18,
                 color: colors.background,
               }}
             >
@@ -379,13 +379,13 @@ export default function CustomerBookingsScreen() {
             </ThemedText>
           </View>
           <View style={{ flex: 1 }}>
-            <ThemedText style={[styles.providerName, { color: colors.text }]}>
+            <ThemedText style={[styles.providerName, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
               {booking.provider.name}
             </ThemedText>
             <View style={styles.ratingRow}>
               <Ionicons name="star" size={12} color="#FFD700" />
               <ThemedText
-                style={[styles.ratingText, { color: colors.textSecondary }]}
+                style={[styles.ratingText, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
               >
                 {booking.provider.rating} ({booking.provider.reviews} reviews)
               </ThemedText>
@@ -401,7 +401,7 @@ export default function CustomerBookingsScreen() {
         >
           <Ionicons name="time" size={16} color={colors.tint} />
           <ThemedText
-            style={[styles.pendingText, { color: colors.textSecondary }]}
+            style={[styles.pendingText, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             Waiting for a provider to accept your request
           </ThemedText>
@@ -416,17 +416,17 @@ export default function CustomerBookingsScreen() {
           >
             Litres
           </ThemedText>
-          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
+          <ThemedText style={[styles.footerValue, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {booking.litres}L
           </ThemedText>
         </View>
         <View style={{ width: "50%" }}>
           <ThemedText
-            style={[styles.footerLabel, { color: colors.textSecondary }]}
+            style={[styles.footerLabel, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             Expected Delivery
           </ThemedText>
-          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
+          <ThemedText style={[styles.footerValue, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {booking.expectedDelivery}
           </ThemedText>
         </View>
@@ -508,11 +508,11 @@ export default function CustomerBookingsScreen() {
               color={colors.textSecondary}
             />
           </View>
-          <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
+          <ThemedText style={[styles.emptyTitle, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {activeTab === "active" ? "No Active Bookings" : "No Past Bookings"}
           </ThemedText>
           <ThemedText
-            style={[styles.emptySubtitle, { color: colors.textSecondary }]}
+            style={[styles.emptySubtitle, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             {activeTab === "active"
               ? "You don't have any active water deliveries right now"
@@ -529,10 +529,10 @@ export default function CustomerBookingsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight', }]}>
           Recently
         </ThemedText>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight', }]}>
           Deliveries
         </ThemedText>
       </View>
@@ -549,7 +549,7 @@ export default function CustomerBookingsScreen() {
           <ThemedText
             style={[
               styles.searchPlaceholder,
-              { color: colors.textSecondary, marginLeft: 8 },
+              { color: colors.textSecondary, marginLeft: 8, fontFamily: 'poppinsMedium', },
             ]}
           >
             Search
@@ -584,7 +584,7 @@ export default function CustomerBookingsScreen() {
                 activeTab === "active"
                   ? colors.background
                   : colors.textSecondary,
-              fontWeight: "500",
+              fontFamily: 'poppinsMedium',
               fontSize: 14,
             }}
           >
@@ -606,7 +606,7 @@ export default function CustomerBookingsScreen() {
             style={{
               color:
                 activeTab === "past" ? colors.background : colors.textSecondary,
-              fontWeight: "600",
+              fontFamily: 'poppinsMedium',
               fontSize: 14,
             }}
           >
@@ -657,7 +657,6 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 48,
-    fontWeight: "600",
     marginBottom: 4,
     lineHeight: 60,
   },
@@ -681,7 +680,6 @@ const styles = StyleSheet.create({
 
   searchPlaceholder: {
     fontSize: 18,
-    fontWeight: "400",
   },
 
   filterButton: {
@@ -737,7 +735,6 @@ const styles = StyleSheet.create({
 
   bookingId: {
     fontSize: 16,
-    fontWeight: "800",
     marginBottom: 12,
   },
 
@@ -755,9 +752,9 @@ const styles = StyleSheet.create({
 
   locationText: {
     fontSize: 12,
-    fontWeight: "500",
     marginLeft: 6,
     flex: 1,
+    fontFamily: 'poppinsMedium',
   },
 
   providerSection: {
@@ -782,7 +779,6 @@ const styles = StyleSheet.create({
 
   providerName: {
     fontSize: 14,
-    fontWeight: "600",
     marginBottom: 2,
   },
 
@@ -794,7 +790,6 @@ const styles = StyleSheet.create({
 
   ratingText: {
     fontSize: 10,
-    fontWeight: "500",
   },
 
   pendingSection: {
@@ -810,7 +805,6 @@ const styles = StyleSheet.create({
 
   pendingText: {
     fontSize: 12,
-    fontWeight: "500",
     flex: 1,
     textTransform: "uppercase",
   },
@@ -864,14 +858,12 @@ const styles = StyleSheet.create({
 
   emptyTitle: {
     fontSize: 18,
-    fontWeight: "600",
     marginBottom: 8,
     textAlign: "center",
   },
 
   emptySubtitle: {
     fontSize: 14,
-    fontWeight: "400",
     textAlign: "center",
     lineHeight: 20,
   },

@@ -80,7 +80,6 @@ export default function AddressModal({
     []
   );
   const [loadingGeo, setLoadingGeo] = useState(false);
-  
 
   useEffect(() => {
     if (user?.uid && token) {
@@ -135,10 +134,12 @@ export default function AddressModal({
       );
       const data = await response.json();
 
-      const suburbList = (data.results || []).slice(0, 200).map((item: any) => ({
-        label: item.name,
-        value: item.name,
-      }));
+      const suburbList = (data.results || [])
+        .slice(0, 200)
+        .map((item: any) => ({
+          label: item.name,
+          value: item.name,
+        }));
 
       setSuburbs(suburbList);
     } catch (error) {
@@ -437,7 +438,6 @@ export default function AddressModal({
                 label: loadingGeo ? "Loading..." : "Select City",
                 value: null,
               }}
-     
               style={{
                 inputIOS: {
                   color: colors.text,
@@ -451,10 +451,13 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-        
               Icon={() =>
                 loadingGeo ? (
-                  <ActivityIndicator size="small" color={colors.tint} style={{ marginTop: 13 }} />
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.tint}
+                    style={{ marginTop: 13 }}
+                  />
                 ) : (
                   <Ionicons
                     name="chevron-down"
@@ -487,7 +490,6 @@ export default function AddressModal({
               }
               value={formData.suburb}
               placeholder={{ label: "Select Suburb (Optional)", value: null }}
-        
               style={{
                 inputIOS: {
                   color: colors.text,
@@ -501,7 +503,6 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-          
               Icon={() => (
                 <Ionicons
                   name="chevron-down"
@@ -609,7 +610,6 @@ export default function AddressModal({
                 },
               }}
               useNativeAndroidPickerStyle={false}
-       
               Icon={() => (
                 <Ionicons
                   name="chevron-down"
@@ -660,13 +660,13 @@ export default function AddressModal({
         )}
 
         {loading ? (
-          <React.Fragment>
+          <View style={{ flex: 1 }}>
             <LoadingBanner
               loading={loading}
               error={null}
               onPress={() => console.log("Button pressed")}
             />
-          </React.Fragment>
+          </View>
         ) : (
           <React.Fragment>
             <View
@@ -688,8 +688,8 @@ export default function AddressModal({
 
               <ThemedText
                 style={{
-                  fontSize: 14,
-                  fontWeight: "600",
+                  fontSize: 18,
+                  fontFamily: "poppinsBold",
                   color: colors.textSecondary,
                   textTransform: "uppercase",
                 }}
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "700",
+    fontFamily: "poppinsBold",
     flex: 1,
     textAlign: "center",
   },
@@ -769,11 +769,11 @@ const styles = StyleSheet.create({
   },
   addressLabel: {
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: "poppinsMedium",
   },
   addressText: {
     fontSize: 12,
-    fontWeight: "400",
+    fontFamily: "poppinsLight",
   },
   emptyContainer: {
     alignItems: "center",
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "poppinsBold",
     marginBottom: 8,
   },
   emptySubtext: {
@@ -816,8 +816,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: 14,
+    fontFamily: "poppinsMedium",
     marginBottom: 8,
   },
   dropdownContainer: {
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    fontWeight: "400",
+    fontFamily: "poppinsExtraLight",
   },
   previewContainer: {
     flexDirection: "row",
@@ -846,14 +846,14 @@ const styles = StyleSheet.create({
   },
   previewLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontFamily: "poppinsMedium",
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: 4,
   },
   previewText: {
     fontSize: 13,
-    fontWeight: "500",
+    fontFamily: "poppinsLight",
     lineHeight: 18,
   },
   buttonGroup: {
@@ -883,3 +883,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+

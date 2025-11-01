@@ -72,7 +72,7 @@ export function ResetPasswordScreen() {
               <TouchableOpacity onPress={() => navigation.goBack()} style={{width: 40, height: 40, justifyContent: "center", alignItems: "center" , borderRadius: 24, backgroundColor: colors.tint }}>
                 <Ionicons name="chevron-back" size={28} color={colors.background} />
               </TouchableOpacity>
-              <ThemedText style={styles.title}>Reset Password</ThemedText>
+              <ThemedText style={[styles.title, {fontSize: 28}]}>Reset Password</ThemedText>
 
             </View>
 

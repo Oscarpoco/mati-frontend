@@ -189,8 +189,8 @@ export default function EditDetailsModal({
             style={{
               color: colors.text,
               textAlign: "center",
-              fontSize: 22,
-              fontWeight: "600",
+              fontSize: 24,
+              fontFamily: 'poppinsBold',
             }}
           >
             Edit Details
@@ -256,7 +256,7 @@ export default function EditDetailsModal({
           )}
 
           <View style={styles.formGroup}>
-            <ThemedText style={styles.formLabel}>Full Name</ThemedText>
+            <ThemedText style={[styles.formLabel, {color: colors.textSecondary}]}>Full Name</ThemedText>
             <TextInput
               style={[
                 styles.textInput,
@@ -275,7 +275,7 @@ export default function EditDetailsModal({
           </View>
 
           <View style={styles.formGroup}>
-            <ThemedText style={styles.formLabel}>Phone Number</ThemedText>
+            <ThemedText style={[styles.formLabel, {color: colors.textSecondary}]}>Phone Number</ThemedText>
             <TextInput
               style={[
                 styles.textInput,
@@ -326,8 +326,8 @@ export default function EditDetailsModal({
 
               <ThemedText
                 style={{
-                  fontSize: 14,
-                  fontWeight: "600",
+                  fontSize: 18,
+                  fontFamily: 'poppinsBold',
                   color: colors.textSecondary,
                   textTransform: "uppercase",
                 }}
@@ -389,10 +389,10 @@ const styles = {
     marginBottom: 20,
   },
   formLabel: {
-    fontSize: 14,
-    fontWeight: "400" as const,
+    fontSize: 16,
+    fontFamily: 'poppinsBold',
     marginBottom: 8,
-    opacity: 0.7,
+    textTransform: 'uppercase' as any,
   },
   textInput: {
     borderWidth: 1,
@@ -400,7 +400,7 @@ const styles = {
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    fontWeight: "500" as const,
+    fontFamily: 'poppinsExtraLight',
   },
   saveButton: {
     alignItems: "center" as const,

@@ -125,7 +125,7 @@ export function RegisterScreen() {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.title, { color: colors.text }]}>
+              <Text style={[styles.title, {fontSize: 28, color: colors.text}]}>
                 Create Account
               </Text>
             </View>
@@ -286,7 +286,7 @@ export function RegisterScreen() {
                   />
                 )}
               </View>
-              <ThemedText style={{ fontSize: 16, marginLeft: 12 }}>
+              <ThemedText style={{ fontSize: 16, marginLeft: 12, fontFamily: 'poppinsLight', }}>
                 Register as a water provider
               </ThemedText>
             </TouchableOpacity>
@@ -389,11 +389,11 @@ export function RegisterScreen() {
                 marginTop: 20,
               }}
             >
-              <ThemedText style={{ color: colors.textSecondary }}>
+              <ThemedText style={{ color: colors.textSecondary, fontFamily: 'poppinsBold', }}>
                 Already have an account?{" "}
               </ThemedText>
               <TouchableOpacity onPress={() => navigation.navigate("Login")} disabled={loading}>
-                <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
+                <ThemedText style={{ color: colors.tint, fontFamily: 'poppinsMedium', }}>
                   Login
                 </ThemedText>
               </TouchableOpacity>

@@ -1,4 +1,3 @@
-// components/profile/UserInfoCard.tsx
 import { StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,15 +21,11 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
       ]}
     >
       {/* STYLING DOTS */}
-      <View style={[styles.stylingDotOne, { backgroundColor: colors.tint }]} />
       <View style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]} />
-      <View
-        style={[styles.stylingDotThree, { backgroundColor: colors.tint }]}
-      />
       <View style={[styles.stylingDotFour, { backgroundColor: colors.tint }]} />
 
       {/* NAME */}
-      <View style={styles.userInfoRow}>
+      <View style={[styles.userInfoRow, {borderTopWidth: 1, borderColor: colors.border}]}>
         <ThemedText style={styles.userInfoLabel}>Name</ThemedText>
         <ThemedText style={styles.userInfoValue}>
           {user?.name || "N/A"}
@@ -97,14 +92,16 @@ const styles = StyleSheet.create({
   },
   userInfoLabel: {
     fontSize: 14,
-    fontWeight: "200",
+    fontFamily: 'poppinsBold',
     opacity: 0.7,
-    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textAlign: 'left'
   },
   userInfoValue: {
     fontSize: 14,
     fontWeight: "200",
-    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textAlign: 'right'
   },
   divider: {
     height: 1,

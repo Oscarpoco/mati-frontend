@@ -46,9 +46,9 @@ const LoadingBanner: React.FC<LoadingBannerProps> = ({
           </View>
 
           <ThemedText
-            style={[styles.confirmText, { color: colors.text, fontSize: 12 }]}
+            style={[styles.confirmText, { color: colors.text, fontSize: 16, fontFamily: 'poppinsBold', }]}
           >
-            LOADING PLEASE WAIT
+           PLEASE WAIT
           </ThemedText>
 
           <TouchableOpacity
