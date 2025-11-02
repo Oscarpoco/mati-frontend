@@ -42,7 +42,7 @@ export function RegisterScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.register);
 
-  const name = "Champ!";
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -125,7 +125,9 @@ export function RegisterScreen() {
                 />
               </TouchableOpacity>
 
-              <Text style={[styles.title, {fontSize: 28, color: colors.text}]}>
+              <Text
+                style={[styles.title, { fontSize: 28, color: colors.text }]}
+              >
                 Create Account
               </Text>
             </View>
@@ -170,6 +172,41 @@ export function RegisterScreen() {
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
+                  editable={!loading}
+                />
+              </View>
+            </View>
+
+            {/* FULLNAME INPUT */}
+            <View style={styles.inputWrapper}>
+              <ThemedText style={[styles.label, { color: colors.text }]}>
+                Full Name
+              </ThemedText>
+              <View
+                style={[
+                  styles.inputField,
+                  { borderColor: colors.border, backgroundColor: colors.card },
+                ]}
+              >
+                <View
+                  style={{
+                    width: 52,
+                    height: 52,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: 5,
+                    backgroundColor: colors.tint,
+                    borderRadius: 20,
+                  }}
+                >
+                  <Ionicons name="person" size={22} color={colors.background} />
+                </View>
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Champ!"
+                  placeholderTextColor={colors.textSecondary}
+                  value={name}
+                  onChangeText={setName}
                   editable={!loading}
                 />
               </View>
@@ -286,7 +323,13 @@ export function RegisterScreen() {
                   />
                 )}
               </View>
-              <ThemedText style={{ fontSize: 16, marginLeft: 12, fontFamily: 'poppinsLight', }}>
+              <ThemedText
+                style={{
+                  fontSize: 16,
+                  marginLeft: 12,
+                  fontFamily: "poppinsLight",
+                }}
+              >
                 Register as a water provider
               </ThemedText>
             </TouchableOpacity>
@@ -389,11 +432,21 @@ export function RegisterScreen() {
                 marginTop: 20,
               }}
             >
-              <ThemedText style={{ color: colors.textSecondary, fontFamily: 'poppinsBold', }}>
+              <ThemedText
+                style={{
+                  color: colors.textSecondary,
+                  fontFamily: "poppinsBold",
+                }}
+              >
                 Already have an account?{" "}
               </ThemedText>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")} disabled={loading}>
-                <ThemedText style={{ color: colors.tint, fontFamily: 'poppinsMedium', }}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Login")}
+                disabled={loading}
+              >
+                <ThemedText
+                  style={{ color: colors.tint, fontFamily: "poppinsMedium" }}
+                >
                   Login
                 </ThemedText>
               </TouchableOpacity>

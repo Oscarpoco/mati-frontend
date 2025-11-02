@@ -11,12 +11,15 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect } from "react";
+import LottieView from "lottie-react-native";
+
+// COMPONENTS
 import MatiLogo from "@/components/ui/Logo";
 import { StatusBar } from "expo-status-bar";
-import LottieView from "lottie-react-native";
+// ENDS
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
@@ -29,7 +32,10 @@ import {
   removeRequest,
   clearSuccess,
 } from "@/redux/slice/getAllRequests";
+// ENDS
 
+
+// INTERFACE
 interface Request {
   requestId: string;
   distance: number;
@@ -51,13 +57,17 @@ export interface Provider {
   totalReviews: number;
   avatar: string;
 }
+// ENDS
 
 export default function ProviderHomeScreen() {
+
+  // THEME
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
-  const dispatch = useAppDispatch();
-
+  // ENDS
+  
   // REDUX AUTH STATE
+  const dispatch = useAppDispatch();
   const { user, token } = useAppSelector((state: RootState) => state.auth);
   const { success, error } = useAppSelector(
     (state: RootState) => state.customerRequests
@@ -65,30 +75,39 @@ export default function ProviderHomeScreen() {
   const { requests, fetching } = useSelector(
     (state: RootState) => state.customerRequests
   );
+  // ENDS
 
+  // NOTIFICATION STATE
   const notifications = 0;
+  // ENDS
 
+  // FETCH USER DETAILS
   useEffect(() => {
     if (user?.uid && token) {
       dispatch(fetchUserById({ uid: user.uid, token }));
     }
   }, [dispatch, user?.uid, token]);
+  // ENDS
 
+  // FETCH AVAILABLE REQUESTS
   useEffect(() => {
     if (token) {
       dispatch(getAllRequests(token));
     }
-  }, [dispatch, token]);
 
-  // Show message if provider has reached max requests
+  }, [dispatch, token]);
+  // ENDS
+
+  // FOR DEBUGGING PURPOSE
   useEffect(() => {
     if (requests?.length === 0 && !fetching) {
       // Check if it's because they hit the limit or just no pending requests
-      console.log("No pending requests available");
+      // console.log("No pending requests available");
     }
   }, [requests, fetching]);
+  // ENDS
 
-  // Handle successful accept
+  // HANDLE SUCCESSFUL ACCEPTS OF REQUEST
   useEffect(() => {
     if (success && token) {
       Alert.alert("Success", "Request accepted successfully!");
@@ -96,13 +115,15 @@ export default function ProviderHomeScreen() {
       dispatch(clearSuccess());
     }
   }, [success, token, dispatch]);
+  // ENDS
 
-  // Handle error
+  // ERROR HANDLING
   useEffect(() => {
     if (error) {
       Alert.alert("Error", error);
     }
   }, [error]);
+  // ENDS
 
   // HANDLE ACCEPT
   const handleAccept = (requestId: string) => {
@@ -144,6 +165,7 @@ export default function ProviderHomeScreen() {
   };
   // ENDS
 
+  // FORMAT DATE
   const formatCreatedDate = (dateString: any) => {
     if (!dateString) return "Invalid Date";
 
@@ -174,7 +196,10 @@ export default function ProviderHomeScreen() {
 
     return `${dayWithSuffix} ${month} ${year}, ${time}`;
   };
+  // ENDS
 
+
+  // RENDER CARD
   const renderRequestCard = ({ item }: { item: Request }) => {
     return (
       <View
@@ -191,7 +216,7 @@ export default function ProviderHomeScreen() {
             <ThemedText
               style={[
                 styles.customerName,
-                { color: colors.text, fontFamily: Fonts.sans },
+                { color: colors.text, fontFamily: 'poppinsMedium', },
               ]}
             >
               {item.name || "Customer"}
@@ -199,7 +224,7 @@ export default function ProviderHomeScreen() {
             <ThemedText
               style={[
                 styles.location,
-                { color: colors.textSecondary, fontFamily: Fonts.sans },
+                { color: colors.textSecondary, fontFamily: 'poppinsMedium'},
               ]}
             >
               {item.location.address}
@@ -215,7 +240,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.distanceText,
-                { color: colors.tint, fontFamily: Fonts.sans },
+                { color: colors.tint, fontFamily: 'poppinsBold', },
               ]}
             >
               {item.distance.toFixed(2)} km
@@ -229,7 +254,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.text, fontFamily: Fonts.sans },
+                { color: colors.text, fontFamily: 'poppinsMedium', },
               ]}
             >
               {item.litres} L
@@ -241,7 +266,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.text, fontFamily: Fonts.sans },
+                { color: colors.text, fontFamily: 'poppinsLight', },
               ]}
             >
               Needed by the {formatCreatedDate(item.date)}
@@ -253,7 +278,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.textSecondary, fontFamily: Fonts.sans },
+                { color: colors.textSecondary, fontFamily: 'poppinsLight', },
               ]}
             >
               Requested on the {formatCreatedDate(item.createdAt)}
@@ -278,7 +303,7 @@ export default function ProviderHomeScreen() {
                 styles.buttonText,
                 {
                   color: colors.warningRed,
-                  fontFamily: Fonts.sans,
+                  fontFamily: 'poppinsLight',
                 },
               ]}
             >
@@ -311,8 +336,7 @@ export default function ProviderHomeScreen() {
                     styles.buttonText,
                     {
                       color: colors.background,
-                      fontFamily: Fonts.sans,
-                      fontWeight: "600",
+                      fontFamily: 'poppinsLight',
                     },
                   ]}
                 >
@@ -326,6 +350,8 @@ export default function ProviderHomeScreen() {
     );
   };
 
+  // ENDS
+
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <LottieView
@@ -337,7 +363,7 @@ export default function ProviderHomeScreen() {
       <ThemedText
         style={[
           styles.emptyMessage,
-          { color: colors.textSecondary, fontFamily: Fonts.sans },
+          { color: colors.textSecondary, fontFamily: 'poppinsBold', },
         ]}
       >
         No requests near you at the moment
@@ -389,7 +415,7 @@ export default function ProviderHomeScreen() {
 
       {/* Welcome Section */}
       <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsMedium', }]}>
           Welcome
         </ThemedText>
         <ThemedText
@@ -397,10 +423,9 @@ export default function ProviderHomeScreen() {
           style={[
             styles.title,
             {
-              fontFamily: Fonts.sans,
+              fontFamily: 'poppinsLight',
               textTransform: "capitalize",
               fontSize: 48,
-              fontWeight: "200",
             },
           ]}
         >
@@ -434,7 +459,6 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 52,
-    fontWeight: "200",
     marginBottom: 4,
     lineHeight: 50,
   },
@@ -484,7 +508,6 @@ const styles = StyleSheet.create({
 
   customerName: {
     fontSize: 16,
-    fontWeight: "600",
     marginBottom: 4,
     textAlign: "left",
     textTransform: "uppercase",
@@ -507,7 +530,6 @@ const styles = StyleSheet.create({
 
   distanceText: {
     fontSize: 12,
-    fontWeight: "600",
   },
 
   detailsContainer: {
@@ -523,7 +545,6 @@ const styles = StyleSheet.create({
 
   detailText: {
     fontSize: 13,
-    fontWeight: "500",
   },
 
   buttonContainer: {
@@ -556,7 +577,6 @@ const styles = StyleSheet.create({
 
   buttonText: {
     fontSize: 13,
-    fontWeight: "600",
   },
 
   emptyContainer: {
@@ -575,7 +595,6 @@ const styles = StyleSheet.create({
 
   emptyMessage: {
     fontSize: 28,
-    fontWeight: "400",
     textAlign: "center",
     textTransform: "capitalize",
     lineHeight: 35,

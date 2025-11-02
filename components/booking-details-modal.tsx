@@ -8,6 +8,7 @@ import {
   Dimensions,
   Modal,
   StatusBar,
+  Platform
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Colors, Fonts } from "@/constants/theme";
@@ -71,13 +72,10 @@ interface BookingDetailsModalProps {
   onClose: () => void;
 }
 
-// Transform raw booking data to match component interface
 export function transformBooking(rawBooking: RawBooking): Booking {
-  // Determine provider object
   let provider: Provider | null = null;
 
   if (rawBooking.provider) {
-    // If provider exists in the nested object
     provider = {
       name: rawBooking.provider.name,
       phone: rawBooking.provider.phoneNumber,
@@ -87,7 +85,6 @@ export function transformBooking(rawBooking: RawBooking): Booking {
       avatar: rawBooking.provider.name?.charAt(0).toUpperCase() || "?",
     };
   } else if (rawBooking.name && rawBooking.phoneNumber && rawBooking.email) {
-    // If provider info is at top level
     provider = {
       name: rawBooking.name,
       phone: rawBooking.phoneNumber,
@@ -132,13 +129,13 @@ export function BookingDetailsModal({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return colors.textSecondary;
+        return "#FF9500";
       case "confirmed":
-        return colors.tint;
+        return "#3B82F6";
       case "delivered":
-        return "#4CAF50";
+        return "#10B981";
       case "cancelled":
-        return "#FF6B6B";
+        return "#EF4444";
       default:
         return colors.textSecondary;
     }
@@ -196,46 +193,19 @@ export function BookingDetailsModal({
           },
         ]}
       >
-        <View
-          style={[styles.modalHeader, { borderBottomColor: colors.border }]}
-        >
+        <View style={styles.modalHeader}>
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              width: 45,
-              height: 45,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
-            }}
+            style={[styles.headerButton, { backgroundColor: colors.card }]}
           >
-            <Ionicons name="chevron-back" size={28} color={colors.background} />
+            <Ionicons name="chevron-back" size={24} color={colors.tint} />
           </TouchableOpacity>
-          <ThemedText
-            style={[
-              {
-                color: colors.text,
-                textAlign: "center",
-                fontSize: 22,
-                fontWeight: "600",
-              },
-            ]}
-          >
-            Booking Details
-          </ThemedText>
+          <ThemedText style={styles.headerTitle}>Order Details</ThemedText>
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              width: 45,
-              height: 45,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
-            }}
+            style={[styles.headerButton, { backgroundColor: colors.card }]}
           >
-            <Ionicons name="scan" size={28} color={colors.background} />
+            <Ionicons name="scan" size={24} color={colors.tint} />
           </TouchableOpacity>
         </View>
 
@@ -243,53 +213,47 @@ export function BookingDetailsModal({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.modalContent}
         >
-          {/* Booking ID and Status */}
-          <View style={styles.modalTopSection}>
-            <ThemedText
-              style={[
-                styles.modalBookingId,
-                { color: colors.tint, fontFamily: Fonts.sans },
-              ]}
-            >
-              {selectedBooking.bookingId}
-            </ThemedText>
+          {/* Status Card */}
+          <View
+            style={[
+              styles.statusCard,
+              { backgroundColor: getStatusColor(selectedBooking.status) + "15" }
+            ]}
+          >
             <View
               style={[
-                styles.modalStatusBadge,
-                {
-                  backgroundColor: getStatusColor(selectedBooking.status),
-                },
+                styles.statusDot,
+                { backgroundColor: getStatusColor(selectedBooking.status) }
               ]}
-            >
+            />
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.statusLabel}>Order Status</ThemedText>
               <ThemedText
-                style={{
-                  color: colors.background,
-                  fontWeight: "700",
-                  fontSize: 11,
-                  textTransform: "capitalize",
-                }}
+                style={[
+                  styles.statusValue,
+                  { color: getStatusColor(selectedBooking.status) }
+                ]}
               >
-                {selectedBooking.status}
+                {selectedBooking.status.charAt(0).toUpperCase() +
+                  selectedBooking.status.slice(1)}
               </ThemedText>
             </View>
+            <ThemedText style={styles.bookingIdLabel}>
+              {selectedBooking.bookingId}
+            </ThemedText>
           </View>
 
-          {/* Timeline Progress */}
-          <View
-            style={[styles.timelineSection, { backgroundColor: colors.card }]}
-          >
-            <View style={styles.timelineContainer}>
+          {/* Modern Timeline */}
+          <View style={[styles.timelineCard, { backgroundColor: colors.card }]}>
+            <View style={styles.timelineTrack}>
               {getTimelineSteps(selectedBooking.status).map((step, index) => (
-                <View key={index} style={styles.timelineItem}>
+                <React.Fragment key={index}>
                   <View
                     style={[
                       styles.timelineCircle,
                       {
                         backgroundColor: step.completed
-                          ? colors.tint
-                          : colors.border,
-                        borderColor: step.completed
-                          ? colors.tint
+                          ? getStatusColor(selectedBooking.status)
                           : colors.border,
                       },
                     ]}
@@ -302,17 +266,29 @@ export function BookingDetailsModal({
                       />
                     )}
                   </View>
-                </View>
+                  {index < 2 && (
+                    <View
+                      style={[
+                        styles.timelineLine,
+                        {
+                          backgroundColor: step.completed
+                            ? getStatusColor(selectedBooking.status)
+                            : colors.border,
+                        },
+                      ]}
+                    />
+                  )}
+                </React.Fragment>
               ))}
             </View>
-            <View style={styles.timelineLabels}>
+            <View style={styles.timelineLabelsRow}>
               {getTimelineSteps(selectedBooking.status).map(
                 (step, index) =>
                   step.label && (
                     <ThemedText
                       key={index}
                       style={[
-                        styles.timelineLabel,
+                        styles.timelineTextLabel,
                         { color: colors.textSecondary },
                       ]}
                     >
@@ -323,219 +299,195 @@ export function BookingDetailsModal({
             </View>
           </View>
 
-          {/* Map Placeholder */}
+          {/* Live Map Placeholder */}
           <View
-            style={[styles.mapPlaceholder, { backgroundColor: colors.card }]}
+            style={[styles.mapSection, { backgroundColor: colors.card }]}
           >
-            <Ionicons name="map" size={60} color={colors.tint} />
-            <ThemedText
-              style={{
-                marginTop: 12,
-                color: colors.textSecondary,
-                fontWeight: "500",
-              }}
-            >
-              {selectedBooking.status === "pending"
-                ? "Waiting for Provider"
-                : "Live Tracking"}
-            </ThemedText>
+            <View style={styles.mapGradient}>
+              <Ionicons name="map" size={80} color={colors.tint} />
+              <ThemedText style={styles.mapText}>
+                {selectedBooking.status === "pending"
+                  ? "Waiting for Provider"
+                  : "Live Tracking Available"}
+              </ThemedText>
+            </View>
           </View>
 
-          {/* Provider Card or Pending Message */}
+          {/* Provider Card or Pending */}
           {selectedBooking.provider && selectedBooking.provider !== null ? (
             <View
               style={[
-                styles.modalSection,
-                { backgroundColor: colors.card, borderColor: colors.tint },
+                styles.providerCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.button,
+                },
               ]}
             >
-              <View style={styles.providerHeader}>
+              <View style={styles.providerContent}>
                 <View
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 18,
-                    backgroundColor: colors.tint,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
+                  style={[
+                    styles.providerAvatar,
+                    { backgroundColor: colors.button},
+                  ]}
                 >
                   <ThemedText
                     style={{
-                      fontWeight: "800",
-                      fontSize: 16,
-                      color: colors.background,
+                      fontSize: 18,
+                      color: colors.tint,
                     }}
                   >
                     {selectedBooking.provider.avatar}
                   </ThemedText>
                 </View>
-                <View style={{ marginLeft: 12, flex: 1 }}>
-                  <ThemedText
-                    style={[styles.providerName, { fontFamily: Fonts.sans }]}
-                  >
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <ThemedText style={styles.providerName}>
                     {selectedBooking.provider.name}
                   </ThemedText>
                   <View style={styles.ratingRow}>
-                    <Ionicons name="star" size={11} color="#FFD700" />
-                    <ThemedText
-                      style={{
-                        fontSize: 10,
-                        color: colors.textSecondary,
-                        marginLeft: 4,
-                      }}
-                    >
-                      {selectedBooking.provider.rating} (
-                      {selectedBooking.provider.reviews} reviews)
+                    <View style={styles.ratingBadge}>
+                      <Ionicons name="star" size={11} color="#FFD700" />
+                      <ThemedText style={styles.ratingText}>
+                        {selectedBooking.provider.rating}
+                      </ThemedText>
+                    </View>
+                    <ThemedText style={styles.reviewsText}>
+                      {selectedBooking.provider.reviews} reviews
                     </ThemedText>
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={[styles.callButton, { backgroundColor: colors.tint }]}
+                  style={[
+                    styles.callButtonSmall,
+                    { backgroundColor: colors.button},
+                  ]}
                 >
-                  <Ionicons name="call" size={20} color={colors.background} />
+                  <Ionicons name="call" size={18} color={colors.tint} />
                 </TouchableOpacity>
               </View>
             </View>
           ) : selectedBooking.status === "pending" ? (
             <View
               style={[
-                styles.modalSection,
+                styles.pendingCard,
                 { backgroundColor: colors.card, borderColor: colors.button },
               ]}
             >
-              <View style={styles.pendingMessageContainer}>
-                <Ionicons name="time" size={24} color={colors.tint} />
-                <ThemedText
+              <View style={{ alignItems: "center", paddingVertical: 8 }}>
+                <View
                   style={[
-                    styles.pendingMessage,
-                    { color: colors.textSecondary },
+                    styles.pendingIcon,
+                    { backgroundColor: colors.button },
                   ]}
                 >
-                  Waiting for a provider to accept your water delivery request
+                  <Ionicons name="hourglass" size={20} color={colors.tint} />
+                </View>
+                <ThemedText style={styles.pendingText}>
+                  Waiting for a provider to accept your request
                 </ThemedText>
               </View>
             </View>
           ) : null}
 
-          {/* Tracking Info */}
-          <View
-            style={[
-              styles.modalSection,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View style={styles.infoRow}>
-              <View style={{ width: "60%" }}>
-                <ThemedText
-                  style={[styles.infoLabel, { color: colors.textSecondary }]}
-                >
-                  Tracking ID
-                </ThemedText>
-                <ThemedText style={[styles.infoValue, { color: colors.text }]}>
-                  {selectedBooking.bookingId}
-                </ThemedText>
+          {/* Info Grid */}
+          <View style={styles.infoGrid}>
+            <View
+              style={[styles.infoCard, { backgroundColor: colors.card }]}
+            >
+              <View
+                style={[
+                  styles.infoBadge,
+                  { backgroundColor: colors.button },
+                ]}
+              >
+                <Ionicons name="water" size={18} color={colors.tint} />
               </View>
-              <View style={{ width: "40%" }}>
-                <ThemedText
-                  style={[styles.infoLabel, { color: colors.textSecondary }]}
-                >
-                  Litres
-                </ThemedText>
-                <ThemedText style={[styles.infoValue, { color: colors.text }]}>
-                  {selectedBooking.litres}L
-                </ThemedText>
+              <ThemedText style={styles.infoCardLabel}>Quantity</ThemedText>
+              <ThemedText style={styles.infoCardValue}>
+                {selectedBooking.litres}L
+              </ThemedText>
+            </View>
+
+            <View
+              style={[styles.infoCard, { backgroundColor: colors.card }]}
+            >
+              <View
+                style={[
+                  styles.infoBadge,
+                  { backgroundColor: colors.button },
+                ]}
+              >
+                <Ionicons name="document-text" size={18} color={colors.tint} />
               </View>
+              <ThemedText style={styles.infoCardLabel}>Tracking ID</ThemedText>
+              <ThemedText style={styles.infoCardValue}>
+                {selectedBooking.bookingId}
+              </ThemedText>
             </View>
           </View>
 
-          {/* Location Details */}
+          {/* Location Section */}
           <View
-            style={[
-              styles.modalSection,
-              { backgroundColor: colors.card, borderColor: colors.border },
-            ]}
+            style={[styles.detailSection, { backgroundColor: colors.card }]}
           >
-            <View style={styles.infoRow}>
-              <View style={{ width: "100%" }}>
-                <ThemedText
-                  style={[styles.infoLabel, { color: colors.textSecondary }]}
-                >
-                  Delivery Location
-                </ThemedText>
-                <ThemedText
-                  style={[styles.infoValue, { color: colors.text }]}
-                  numberOfLines={2}
-                >
-                  {selectedBooking.toLocation}
-                </ThemedText>
-              </View>
+            <View style={styles.detailHeader}>
+              <Ionicons name="location" size={20} color={colors.tint} />
+              <ThemedText style={styles.detailTitle}>
+                Delivery Location
+              </ThemedText>
             </View>
+            <ThemedText style={styles.detailValue} numberOfLines={2}>
+              {selectedBooking.toLocation}
+            </ThemedText>
           </View>
 
-          {/* Dates */}
+          {/* Date Section */}
           <View
-            style={[
-              styles.modalSection,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
+            style={[styles.detailSection, { backgroundColor: colors.card }]}
           >
-            <View style={styles.infoRow}>
-              <View style={{ width: "60%" }}>
-                <ThemedText
-                  style={[styles.infoLabel, { color: colors.textSecondary }]}
-                >
-                  Booked Date
-                </ThemedText>
-                <ThemedText style={[styles.infoValue, { color: colors.text }]}>
+            <View style={styles.detailHeader}>
+              <Ionicons name="calendar" size={20} color={colors.tint} />
+              <ThemedText style={styles.detailTitle}>Timeline</ThemedText>
+            </View>
+            <View style={styles.dateRow}>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.dateLabel}>Booked</ThemedText>
+                <ThemedText style={styles.dateValue}>
                   {selectedBooking.bookedDate}
                 </ThemedText>
               </View>
-              <View style={{ width: "40%" }}>
-                <ThemedText
-                  style={[styles.infoLabel, { color: colors.textSecondary }]}
-                >
-                  Estimated Delivery
-                </ThemedText>
-                <ThemedText style={[styles.infoValue, { color: colors.text }]}>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.dateLabel}>Est. Delivery</ThemedText>
+                <ThemedText style={styles.dateValue}>
                   {selectedBooking.expectedDelivery}
                 </ThemedText>
               </View>
             </View>
           </View>
 
-          {/* Price Info */}
+          {/* Price Section */}
           {selectedBooking.price && (
             <View
-              style={[styles.modalSection, { backgroundColor: colors.card }]}
+              style={[styles.detailSection, { backgroundColor: colors.card }]}
             >
-              <View style={styles.infoRow}>
-                <View style={{ width: "60%" }}>
-                  <ThemedText
-                    style={[styles.infoLabel, { color: colors.textSecondary }]}
-                  >
-                    Distance
-                  </ThemedText>
-                  <ThemedText
-                    style={[styles.infoValue, { color: colors.text }]}
-                  >
+              <View style={styles.detailHeader}>
+                <Ionicons name="pricetag" size={20} color={colors.tint} />
+                <ThemedText style={styles.detailTitle}>Pricing</ThemedText>
+              </View>
+              <View style={styles.priceRow}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.dateLabel}>Distance</ThemedText>
+                  <ThemedText style={styles.dateValue}>
                     {selectedBooking.distance?.toFixed(2) || "0"} km
                   </ThemedText>
                 </View>
-                <View style={{ width: "40%" }}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.dateLabel}>Total Price</ThemedText>
                   <ThemedText
-                    style={[styles.infoLabel, { color: colors.textSecondary }]}
-                  >
-                    Price
-                  </ThemedText>
-                  <ThemedText
-                    style={[styles.infoValue, { color: colors.text }]}
+                    style={[
+                      styles.dateValue,
+                      { color: colors.tint, fontWeight: "800" },
+                    ]}
                   >
                     R {selectedBooking.price?.toFixed(2) || "0"}
                   </ThemedText>
@@ -566,8 +518,8 @@ export function BookingDetailsModal({
 
               <ThemedText
                 style={{
-                  fontSize: 14,
-                  fontWeight: "600",
+                  fontSize: 18,
+                  fontFamily: "poppinsBold",
                   color: colors.background,
                   textTransform: "uppercase",
                 }}
@@ -619,161 +571,311 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: screenHeight * 1,
+    maxHeight: screenHeight * .85,
   },
 
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    paddingVertical: 16,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    paddingTop: 70,
+    paddingTop: 10,
+    gap: 12,
+  },
+
+  headerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: "poppinsBold",
+    flex: 1,
+    textAlign: "center",
   },
 
   modalContent: {
     paddingHorizontal: 16,
-    paddingTop: 30,
-    paddingBottom: 0,
+    paddingTop: 12,
+    paddingBottom: 40,
   },
 
-  modalTopSection: {
+  statusCard: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginBottom: 20,
+    gap: 12,
   },
 
-  modalBookingId: {
-    fontSize: 20,
-    fontWeight: "800",
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
 
-  modalStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+  statusLabel: {
+    fontSize: 11,
+    fontFamily: "poppinsBold",
+    opacity: 0.7,
+    textTransform: "uppercase",
   },
 
-  timelineSection: {
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    borderRadius: 28,
-    marginBottom: 16,
+  statusValue: {
+    fontSize: 14,
+    fontFamily: "poppinsMedium",
+    marginTop: 2,
   },
 
-  timelineContainer: {
+  bookingIdLabel: {
+    fontSize: 14,
+    fontFamily: "poppinsBold",
+    opacity: 0.6,
+  },
+
+  timelineCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderRadius: 24,
+    marginBottom: 20,
+  },
+
+  timelineTrack: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 20,
     justifyContent: "space-between",
-  },
-
-  timelineItem: {
-    alignItems: "center",
-    flex: 1,
   },
 
   timelineCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 0,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
   },
 
   timelineLine: {
-    position: "absolute",
-    height: 2,
-    width: "33.33%",
-    top: 11,
-    left: "33.33%",
+    height: 3,
+    flex: 1,
+    marginHorizontal: 4,
   },
 
-  timelineLabels: {
+  timelineLabelsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
 
-  timelineLabel: {
-    fontSize: 10,
-    fontWeight: "600",
+  timelineTextLabel: {
+    fontSize: 12,
+    fontFamily: "poppinsMedium",
     flex: 1,
     textAlign: "center",
   },
 
-  mapPlaceholder: {
-    height: 200,
-    borderRadius: 38,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
+  mapSection: {
+    height: 220,
+    borderRadius: 28,
+    marginBottom: 20,
+    overflow: "hidden",
   },
 
-  modalSection: {
-    marginBottom: 16,
+  mapGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  mapText: {
+    marginTop: 16,
+    fontSize: 14,
+    fontFamily: "poppinsBold",
+    opacity: 0.7,
+  },
+
+  providerCard: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 24,
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginBottom: 20,
     borderWidth: 1,
   },
 
-  providerHeader: {
+  providerContent: {
     flexDirection: "row",
     alignItems: "center",
   },
 
+  providerAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   providerName: {
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 16,
+    fontFamily: "poppinsBold",
   },
 
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 6,
+    gap: 8,
+  },
+
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+  },
+
+  ratingText: {
+    fontSize: 11,
+    fontFamily: "poppinsLight",
+    color: "#FFD700",
+  },
+
+  reviewsText: {
+    fontSize: 11,
+    fontFamily: "poppinsLight",
+    opacity: 0.6,
+  },
+
+  callButtonSmall: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 12,
+  },
+
+  pendingCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+
+  pendingIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
+  pendingText: {
+    fontSize: 12,
+    fontFamily: "poppinsMedium",
+    textAlign: "center",
+    opacity: 0.8,
     marginTop: 4,
   },
 
-  callButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 18,
+  infoGrid: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+
+  infoCard: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+
+  infoBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 8,
   },
 
-  pendingMessageContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    gap: 12,
-  },
-
-  pendingMessage: {
-    fontSize: 13,
-    fontWeight: "500",
-    flex: 1,
-    textTransform: "uppercase",
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  infoLabel: {
+  infoCardLabel: {
     fontSize: 10,
-    fontWeight: "600",
+    fontFamily: "poppinsMedium",
+    opacity: 0.6,
     textTransform: "uppercase",
     marginBottom: 4,
   },
 
-  infoValue: {
+  infoCardValue: {
+    fontSize: 14,
+    fontFamily: "poppinsBold",
+  },
+
+  detailSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+
+  detailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+
+  detailTitle: {
+    fontSize: 16,
+    fontFamily: "poppinsBold",
+  },
+
+  detailValue: {
     fontSize: 13,
-    fontWeight: "700",
+    fontFamily: "poppinsMedium",
+    opacity: 0.8,
+    marginLeft: 30,
+  },
+
+  dateRow: {
+    flexDirection: "row",
+    gap: 16,
+    marginLeft: 30,
+  },
+
+  priceRow: {
+    flexDirection: "row",
+    gap: 16,
+    marginLeft: 30,
+  },
+
+  dateLabel: {
+    fontSize: 10,
+    fontFamily: "poppinsMedium",
+    opacity: 0.6,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+
+  dateValue: {
+    fontSize: 14,
+    fontFamily: "poppinsBold",
   },
 
   liveTrackingButton: {

@@ -314,7 +314,7 @@ export default function ProviderBookingsScreen() {
           <ThemedText
             style={{
               fontSize: 12,
-              fontWeight: "700",
+              fontFamily: 'poppinsMedium',
               color: colors.background,
               textTransform: "capitalize",
             }}
@@ -327,7 +327,7 @@ export default function ProviderBookingsScreen() {
         <ThemedText
           style={[
             styles.bookingId,
-            { color: colors.tint, fontFamily: Fonts.sans },
+            { color: colors.tint, fontFamily: 'poppinsBold',},
           ]}
         >
           {booking.bookingId}
@@ -351,7 +351,7 @@ export default function ProviderBookingsScreen() {
         <View style={styles.locationItem}>
           <Ionicons name="location" size={16} color={colors.textSecondary} />
           <ThemedText
-            style={[styles.locationText, { color: colors.textSecondary }]}
+            style={[styles.locationText, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
             numberOfLines={1}
           >
             {booking.toLocation}
@@ -364,21 +364,21 @@ export default function ProviderBookingsScreen() {
       <View style={styles.cardFooter}>
         <View style={{ width: "50%" }}>
           <ThemedText
-            style={[styles.footerLabel, { color: colors.textSecondary }]}
+            style={[styles.footerLabel, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             Litres
           </ThemedText>
-          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
+          <ThemedText style={[styles.footerValue, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {booking.litres}L
           </ThemedText>
         </View>
         <View style={{ width: "50%" }}>
           <ThemedText
-            style={[styles.footerLabel, { color: colors.textSecondary }]}
+            style={[styles.footerLabel, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             Expected Delivery
           </ThemedText>
-          <ThemedText style={[styles.footerValue, { color: colors.text }]}>
+          <ThemedText style={[styles.footerValue, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {booking.expectedDelivery}
           </ThemedText>
         </View>
@@ -460,11 +460,11 @@ export default function ProviderBookingsScreen() {
               color={colors.textSecondary}
             />
           </View>
-          <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
+          <ThemedText style={[styles.emptyTitle, { color: colors.text, fontFamily: 'poppinsMedium', }]}>
             {activeTab === "active" ? "No Active Bookings" : "No Past Bookings"}
           </ThemedText>
           <ThemedText
-            style={[styles.emptySubtitle, { color: colors.textSecondary }]}
+            style={[styles.emptySubtitle, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
             {activeTab === "active"
               ? "You don't have any active water deliveries right now"
@@ -481,10 +481,10 @@ export default function ProviderBookingsScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight', }]}>
           Recently
         </ThemedText>
-        <ThemedText style={[styles.title, { fontFamily: Fonts.sans }]}>
+        <ThemedText style={[styles.title, { fontFamily: 'poppinsLight', }]}>
           Deliveries
         </ThemedText>
       </View>
@@ -501,7 +501,7 @@ export default function ProviderBookingsScreen() {
           <ThemedText
             style={[
               styles.searchPlaceholder,
-              { color: colors.textSecondary, marginLeft: 8 },
+              { color: colors.textSecondary, marginLeft: 8, fontFamily: 'poppinsMedium', },
             ]}
           >
             Search
@@ -536,7 +536,7 @@ export default function ProviderBookingsScreen() {
                 activeTab === "active"
                   ? colors.background
                   : colors.textSecondary,
-              fontWeight: "500",
+              fontFamily: 'poppinsMedium',
               fontSize: 14,
             }}
           >
@@ -558,7 +558,7 @@ export default function ProviderBookingsScreen() {
             style={{
               color:
                 activeTab === "past" ? colors.background : colors.textSecondary,
-              fontWeight: "600",
+              fontFamily: 'poppinsMedium',
               fontSize: 14,
             }}
           >
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
 
   locationText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontFamily: 'poppinsMedium',
     marginLeft: 6,
     flex: 1,
   },

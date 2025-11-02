@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
 import { BookingDetailsModal } from "@/components/booking-details-modal";
 import { TimelineTracker } from "@/components/timeline-tracker";
+import { useFocusEffect } from "@react-navigation/native";
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
@@ -169,11 +170,17 @@ export default function CustomerBookingsScreen() {
     (state) => state.request
   );
 
-  useEffect(() => {
-    if (user?.uid && token && user?.role) {
-      dispatch(getRequests({ uid: user.uid, token, role: user.role }));
-    }
-  }, [dispatch, user?.uid, user?.role, token]);
+  // FETCH REQUESTS
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.uid && token && user?.role) {
+        dispatch(getRequests({ uid: user.uid, token, role: user.role }));
+      }
+      
+    }, [dispatch, user?.uid, user?.role, token])
+  );
+  // ENDS
+
 
   // Transform backend customerRequests to bookings
   useEffect(() => {
@@ -549,7 +556,7 @@ export default function CustomerBookingsScreen() {
           <ThemedText
             style={[
               styles.searchPlaceholder,
-              { color: colors.textSecondary, marginLeft: 8, fontFamily: 'poppinsMedium', },
+              { color: colors.textSecondary, marginLeft: 8, fontFamily: 'poppinsMedium' },
             ]}
           >
             Search

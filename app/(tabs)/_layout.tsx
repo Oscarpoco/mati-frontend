@@ -309,7 +309,7 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     position: "absolute",
-    bottom: 25,
+    bottom: 20,
     left: 20,
     right: 20,
     height: Platform.select({ ios: 72, android: 80 }),

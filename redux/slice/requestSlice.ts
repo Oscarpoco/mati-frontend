@@ -50,19 +50,23 @@ export const createRequest = createAsyncThunk(
       token,
       uid,
       date,
+      name,
+      phoneNumber
     }: {
       litres: number;
       location: Location;
       token: string;
       uid: string;
       date: string;
+      name: string;
+      phoneNumber: string;
     },
     { rejectWithValue }
   ) => {
     try {
       const response = await axios.post(
         `${API_URL}/customer/request/${uid}`,
-        { litres, location, date },
+        { litres, location, date, name, phoneNumber },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -116,7 +120,6 @@ export const getRequestById = createAsyncThunk(
 );
 
 // 🔹 GET CUSTOMER REQUESTS
-// 🔹 GET CUSTOMER REQUESTS
 export const getRequests = createAsyncThunk(
   "requests/getRequests",
   async (
@@ -134,13 +137,13 @@ export const getRequests = createAsyncThunk(
         throw new Error("Unknown user role");
       }
 
+
       const response = await axios.get(`${API_URL}${endpoint}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("MY REQUESTS DATA", response.data);
 
       return response.data;
     } catch (error: any) {

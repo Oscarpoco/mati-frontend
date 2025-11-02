@@ -14,7 +14,6 @@ export type Provider = {
 export type Request = {
   requestId: string;
   provider: Provider;
-  // Add other fields as needed
 };
 
 export const AcceptRequest = createAsyncThunk(
@@ -44,8 +43,6 @@ export const AcceptRequest = createAsyncThunk(
           },
         }
       );
-
-      console.log("REQUEST ACCEPTED", response.data);
 
       return { requestId, data: response.data };
     } catch (error: any) {
@@ -103,7 +100,7 @@ const customerRequestsSlice = createSlice({
       })
       .addCase(getAllRequests.fulfilled, (state, action) => {
         state.fetching = false;
-        state.requests = action.payload;
+        state.requests = action.payload.requests;
       })
       .addCase(getAllRequests.rejected, (state, action) => {
         state.fetching = false;

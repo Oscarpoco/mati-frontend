@@ -10,39 +10,49 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+
+// COMPONENTS
 import AddressModal from "@/components/AddressModal";
 import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
-import { StatusBar } from "expo-status-bar";
 import LoadingBanner from "@/components/ui/LoadingBanner";
+import { NotificationModal } from "@/components/NotificationModal";
+// ENDS
 
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { fetchUserById } from "@/redux/slice/authSlice";
 import { createRequest } from "@/redux/slice/requestSlice";
+// ENDS
 
 export default function CustomerHomeScreen() {
   // GET CURRENT COLOR SCHEME
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
-  const dispatch = useAppDispatch();
+  // ENDS
 
   // 🔹 REDUX AUTH STATE
+  const dispatch = useAppDispatch();
   const { user, token } = useAppSelector((state) => state.auth);
   const { selectedLocation } = useAppSelector((state) => state.location);
   const { loading, error, success } = useAppSelector((state) => state.request);
+  // ENDS
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
   const [quantity, setQuantity] = useState(20);
   const [selectedDate, setSelectedDate] = useState("");
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [notificationVisible, setNotificationVisible] = useState(false);
   const notifications = 0;
   const [timeLeft, setTimeLeft] = useState(180);
+  // ENDS
 
+  // WAITING TIME
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timer = setInterval(() => {
@@ -53,12 +63,15 @@ export default function CustomerHomeScreen() {
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
+  // ENDS
 
+  // FETCH USER DETAILS ON MOUNT
   useEffect(() => {
     if (user?.uid && token) {
       dispatch(fetchUserById({ uid: user.uid, token }));
     }
   }, [dispatch, user?.uid, token]);
+  // ENDS
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
   const handleConfirm = () => {
@@ -72,6 +85,7 @@ export default function CustomerHomeScreen() {
       return;
     }
 
+    // SEND DATA TO REDUX - THEN TO BACKEND
     dispatch(
       createRequest({
         litres: quantity,
@@ -83,14 +97,20 @@ export default function CustomerHomeScreen() {
         token,
         uid: user.uid,
         date: selectedDate,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
       })
     );
   };
+  // ENDS
 
+  // ADDRESS MODAL
   const handleOpenAddressModal = () => {
     setAddressModalVisible(true);
   };
+  // ENDS
 
+  // PICK DATE
   const handleDateSelect = (day: any) => {
     setSelectedDate(day.dateString);
     setDatePickerVisible(false);
@@ -106,6 +126,7 @@ export default function CustomerHomeScreen() {
 
     return `${month}\n${day}, ${year}`;
   };
+  // ENDS
 
   return (
     <ThemedView
@@ -121,6 +142,7 @@ export default function CustomerHomeScreen() {
           <View style={styles.headerButtons}>
             {/* NOTIFICATION BUTTON */}
             <TouchableOpacity
+              onPress={() => setNotificationVisible(true)}
               style={[
                 styles.iconButton,
                 { backgroundColor: colors.card, borderColor: colors.border },
@@ -153,15 +175,13 @@ export default function CustomerHomeScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100, gap: 20 }}>
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText style={[styles.title]}>
-            Welcome
-          </ThemedText>
+          <ThemedText style={[styles.title]}>Welcome</ThemedText>
           <ThemedText
             numberOfLines={1}
             style={[
               styles.title,
               {
-                fontFamily: 'poppinsMedium',
+                fontFamily: "poppinsMedium",
                 textTransform: "capitalize",
                 fontSize: 46,
               },
@@ -239,8 +259,25 @@ export default function CustomerHomeScreen() {
             </TouchableOpacity>
           </View>
 
+          <ThemedText
+            style={{
+              fontSize: 12,
+              fontFamily: "poppinsMedium",
+              textAlign: "center",
+              color: colors.textSecondary,
+              marginBottom: 5,
+            }}
+          >
+            CHOOSE NUMBER OF WATER BOTTLE NEEDED
+          </ThemedText>
+
           {/* QUANTITY CONTROLS */}
-          <View style={[styles.quantityRow, {backgroundColor: colors.button, borderColor: colors.border}]}>
+          <View
+            style={[
+              styles.quantityRow,
+              { backgroundColor: colors.button, borderColor: colors.border },
+            ]}
+          >
             <TouchableOpacity
               onPress={() => quantity > 1 && setQuantity(quantity - 1)}
               style={[
@@ -329,19 +366,6 @@ export default function CustomerHomeScreen() {
               >
                 SUCCESS! PLEASE WAIT FOR AVAILABLE PROVIDER.
               </ThemedText>
-              <ThemedText
-                style={{
-                  color: colors.warningRed,
-                  fontSize: 16,
-                  textAlign: "center",
-                  textTransform: "uppercase",
-                  width: "100%",
-                }}
-              >
-                {`Waiting minutes are ${minutes}:${seconds
-                  .toString()
-                  .padStart(2, "0")}`}
-              </ThemedText>
             </View>
           )}
         </React.Fragment>
@@ -384,7 +408,7 @@ export default function CustomerHomeScreen() {
               <ThemedText
                 style={{
                   fontSize: 18,
-                  fontFamily: 'poppinsBold',
+                  fontFamily: "poppinsBold",
                   color: colors.textSecondary,
                   textTransform: "uppercase",
                 }}
@@ -407,6 +431,7 @@ export default function CustomerHomeScreen() {
           </React.Fragment>
         )}
       </ScrollView>
+      {/* ENDS */}
 
       {/* ADDRESS MODAL */}
       <AddressModal
@@ -414,6 +439,7 @@ export default function CustomerHomeScreen() {
         onClose={() => setAddressModalVisible(false)}
         initialView="list"
       />
+      {/* ENDS */}
 
       {/* CALENDAR MODAL */}
       <Modal
@@ -448,9 +474,7 @@ export default function CustomerHomeScreen() {
                 color={colors.background}
               />
             </TouchableOpacity>
-            <ThemedText style={styles.calendarTitle}>
-              Delivery Date
-            </ThemedText>
+            <ThemedText style={styles.calendarTitle}>Delivery Date</ThemedText>
           </View>
 
           <View
@@ -491,6 +515,15 @@ export default function CustomerHomeScreen() {
           </View>
         </View>
       </Modal>
+      {/* ENDS */}
+
+      {/* NOTIFICATION MODAL */}
+      <NotificationModal
+        visible={notificationVisible}
+        onClose={() => setNotificationVisible(false)}
+      />
+      {/* ENDS */}
+      
     </ThemedView>
   );
 }
@@ -511,9 +544,8 @@ const styles = StyleSheet.create({
     fontSize: 52,
     marginBottom: 4,
     lineHeight: 60,
-    fontFamily: 'poppinsBold',
+    fontFamily: "poppinsBold",
   },
-
 
   headerButtons: {
     flexDirection: "row",
@@ -548,7 +580,7 @@ const styles = StyleSheet.create({
 
   quickTitle: {
     fontSize: 32,
-    fontFamily: 'poppinsLight',
+    fontFamily: "poppinsLight",
     marginBottom: 4,
     lineHeight: 50,
     textTransform: "uppercase",
@@ -559,7 +591,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.6,
     marginBottom: 16,
-    fontFamily: 'poppinsExtraLight',
+    fontFamily: "poppinsExtraLight",
     textAlign: "center",
   },
 
@@ -609,7 +641,7 @@ const styles = StyleSheet.create({
   },
 
   locationButtonText: {
-    fontFamily: 'poppinsLight',
+    fontFamily: "poppinsLight",
     textTransform: "uppercase",
     textAlign: "left",
   },
@@ -626,7 +658,7 @@ const styles = StyleSheet.create({
 
   dateButtonText: {
     fontSize: 12,
-    fontFamily: 'poppinsLight',
+    fontFamily: "poppinsLight",
     textTransform: "uppercase",
     textAlign: "center",
   },
@@ -638,7 +670,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderRadius: 32,
     padding: 4,
-    borderWidth: .7,
+    borderWidth: 0.7,
     alignItems: "center",
   },
 
@@ -662,14 +694,14 @@ const styles = StyleSheet.create({
 
   quantityText: {
     fontSize: 18,
-    fontFamily: 'poppinsMedium',
+    fontFamily: "poppinsMedium",
   },
 
   confirmContainer: {
     width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 28,
+    marginBottom: 10,
     borderRadius: 32,
     flexDirection: "row",
     padding: 4,
@@ -710,9 +742,9 @@ const styles = StyleSheet.create({
 
   calendarTitle: {
     fontSize: 28,
-    fontFamily: 'poppinsBold',
+    fontFamily: "poppinsBold",
     flex: 1,
-    lineHeight:50
+    lineHeight: 50,
   },
 
   calendarContainer: {
