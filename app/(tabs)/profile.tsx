@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import React, { useState } from "react";
 import { useAppSelector } from "@/redux/store/hooks";
 

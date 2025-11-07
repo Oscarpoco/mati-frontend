@@ -23,7 +23,6 @@ const initialState: RegisterState = {
   message: null,
 };
 
-// ✅ Async thunk for register
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData: RegisterUserData, { rejectWithValue }) => {

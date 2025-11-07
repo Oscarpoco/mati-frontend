@@ -46,7 +46,7 @@ export function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [isProvider, setIsProvider] = useState(false);
+  const [role, setRole] = useState("customer");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
@@ -62,7 +62,7 @@ export function RegisterScreen() {
           email: email.trim().toLowerCase(),
           password,
           phoneNumber: phone || "",
-          role: isProvider ? "provider" : "customer",
+          role,
         })
       );
 
@@ -203,7 +203,7 @@ export function RegisterScreen() {
                 </View>
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
-                  placeholder="Champ!"
+                  placeholder="Oscar Poco"
                   placeholderTextColor={colors.textSecondary}
                   value={name}
                   onChangeText={setName}
@@ -297,42 +297,154 @@ export function RegisterScreen() {
               </View>
             </View>
 
-            {/* PROVIDER CHECKBOX */}
-            <TouchableOpacity
-              onPress={() => setIsProvider(!isProvider)}
-              style={[
-                styles.checkboxContainer,
-                { borderColor: colors.border, backgroundColor: colors.card },
-              ]}
-              disabled={loading}
+            {/* ROLE WRAPPER */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: 10,
+                marginBottom: 20,
+              }}
             >
-              <View
+              {/* CUSTOMER CHECKBOX */}
+              <TouchableOpacity
+                onPress={() => setRole("customer")}
                 style={[
-                  styles.checkbox,
+                  styles.checkboxContainer,
                   {
-                    backgroundColor: isProvider ? colors.tint : "transparent",
-                    borderColor: colors.successGreen,
+                    borderColor: colors.border,
+                    backgroundColor:
+                      role === "customer" ? colors.tint : colors.card,
+                    flex: 1,
+                    marginRight: 6,
                   },
                 ]}
+                disabled={loading}
               >
-                {isProvider && (
-                  <Ionicons
-                    name="checkmark"
-                    size={16}
-                    color={colors.background}
-                  />
-                )}
-              </View>
-              <ThemedText
-                style={{
-                  fontSize: 16,
-                  marginLeft: 12,
-                  fontFamily: "poppinsLight",
-                }}
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      backgroundColor:
+                        role === "customer" ? colors.tint : "transparent",
+                      borderColor: colors.successGreen,
+                    },
+                  ]}
+                >
+                  {role === "customer" && (
+                    <Ionicons
+                      name="checkmark"
+                      size={16}
+                      color={colors.background}
+                    />
+                  )}
+                </View>
+                <ThemedText
+                  style={{
+                    fontSize: 9,
+                    marginLeft: 8,
+                    fontFamily: "poppinsLight",
+                    textTransform: "uppercase",
+                    textAlign: "left",
+                  }}
+                >
+                  Customer
+                </ThemedText>
+              </TouchableOpacity>
+
+              {/* PROVIDER CHECKBOX */}
+              <TouchableOpacity
+                onPress={() => setRole("provider")}
+                style={[
+                  styles.checkboxContainer,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor:
+                      role === "provider" ? colors.tint : colors.card,
+                    flex: 1,
+                    marginHorizontal: 6,
+                  },
+                ]}
+                disabled={loading}
               >
-                Register as a water provider
-              </ThemedText>
-            </TouchableOpacity>
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      backgroundColor:
+                        role === "provider" ? colors.tint : "transparent",
+                      borderColor: colors.successGreen,
+                    },
+                  ]}
+                >
+                  {role === "provider" && (
+                    <Ionicons
+                      name="checkmark"
+                      size={16}
+                      color={colors.background}
+                    />
+                  )}
+                </View>
+                <ThemedText
+                  style={{
+                    fontSize: 9,
+                    marginLeft: 8,
+                    fontFamily: "poppinsLight",
+                    textTransform: "uppercase",
+                    textAlign: "left",
+                  }}
+                >
+                  Provider
+                </ThemedText>
+              </TouchableOpacity>
+
+              {/* SELLER CHECKBOX */}
+              <TouchableOpacity
+                onPress={() => setRole("seller")}
+                style={[
+                  styles.checkboxContainer,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor:
+                      role === "seller" ? colors.tint : colors.card,
+                    flex: 1,
+                    marginLeft: 6,
+                  },
+                ]}
+                disabled={loading}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      backgroundColor:
+                        role === "seller" ? colors.tint : "transparent",
+                      borderColor: colors.successGreen,
+                    },
+                  ]}
+                >
+                  {role === "seller" && (
+                    <Ionicons
+                      name="checkmark"
+                      size={16}
+                      color={colors.background}
+                    />
+                  )}
+                </View>
+                <ThemedText
+                  style={{
+                    fontSize: 9,
+                    marginLeft: 8,
+                    fontFamily: "poppinsLight",
+                    textTransform: "uppercase",
+                    textAlign: "left",
+                  }}
+                >
+                  Seller
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* ERROR DISPLAY */}

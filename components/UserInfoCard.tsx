@@ -1,7 +1,7 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text, Animated } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface UserInfoCardProps {
   user: any;
@@ -10,8 +10,46 @@ interface UserInfoCardProps {
 
 export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
   const isVerified = user?.isVerified ?? true;
+  const [expanded, expand] = useState(false);
+  const animHeight = useRef(new Animated.Value(0)).current;
+  const animOpacity = useRef(new Animated.Value(0)).current;
 
   const userType = user?.role;
+
+  useEffect(() => {
+    if (expanded) {
+      Animated.parallel([
+        Animated.timing(animHeight, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(animHeight, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  }, [expanded, animHeight, animOpacity]);
+
+  const chevronRotate = animHeight.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
 
   return (
     <View
@@ -20,58 +58,121 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
         { backgroundColor: colors.background, borderColor: colors.border },
       ]}
     >
-      {/* STYLING DOTS */}
-      <View style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]} />
-      <View style={[styles.stylingDotFour, { backgroundColor: colors.tint }]} />
+      <TouchableOpacity
+        style={{
+          backgroundColor: colors.border,
+          paddingHorizontal: 16,
+          paddingVertical: 6,
+          flexDirection: "row",
+          gap: 12,
+          alignItems: "center",
+          borderLeftWidth: 4,
+          borderRightWidth: 4,
+          borderColor: colors.button,
+        }}
+        onPress={() => {
+          expand(!expanded);
+        }}
+        activeOpacity={0.7}
+      >
+        <Animated.View
+          style={{
+            transform: [{ rotate: chevronRotate }],
+          }}
+        >
+          <Ionicons
+            name="chevron-down"
+            size={28}
+            color={expanded ? colors.bottomNav : colors.tint}
+          />
+        </Animated.View>
+        <Text
+          style={{
+            color: colors.textSecondary,
+            fontFamily: "poppinsMedium",
+            fontSize: 16,
+            textTransform: "uppercase",
+            textAlign: "center",
+          }}
+        >
+          {expanded ? "Hide Profile Details" : "View Profile Details"}
+        </Text>
+      </TouchableOpacity>
 
-      {/* NAME */}
-      <View style={[styles.userInfoRow, {borderTopWidth: 1, borderColor: colors.border}]}>
-        <ThemedText style={styles.userInfoLabel}>Name</ThemedText>
-        <ThemedText style={styles.userInfoValue}>
-          {user?.name || "N/A"}
-        </ThemedText>
-      </View>
-      <View style={styles.divider} />
+      <Animated.View
+        style={{
+          opacity: animOpacity,
+          height: animHeight.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 180],
+          }),
+          overflow: "hidden",
+        }}
+      >
+        {/* STYLING DOTS */}
+        <View
+          style={[styles.stylingDotTwo, { backgroundColor: colors.tint }]}
+        />
+        <View
+          style={[styles.stylingDotFour, { backgroundColor: colors.tint }]}
+        />
 
-      {/* PHONE */}
-      <View style={styles.userInfoRow}>
-        <ThemedText style={styles.userInfoLabel}>Phone</ThemedText>
-        <ThemedText style={styles.userInfoValue}>
-          {user?.phoneNumber || "N/A"}
-        </ThemedText>
-      </View>
-      <View style={styles.divider} />
-
-      {/* EMAIL */}
-      <View style={styles.userInfoRow}>
-        <ThemedText style={styles.userInfoLabel}>Email</ThemedText>
-        <ThemedText style={styles.userInfoValue}>
-          {user?.email || "N/A"}
-        </ThemedText>
-      </View>
-      <View style={styles.divider} />
-
-      {/* VERIFICATION */}
-      {userType === "provider" && (
-        <View style={styles.userInfoRow}>
-          <ThemedText style={styles.userInfoLabel}>Verification</ThemedText>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Ionicons
-              name={isVerified ? "checkmark-circle" : "close-circle"}
-              size={18}
-              color={isVerified ? "#10B981" : "#EF4444"}
-            />
-            <ThemedText
-              style={{
-                color: isVerified ? "#10B981" : "#EF4444",
-                fontWeight: "400",
-              }}
-            >
-              {isVerified ? "VERIFIED" : "NOT VERIFIED"}
-            </ThemedText>
-          </View>
+        {/* NAME */}
+        <View
+          style={[
+            styles.userInfoRow,
+            { borderTopWidth: 1, borderColor: colors.border },
+          ]}
+        >
+          <ThemedText style={styles.userInfoLabel}>Name</ThemedText>
+          <ThemedText style={styles.userInfoValue}>
+            {user?.name || "N/A"}
+          </ThemedText>
         </View>
-      )}
+        <View style={styles.divider} />
+
+        {/* PHONE */}
+        <View style={styles.userInfoRow}>
+          <ThemedText style={styles.userInfoLabel}>Phone</ThemedText>
+          <ThemedText style={styles.userInfoValue}>
+            {user?.phoneNumber || "N/A"}
+          </ThemedText>
+        </View>
+        <View style={styles.divider} />
+
+        {/* EMAIL */}
+        <View style={styles.userInfoRow}>
+          <ThemedText style={styles.userInfoLabel}>Email</ThemedText>
+          <ThemedText style={styles.userInfoValue}>
+            {user?.email || "N/A"}
+          </ThemedText>
+        </View>
+        <View style={styles.divider} />
+
+        {/* VERIFICATION */}
+        {userType === "provider" && (
+          <View style={styles.userInfoRow}>
+            <ThemedText style={styles.userInfoLabel}>Verification</ThemedText>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <Ionicons
+                name={isVerified ? "checkmark-circle" : "close-circle"}
+                size={18}
+                color={isVerified ? "#10B981" : "#EF4444"}
+              />
+              <ThemedText
+                style={{
+                  color: isVerified ? "#10B981" : "#EF4444",
+                  fontWeight: "400",
+                }}
+              >
+                {isVerified ? "VERIFIED" : "NOT VERIFIED"}
+              </ThemedText>
+            </View>
+          </View>
+        )}
+      </Animated.View>
     </View>
   );
 }
@@ -82,7 +183,7 @@ const styles = StyleSheet.create({
     padding: 26,
     paddingHorizontal: 30,
     marginHorizontal: -25,
-    marginBottom: 24,
+    marginBottom: 0,
   },
   userInfoRow: {
     flexDirection: "row",
@@ -92,16 +193,16 @@ const styles = StyleSheet.create({
   },
   userInfoLabel: {
     fontSize: 14,
-    fontFamily: 'poppinsBold',
+    fontFamily: "poppinsBold",
     opacity: 0.7,
-    textTransform: 'uppercase',
-    textAlign: 'left'
+    textTransform: "uppercase",
+    textAlign: "left",
   },
   userInfoValue: {
     fontSize: 14,
     fontWeight: "200",
-    textTransform: 'uppercase',
-    textAlign: 'right'
+    textTransform: "uppercase",
+    textAlign: "right",
   },
   divider: {
     height: 1,
@@ -117,7 +218,7 @@ const styles = StyleSheet.create({
   stylingDotTwo: {
     position: "absolute",
     bottom: 0,
-    right: 0,
+    right: -25,
     width: 30,
     height: 20,
   },
@@ -131,7 +232,7 @@ const styles = StyleSheet.create({
   stylingDotFour: {
     position: "absolute",
     bottom: 0,
-    left: 0,
+    left: -25,
     width: 30,
     height: 20,
   },

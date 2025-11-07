@@ -262,7 +262,7 @@ export function AnnouncementBanner({
               opacity: 0.7,
             }}
           >
-            UPDATES: 27 OCTOBER 2025 BY GAMEFUXION-ZA
+            UPDATES: 07 NOVEMBER 2025 BY GAMEFUXION-ZA
           </ThemedText>
         </View>
       </View>

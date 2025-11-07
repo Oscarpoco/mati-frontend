@@ -5,12 +5,11 @@ import {
   TextInput,
   useColorScheme,
   KeyboardAvoidingView,
-  ScrollView,
-  Text,
+  ScrollView
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";

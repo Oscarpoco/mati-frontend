@@ -821,14 +821,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dropdownContainer: {
-    borderRadius: 28,
+    borderRadius: 18,
     borderWidth: 1,
     paddingHorizontal: 14,
     justifyContent: "center",
     height: 50,
   },
   textInput: {
-    borderRadius: 28,
+    borderRadius: 18,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 12,

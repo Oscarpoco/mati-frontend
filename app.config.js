@@ -2,9 +2,9 @@ import "dotenv/config";
 
 export default {
   expo: {
-    name: "MATI",
+    name: "Mati",
     slug: "mati-frontend",
-    version: "1.0.0",
+    version: "1.5.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "matifrontend",
@@ -17,7 +17,7 @@ export default {
 
     android: {
       adaptiveIcon: {
-        backgroundColor: "#E6F4FE",
+        backgroundColor: "#000000",
         foregroundImage: "./assets/images/android-icon-foreground.png",
         backgroundImage: "./assets/images/android-icon-background.png",
         monochromeImage: "./assets/images/android-icon-monochrome.png",
@@ -40,7 +40,7 @@ export default {
           image: "./assets/images/splash-icon.png",
           imageWidth: 200,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#000000",
           dark: {
             backgroundColor: "#000000",
           },
@@ -54,7 +54,6 @@ export default {
     },
 
     extra: {
-      // ✅ Load environment variables dynamically
       EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
       EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       EXPO_PUBLIC_NEWS_API: process.env.EXPO_PUBLIC_NEWS_API,
