@@ -365,7 +365,7 @@ export function LoginScreen() {
       {showAnnouncement && (
         <AnnouncementBanner
           title="IMPORTANT ANNOUNCEMENT"
-          message="The wait is over! MATI BETA Version is finally here. Create your Account as a Customer to experience great work made by GAMEFUXION-ZA Developers. NOTE: This app does not feature any payment method in Beta. Expect the first full version on 22 November."
+          message="The wait is over! MATI BETA Version is finally here. Create your Account as a Customer or Provider to experience great work made by GAMEFUXION-ZA Developers. NOTE: This app does not feature any payment method in Beta. Expect the first full version on 22 January."
           fields={[
             {
               label: "Email",

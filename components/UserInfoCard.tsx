@@ -1,4 +1,10 @@
-import { StyleSheet, View, TouchableOpacity, Text, Animated } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Animated,
+} from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState, useRef, useEffect } from "react";
@@ -66,9 +72,10 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
           flexDirection: "row",
           gap: 12,
           alignItems: "center",
-          borderLeftWidth: 4,
-          borderRightWidth: 4,
+          borderLeftWidth: 5,
+          borderRightWidth: 5,
           borderColor: colors.button,
+          marginHorizontal: -5,
         }}
         onPress={() => {
           expand(!expanded);

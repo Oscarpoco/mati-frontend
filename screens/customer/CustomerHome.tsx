@@ -21,6 +21,7 @@ import { Calendar } from "react-native-calendars";
 import MatiLogo from "@/components/ui/Logo";
 import LoadingBanner from "@/components/ui/LoadingBanner";
 import { NotificationModal } from "@/components/NotificationModal";
+import { WaitingModal } from "@/components/ui/WaitingPopup";
 // ENDS
 
 // REDUX
@@ -49,20 +50,7 @@ export default function CustomerHomeScreen() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [notificationVisible, setNotificationVisible] = useState(false);
   const notifications = 0;
-  const [timeLeft, setTimeLeft] = useState(180);
-  // ENDS
-
-  // WAITING TIME
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const [isWaiting, setIsWaiting] = useState(true);
   // ENDS
 
   // FETCH USER DETAILS ON MOUNT
@@ -74,7 +62,7 @@ export default function CustomerHomeScreen() {
   // ENDS
 
   // HANDLE CONFIRM BUTTON - TRIGGERS HORIZONTAL LOADING ANIMATION
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedLocation || !selectedDate) {
       alert("Please select an address and delivery date");
       return;
@@ -85,22 +73,29 @@ export default function CustomerHomeScreen() {
       return;
     }
 
-    // SEND DATA TO REDUX - THEN TO BACKEND
-    dispatch(
-      createRequest({
-        litres: quantity,
-        location: {
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-          address: selectedLocation.address,
-        },
-        token,
-        uid: user.uid,
-        date: selectedDate,
-        name: user.name,
-        phoneNumber: user.phoneNumber,
-      })
-    );
+    try {
+      await dispatch(
+        createRequest({
+          litres: quantity,
+          location: {
+            latitude: selectedLocation.latitude,
+            longitude: selectedLocation.longitude,
+            address: selectedLocation.address,
+          },
+          token,
+          uid: user.uid,
+          date: selectedDate,
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+        })
+      );
+
+      if (success === true) {
+        setIsWaiting(true);
+      }
+    } catch (error: any) {
+      console.error("Error creating request:", error);
+    }
   };
   // ENDS
 
@@ -344,32 +339,6 @@ export default function CustomerHomeScreen() {
           )}
         </React.Fragment>
 
-        {/* SUCCESS HANDLING */}
-        <React.Fragment>
-          {success === true && (
-            <View
-              style={{
-                paddingVertical: 10,
-                alignItems: "center",
-                width: "100%",
-                justifyContent: "center",
-              }}
-            >
-              <ThemedText
-                style={{
-                  color: colors.successGreen,
-                  fontSize: 12,
-                  textAlign: "center",
-                  textTransform: "uppercase",
-                  width: "100%",
-                }}
-              >
-                SUCCESS! PLEASE WAIT FOR AVAILABLE PROVIDER.
-              </ThemedText>
-            </View>
-          )}
-        </React.Fragment>
-
         {/* CONFIRM BUTTON WITH LOADING ANIMATION */}
         {loading ? (
           <React.Fragment>
@@ -523,7 +492,13 @@ export default function CustomerHomeScreen() {
         onClose={() => setNotificationVisible(false)}
       />
       {/* ENDS */}
-      
+
+      {/* WAITING MODAL */}
+      <WaitingModal
+        visible={isWaiting}
+        onClose={() => setIsWaiting(false)}
+      />
+      {/* ENDS */}
     </ThemedView>
   );
 }
