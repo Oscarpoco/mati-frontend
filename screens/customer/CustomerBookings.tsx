@@ -406,11 +406,10 @@ export default function CustomerBookingsScreen() {
             { backgroundColor: colors.background, borderColor: colors.border },
           ]}
         >
-          <Ionicons name="time" size={16} color={colors.tint} />
           <ThemedText
             style={[styles.pendingText, { color: colors.textSecondary, fontFamily: 'poppinsMedium', }]}
           >
-            Waiting for a provider to accept your request
+           Please wait while we find a nearby provider to accept your request.
           </ThemedText>
         </View>
       ) : null}
@@ -802,9 +801,10 @@ const styles = StyleSheet.create({
   pendingSection: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 16,
+    borderRadius: 0,
     borderWidth: 1,
     marginBottom: 12,
     gap: 8,
@@ -814,6 +814,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     flex: 1,
     textTransform: "uppercase",
+    textAlign: "left",
   },
 
   cardFooter: {
@@ -823,14 +824,12 @@ const styles = StyleSheet.create({
 
   footerLabel: {
     fontSize: 10,
-    fontWeight: "600",
     textTransform: "uppercase",
     marginBottom: 4,
   },
 
   footerValue: {
     fontSize: 12,
-    fontWeight: "700",
   },
 
   actionButtons: {

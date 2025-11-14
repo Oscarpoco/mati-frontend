@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,50 +7,16 @@ import {
   Animated,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
 
-interface PendingRequest {
-  id: string;
-  type: "pending";
-  title: string;
-  timestamp: string;
-  litre: number;
-}
-
-const generateDummyPendingRequests = (): PendingRequest[] => [
-  {
-    id: "1",
-    type: "pending",
-    title: "Water Delivery",
-    timestamp: "2 mins ago",
-    litre: 20,
-  },
-  {
-    id: "2",
-    type: "pending",
-    title: "Tank Refill",
-    timestamp: "5 mins ago",
-    litre: 50,
-  },
-  {
-    id: "3",
-    type: "pending",
-    title: "Maintenance Request",
-    timestamp: "10 mins ago",
-    litre: 0,
-  },
-  {
-    id: "4",
-    type: "pending",
-    title: "Emergency Fill",
-    timestamp: "15 mins ago",
-    litre: 100,
-  },
-];
+// REDUX
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { getRequests } from "@/redux/slice/requestSlice";
+// ENDS
 
 interface waitingModalProps {
   visible: boolean;
@@ -80,40 +46,49 @@ const AnimatedDrop = ({ color }: { color: string }) => {
   }, [bounceAnim]);
 
   return (
-    <Animated.View
-      style={[
-        styles.dropContainer,
-        {
-          transform: [{ translateY: bounceAnim }],
-        },
-      ]}
-    >
-      <View style={[styles.drop, { backgroundColor: color }]}>
-        <Ionicons name="water" size={36} color="#fff" />
+    <View style={[styles.dropContainer]}>
+      <View style={[styles.drop]}>
+        <Ionicons name="water" size={36} color="#41F4DA" />
       </View>
-    </Animated.View>
+    </View>
   );
 };
 
+// PULSE RINGS
 const PulseRing = ({ color }: { color: string }) => {
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0.4)).current;
 
   React.useEffect(() => {
     const animation = Animated.loop(
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 1.6,
-          duration: 2400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 2400,
-          useNativeDriver: true,
-        }),
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(scaleAnim, {
+            toValue: 1.6,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 0,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(scaleAnim, {
+            toValue: 0.9,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 0.4,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ]),
       ])
     );
+
     animation.start();
     return () => animation.stop();
   }, [scaleAnim, opacityAnim]);
@@ -128,20 +103,60 @@ const PulseRing = ({ color }: { color: string }) => {
           opacity: opacityAnim,
         },
       ]}
-    />
+    >
+      <Animated.View
+        style={[
+          styles.pulseRing1,
+          {
+            borderColor: color,
+            transform: [{ scale: scaleAnim }],
+            opacity: opacityAnim,
+          },
+        ]}
+      >
+        <Animated.View
+          style={[
+            styles.pulseRing2,
+            {
+              borderColor: color,
+              transform: [{ scale: scaleAnim }],
+              opacity: opacityAnim,
+            },
+          ]}
+        />
+      </Animated.View>
+    </Animated.View>
   );
 };
+// ENDS
 
 export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
-  const colorScheme = useColorScheme();
   const colors = Colors["dark"];
-  const [pendingRequests, setPendingRequests] = useState(
-    generateDummyPendingRequests()
+
+  // 🔹 REDUX AUTH STATE
+  const dispatch = useAppDispatch();
+  const { user, token } = useAppSelector((state) => state.auth);
+  const { loading, customerRequests } = useAppSelector(
+    (state) => state.request
   );
 
+  const [pendingRequests, setPendingRequests] = useState(customerRequests);
   const slideAnim = useRef(new Animated.Value(600)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  // FETCH REQUESTS
+  useEffect(() => {
+    if (user?.uid && token && user?.role) {
+      dispatch(getRequests({ uid: user.uid, token, role: user.role }));
+    }
+  }, [dispatch, user?.uid, user?.role, token]);
+  // ENDS
+
+  // Update pendingRequests whenever customerRequests changes
+  useEffect(() => {
+    setPendingRequests(customerRequests);
+  }, [customerRequests]);
 
   React.useEffect(() => {
     if (visible) {
@@ -181,7 +196,7 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
         }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, scaleAnim, slideAnim, fadeAnim]);
 
   const handleCancelRequest = (id: string) => {
     setPendingRequests(pendingRequests.filter((req) => req.id !== id));
@@ -232,7 +247,12 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
             </TouchableOpacity>
 
             {/* Header Section */}
-            <View style={styles.headerSection}>
+            <View
+              style={[
+                styles.headerSection,
+                { backgroundColor: colors.background },
+              ]}
+            >
               <View style={styles.pulseContainer}>
                 <PulseRing color={colors.tint} />
                 <AnimatedDrop color={colors.tint} />
@@ -255,17 +275,38 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
             </View>
 
             {/* Service Details - Horizontal Scroll */}
-            <View style={styles.detailsSection}>
+            <View
+              style={[
+                styles.detailsSection,
+                { backgroundColor: colors.background },
+              ]}
+            >
               <ThemedText
                 style={[
                   styles.sectionTitle,
-                  { fontFamily: "poppinsBold", color: colors.text },
+                  { fontFamily: "poppinsLight", color: colors.text },
                 ]}
               >
                 Your Pending Requests
               </ThemedText>
 
-              {pendingRequests.length > 0 ? (
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={colors.tint} />
+                  <ThemedText
+                    style={[
+                      styles.loadingText,
+                      {
+                        fontFamily: "poppinsLight",
+                        color: colors.textSecondary,
+                        marginTop: 12,
+                      },
+                    ]}
+                  >
+                    Fetching your requests...
+                  </ThemedText>
+                </View>
+              ) : pendingRequests.length > 0 ? (
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -285,36 +326,41 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
                       ]}
                     >
                       <View style={styles.cardHeader}>
-                        <View
-                          style={[
-                            styles.cardIcon,
-                            {
-                              backgroundColor: colors.button,
-                            },
-                          ]}
-                        >
+                        <View style={[styles.cardIcon]}>
                           <Ionicons
                             name="water"
                             size={28}
                             color={colors.tint}
                           />
                         </View>
-                        <TouchableOpacity
-                          style={[
-                            styles.cancelButtonCard,
-                            {
-                              backgroundColor: colors.warningRed,
-                            },
-                          ]}
-                          onPress={() => handleCancelRequest(item.id)}
-                          activeOpacity={0.6}
-                        >
-                          <Ionicons
-                            name="close"
-                            size={16}
-                            color={colors.text}
-                          />
-                        </TouchableOpacity>
+
+                        {item.litres > 0 && (
+                          <View
+                            style={[
+                              styles.litreTagCard,
+                              {
+                                backgroundColor: colors.button,
+                              },
+                            ]}
+                          >
+                            <Ionicons
+                              name="water"
+                              size={13}
+                              color={colors.tint}
+                            />
+                            <ThemedText
+                              style={[
+                                styles.litreTextCard,
+                                {
+                                  fontFamily: "poppinsBold",
+                                  color: colors.tint,
+                                },
+                              ]}
+                            >
+                              {item.litres}L
+                            </ThemedText>
+                          </View>
+                        )}
                       </View>
 
                       <ThemedText
@@ -323,7 +369,7 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
                           { fontFamily: "poppinsBold", color: colors.text },
                         ]}
                       >
-                        {item.title}
+                        R {item.price}
                       </ThemedText>
 
                       <ThemedText
@@ -335,36 +381,24 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
                           },
                         ]}
                       >
-                        {item.timestamp}
+                        {new Date(item.createdAt).toLocaleString("en-ZA", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </ThemedText>
 
-                      {item.litre > 0 && (
-                        <View
-                          style={[
-                            styles.litreTagCard,
-                            {
-                              backgroundColor: colors.button,
-                            },
-                          ]}
-                        >
-                          <Ionicons
-                            name="water"
-                            size={13}
-                            color={colors.tint}
-                          />
-                          <ThemedText
-                            style={[
-                              styles.litreTextCard,
-                              {
-                                fontFamily: "poppinsBold",
-                                color: colors.tint,
-                              },
-                            ]}
-                          >
-                            {item.litre}L
-                          </ThemedText>
-                        </View>
-                      )}
+                      <TouchableOpacity
+                        style={[styles.cancelButtonCard]}
+                        onPress={() => handleCancelRequest(item.id)}
+                        activeOpacity={0.6}
+                      >
+                        <ThemedText style={{ color: colors.textSecondary }}>
+                          Cancel
+                        </ThemedText>
+                      </TouchableOpacity>
                     </Animated.View>
                   ))}
                 </ScrollView>
@@ -408,7 +442,7 @@ export const WaitingModal = ({ visible, onClose }: waitingModalProps) => {
               <ThemedText
                 style={[
                   styles.infoText,
-                  { fontFamily: "poppinsMedium", color: colors.textSecondary },
+                  { fontFamily: "poppinsLight", color: "#fb0303ab" },
                 ]}
               >
                 You&apos;ll receive a notification once a provider accepts your
@@ -467,7 +501,23 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 55,
-    borderWidth: 2.5,
+    borderWidth: 3.5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pulseRing1: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3.5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pulseRing2: {
+    width: 60,
+    height: 60,
+    borderRadius: 25,
+    borderWidth: 3.5,
   },
   dropContainer: {
     width: 110,
@@ -519,15 +569,18 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   detailsSection: {
-    paddingVertical: 24,
+    paddingVertical: 4,
     borderTopWidth: 0.8,
     borderTopColor: "rgba(255, 255, 255, 0.08)",
+    marginBottom: 18,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     marginBottom: 18,
-    marginLeft: 24,
+    paddingLeft: 24,
     letterSpacing: -0.3,
+    lineHeight: 38,
+    paddingVertical: 5,
   },
   horizontalScroll: {
     flexGrow: 0,
@@ -536,10 +589,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     gap: 14,
   },
+  loadingContainer: {
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  loadingText: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
   requestCard: {
     width: 170,
     padding: 16,
-    borderRadius: 28,
+    borderRadius: 32,
     borderWidth: 1,
     justifyContent: "space-between",
     minHeight: 150,
@@ -551,18 +614,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    height: 37,
     justifyContent: "center",
     alignItems: "center",
   },
   cancelButtonCard: {
-    width: 32,
+    width: "100%",
     height: 32,
-    borderRadius: 10,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#fc030351",
   },
   cardTitle: {
     fontSize: 14,
@@ -578,7 +640,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -607,19 +669,19 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 18,
     textAlign: "center",
   },
   emptyContainer: {
     alignItems: "center",
-    paddingVertical: 36,
+    paddingVertical: 16,
     paddingHorizontal: 24,
   },
   emptyIcon: {
     width: 90,
     height: 90,
-    borderRadius: 18,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 18,

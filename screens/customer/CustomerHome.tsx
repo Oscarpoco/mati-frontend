@@ -27,7 +27,7 @@ import { WaitingModal } from "@/components/ui/WaitingPopup";
 // REDUX
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { fetchUserById } from "@/redux/slice/authSlice";
-import { createRequest } from "@/redux/slice/requestSlice";
+import { createRequest, getRequests } from "@/redux/slice/requestSlice";
 // ENDS
 
 export default function CustomerHomeScreen() {
@@ -40,7 +40,7 @@ export default function CustomerHomeScreen() {
   const dispatch = useAppDispatch();
   const { user, token } = useAppSelector((state) => state.auth);
   const { selectedLocation } = useAppSelector((state) => state.location);
-  const { loading, error, success } = useAppSelector((state) => state.request);
+  const { loading, error } = useAppSelector((state) => state.request);
   // ENDS
 
   // STATE FOR QUANTITY, LOCATION, AND DATES
@@ -50,7 +50,7 @@ export default function CustomerHomeScreen() {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [notificationVisible, setNotificationVisible] = useState(false);
   const notifications = 0;
-  const [isWaiting, setIsWaiting] = useState(true);
+  const [isWaiting, setIsWaiting] = useState(false);
   // ENDS
 
   // FETCH USER DETAILS ON MOUNT
@@ -90,9 +90,9 @@ export default function CustomerHomeScreen() {
         })
       );
 
-      if (success === true) {
-        setIsWaiting(true);
-      }
+      await dispatch(getRequests({ uid: user.uid, token, role: user.role }));
+
+      setIsWaiting(true);
     } catch (error: any) {
       console.error("Error creating request:", error);
     }
@@ -278,12 +278,12 @@ export default function CustomerHomeScreen() {
               style={[
                 styles.quantityButton,
                 {
-                  backgroundColor: colors.warningRed,
+                  backgroundColor: colors.tint,
                   borderColor: colors.border,
                 },
               ]}
             >
-              <Ionicons name="remove" size={32} color={colors.background} />
+              <Ionicons name="remove" size={38} color={colors.background} />
             </TouchableOpacity>
 
             <View
@@ -291,7 +291,7 @@ export default function CustomerHomeScreen() {
                 styles.quantityDisplay,
                 {
                   backgroundColor: colors.background,
-                  borderColor: colors.border,
+                  borderColor: colors.tint,
                 },
               ]}
             >
@@ -308,7 +308,7 @@ export default function CustomerHomeScreen() {
                 },
               ]}
             >
-              <Ionicons name="add" size={32} color={colors.background} />
+              <Ionicons name="add" size={38} color={colors.background} />
             </TouchableOpacity>
           </View>
         </View>
@@ -400,6 +400,9 @@ export default function CustomerHomeScreen() {
           </React.Fragment>
         )}
       </ScrollView>
+      {/* ENDS */}
+
+      {/* VOICE AI FLOATING BUTTON */}
       {/* ENDS */}
 
       {/* ADDRESS MODAL */}
@@ -494,10 +497,7 @@ export default function CustomerHomeScreen() {
       {/* ENDS */}
 
       {/* WAITING MODAL */}
-      <WaitingModal
-        visible={isWaiting}
-        onClose={() => setIsWaiting(false)}
-      />
+      <WaitingModal visible={isWaiting} onClose={() => setIsWaiting(false)} />
       {/* ENDS */}
     </ThemedView>
   );
@@ -643,16 +643,16 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
     justifyContent: "space-between",
-    borderRadius: 32,
+    borderRadius: 0,
     padding: 4,
     borderWidth: 0.7,
     alignItems: "center",
   },
 
   quantityButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 28,
+    width: 50,
+    height: 50,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -660,8 +660,8 @@ const styles = StyleSheet.create({
 
   quantityDisplay: {
     width: 150,
-    height: 60,
-    borderRadius: 28,
+    height: 50,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
