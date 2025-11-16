@@ -151,6 +151,7 @@ export default function WaterSalesScreen() {
             quantity: 1,
             name: product.name,
             price: product.price,
+            type: product.type,
           });
         }
 
@@ -588,7 +589,13 @@ export default function WaterSalesScreen() {
       <CartModal
         visible={cartVisible}
         onClose={() => setCartVisible(false)}
-        items={Array.from(cartItems.values())}
+        items={Array.from(cartItems.values()).map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          type: item.type,
+        }))}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeFromCart}
         onCheckout={() => {
@@ -693,10 +700,10 @@ const styles = StyleSheet.create({
     right: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: 0,
   },
   productContent: { padding: 10 },
-  productName: { fontSize: 14, marginBottom: 8 },
+  productName: { fontSize: 12, marginBottom: 8 },
   ratingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -707,7 +714,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -716,7 +723,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,

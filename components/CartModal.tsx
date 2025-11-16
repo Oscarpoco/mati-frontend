@@ -1,19 +1,19 @@
-import React, { useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  Animated,
-  PanResponder,
-  Platform,
-} from "react-native";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  FlatList,
+  Modal,
+  PanResponder,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export interface CartItem {
   id: string;
@@ -43,14 +43,152 @@ export const CartModal: React.FC<CartModalProps> = ({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
+  // Modal animations
+  const slideAnim = useRef(new Animated.Value(600)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const backdropAnim = useRef(new Animated.Value(0)).current;
+  const bottomSectionAnim = useRef(new Animated.Value(100)).current;
+  const [animatedTotal, setAnimatedTotal] = useState(0);
+
   const totalBalance = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  // 🔹 Cart Item Component with Swipe Delete
-  const CartItemComponent = ({ item }: { item: CartItem }) => {
+  // Animate modal entry/exit
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 65,
+          friction: 11,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.ease),
+        }),
+        Animated.timing(backdropAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(bottomSectionAnim, {
+          toValue: 0,
+          delay: 150,
+          useNativeDriver: true,
+          tension: 65,
+          friction: 11,
+        }),
+      ]).start();
+
+      // Counter animation for total
+      const duration = 600;
+      const steps = 30;
+      const stepValue = totalBalance / steps;
+      let currentStep = 0;
+
+      const timer = setInterval(() => {
+        currentStep++;
+        const newValue = Math.min(stepValue * currentStep, totalBalance);
+        setAnimatedTotal(newValue);
+        if (currentStep >= steps) {
+          clearInterval(timer);
+          setAnimatedTotal(totalBalance);
+        }
+      }, duration / steps);
+
+      return () => {
+        if (timer) clearInterval(timer);
+      };
+    } else {
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 600,
+          duration: 250,
+          useNativeDriver: true,
+          easing: Easing.in(Easing.ease),
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backdropAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bottomSectionAnim, {
+          toValue: 100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+      setAnimatedTotal(0);
+    }
+  }, [visible, totalBalance]);
+
+  // 🔹 Modern Cart Item Component with Swipe Delete
+  const CartItemComponent = ({ item, index }: { item: CartItem; index: number }) => {
     const pan = useRef(new Animated.ValueXY()).current;
+    const scaleAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(0)).current;
+    const priceAnim = useRef(new Animated.Value(item.price * item.quantity)).current;
+    const quantityScale = useRef(new Animated.Value(1)).current;
+
+    // Staggered entry animation
+    useEffect(() => {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          delay: index * 80,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 7,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          delay: index * 80,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, []);
+
+    // Animate price change
+    useEffect(() => {
+      Animated.sequence([
+        Animated.timing(priceAnim, {
+          toValue: item.price * item.quantity,
+          duration: 300,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }, [item.quantity, item.price]);
+
+    // Animate quantity change
+    const animateQuantityChange = () => {
+      Animated.sequence([
+        Animated.spring(quantityScale, {
+          toValue: 1.2,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+        Animated.spring(quantityScale, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+      ]).start();
+    };
+
     const panResponder = useRef(
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
@@ -62,30 +200,69 @@ export const CartModal: React.FC<CartModalProps> = ({
         },
         onPanResponderRelease: (_, { dx }) => {
           if (dx < -80) {
-            Animated.timing(pan.x, {
-              toValue: -120,
-              duration: 200,
-              useNativeDriver: true,
-            }).start();
+            Animated.parallel([
+              Animated.timing(pan.x, {
+                toValue: -120,
+                duration: 200,
+                useNativeDriver: true,
+                easing: Easing.out(Easing.ease),
+              }),
+              Animated.timing(opacityAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }),
+            ]).start(() => {
+              onRemoveItem(item.id);
+            });
           } else {
             Animated.spring(pan.x, {
               toValue: 0,
               useNativeDriver: true,
+              tension: 100,
+              friction: 8,
             }).start();
           }
         },
       })
     ).current;
 
+    const deleteOpacity = pan.x.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [1, 0.5, 0],
+      extrapolate: "clamp",
+    });
+
     return (
-      <View style={styles.itemWrapper}>
-        {/* Delete Button */}
-        <TouchableOpacity
-          style={[styles.deleteButton, { backgroundColor: "#FF6B6B" }]}
-          onPress={() => onRemoveItem(item.id)}
+      <Animated.View
+        style={[
+          styles.itemWrapper,
+          {
+            opacity: opacityAnim,
+            transform: [
+              { scale: scaleAnim },
+              { translateX: pan.x },
+            ],
+          },
+        ]}
+      >
+        {/* Delete Button Background */}
+        <Animated.View
+          style={[
+            styles.deleteButtonBg,
+            {
+              opacity: deleteOpacity,
+            },
+          ]}
         >
-          <Ionicons name="trash-bin" size={20} color="white" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButtonTouch}
+            onPress={() => onRemoveItem(item.id)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="trash-bin" size={22} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
 
         {/* Item Card */}
         <Animated.View
@@ -93,19 +270,40 @@ export const CartModal: React.FC<CartModalProps> = ({
             styles.cartItem,
             {
               backgroundColor: colors.card,
-              borderColor: colors.border,
               transform: [{ translateX: pan.x }],
             },
           ]}
           {...panResponder.panHandlers}
         >
-          <View style={styles.itemInfo}>
-            <View>
+          {/* Left Section - Product Info */}
+          <View style={styles.leftSection}>
+            {/* Icon Container */}
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor:
+                    item.type === "water"
+                      ? `${colors.tint}15`
+                      : `${colors.tint}10`,
+                },
+              ]}
+            >
+              <Ionicons
+                name={item.type === "water" ? "water" : "snow"}
+                size={24}
+                color={colors.tint}
+              />
+            </View>
+
+            {/* Product Details */}
+            <View style={styles.productDetails}>
               <ThemedText
                 style={[
-                  styles.itemName,
+                  styles.productName,
                   { color: colors.text, fontFamily: "poppinsMedium" },
                 ]}
+                numberOfLines={1}
               >
                 {item.name}
               </ThemedText>
@@ -113,354 +311,662 @@ export const CartModal: React.FC<CartModalProps> = ({
                 style={{
                   fontSize: 12,
                   color: colors.textSecondary,
-                  marginTop: 4,
+                  marginTop: 2,
                   fontFamily: "poppinsLight",
                 }}
               >
-                {item.type.toUpperCase()}
+                R{item.price.toFixed(2)}
               </ThemedText>
             </View>
-            <ThemedText
+          </View>
+
+          {/* Right Section - Price & Quantity */}
+          <View style={styles.rightSection}>
+            <PriceDisplay
+              priceAnim={priceAnim}
+              colors={colors}
+              totalPrice={item.price * item.quantity}
+            />
+
+            {/* Quantity Selector */}
+            <View
               style={[
-                styles.itemPrice,
-                { color: colors.text, fontFamily: "poppinsMedium" },
+                styles.quantitySelector,
+                {
+                  backgroundColor: colors.background,
+                },
               ]}
             >
-              R{(item.price * item.quantity).toFixed(2)}
-            </ThemedText>
-          </View>
+              <TouchableOpacity
+                onPress={() => {
+                  animateQuantityChange();
+                  onUpdateQuantity(item.id, Math.max(1, item.quantity - 1));
+                }}
+                style={styles.quantityBtn}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="remove-outline"
+                  size={18}
+                  color={colors.tint}
+                />
+              </TouchableOpacity>
 
-          {/* Quantity Controls */}
-          <View
+              <Animated.Text
+                style={{
+                  fontSize: 14,
+                  fontFamily: "poppinsMedium",
+                  color: colors.text,
+                  minWidth: 24,
+                  textAlign: "center",
+                  transform: [{ scale: quantityScale }],
+                }}
+              >
+                {item.quantity}
+              </Animated.Text>
+
+              <TouchableOpacity
+                onPress={() => {
+                  animateQuantityChange();
+                  onUpdateQuantity(item.id, item.quantity + 1);
+                }}
+                style={styles.quantityBtn}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add-outline" size={18} color={colors.tint} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+      </Animated.View>
+    );
+  };
+
+  // 🔹 Empty Cart State with Animation
+  const EmptyCart = () => {
+    const iconScale = useRef(new Animated.Value(0)).current;
+    const iconRotate = useRef(new Animated.Value(0)).current;
+    const textFade = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      Animated.parallel([
+        Animated.spring(iconScale, {
+          toValue: 1,
+          delay: 200,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 7,
+        }),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(iconRotate, {
+              toValue: 1,
+              duration: 2000,
+              easing: Easing.linear,
+              useNativeDriver: true,
+            }),
+            Animated.timing(iconRotate, {
+              toValue: 0,
+              duration: 2000,
+              easing: Easing.linear,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+        Animated.timing(textFade, {
+          toValue: 1,
+          delay: 400,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, []);
+
+    const rotateInterpolate = iconRotate.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "10deg"],
+    });
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Animated.View
+          style={[
+            styles.emptyIconBg,
+            {
+              backgroundColor: `${colors.tint}10`,
+              transform: [
+                { scale: iconScale },
+                { rotate: rotateInterpolate },
+              ],
+            },
+          ]}
+        >
+          <Ionicons name="cart-outline" size={56} color={colors.tint} />
+        </Animated.View>
+        <Animated.View style={{ opacity: textFade }}>
+          <ThemedText
             style={[
-              styles.quantityControl,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
+              styles.emptyTitle,
+              { color: colors.text, fontFamily: "poppinsMedium" },
             ]}
           >
-            <TouchableOpacity
-              onPress={() =>
-                onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
-              }
-              style={styles.quantityButton}
-            >
-              <Ionicons name="remove-outline" size={18} color={colors.tint} />
-            </TouchableOpacity>
-
-            <ThemedText
-              style={{
-                fontSize: 14,
-                fontFamily: "poppinsMedium",
-                color: colors.text,
-                minWidth: 30,
-                textAlign: "center",
-              }}
-            >
-              {item.quantity}
-            </ThemedText>
-
-            <TouchableOpacity
-              onPress={() => onUpdateQuantity(item.id, item.quantity + 1)}
-              style={styles.quantityButton}
-            >
-              <Ionicons name="add-outline" size={18} color={colors.tint} />
-            </TouchableOpacity>
-          </View>
+            Cart is Empty
+          </ThemedText>
+          <ThemedText
+            style={{
+              color: colors.textSecondary,
+              fontSize: 14,
+              marginTop: 8,
+              fontFamily: "poppinsLight",
+              textAlign: "center",
+            }}
+          >
+            Add some refreshing items to get started
+          </ThemedText>
         </Animated.View>
       </View>
     );
   };
 
-  // 🔹 Empty Cart State
-  const EmptyCart = () => (
-    <View style={styles.emptyContainer}>
-      <Ionicons name="cart-outline" size={64} color={colors.textSecondary} />
-      <ThemedText
-        style={[
-          styles.emptyText,
-          { color: colors.text, fontFamily: "poppinsMedium" },
-        ]}
-      >
-        Your cart is empty
-      </ThemedText>
-      <ThemedText
-        style={{
-          color: colors.textSecondary,
-          fontSize: 14,
-          marginTop: 8,
-          fontFamily: "poppinsLight",
-        }}
-      >
-        Add items to get started
-      </ThemedText>
-    </View>
-  );
-
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onClose}
     >
-      <ThemedView
-        style={[styles.modalContainer, { backgroundColor: colors.background }]}
+      <Animated.View
+        style={[
+          styles.backdrop,
+          {
+            opacity: backdropAnim,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+      </Animated.View>
+      <Animated.View
+        style={[
+          styles.modalContainer,
+          {
+            backgroundColor: colors.background,
+            transform: [{ translateY: slideAnim }],
+            opacity: fadeAnim,
+          },
+        ]}
       >
         {/* Header */}
-        <View
-          style={[styles.modalHeader, { borderBottomColor: colors.border }]}
-        >
-          <ThemedText
-            style={[
-              styles.headerTitle,
-              { color: colors.text, fontFamily: "poppinsBold" },
-            ]}
-          >
-            Your Cart
-          </ThemedText>
+        <View style={styles.header}>
+          <View>
+            <ThemedText
+              style={[
+                styles.headerTitle,
+                { color: colors.text, fontFamily: "poppinsBold" },
+              ]}
+            >
+              Shopping Cart
+            </ThemedText>
+            <ThemedText
+              style={{
+                fontSize: 12,
+                color: colors.textSecondary,
+                marginTop: 4,
+                fontFamily: "poppinsLight",
+              }}
+            >
+              {items.length} {items.length === 1 ? "item" : "items"} in cart
+            </ThemedText>
+          </View>
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 16,
-              backgroundColor: colors.card,
-            }}
+            style={[
+              styles.closeBtn,
+              { backgroundColor: colors.tint },
+            ]}
+            activeOpacity={0.7}
           >
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close-outline" size={22} color={colors.text} />
           </TouchableOpacity>
         </View>
 
-        {/* Cart Items */}
+        {/* Cart Items List */}
         {items.length === 0 ? (
           <EmptyCart />
         ) : (
           <FlatList
             data={items}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <CartItemComponent item={item} />}
+            renderItem={({ item, index }) => (
+              <CartItemComponent item={item} index={index} />
+            )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16}
           />
         )}
 
-        {/* Bottom Section */}
+        {/* Bottom Summary Section */}
         {items.length > 0 && (
-          <View
+          <Animated.View
             style={[
               styles.bottomSection,
-              { backgroundColor: colors.card, borderTopColor: colors.border },
+              {
+                backgroundColor: colors.card,
+                transform: [{ translateY: bottomSectionAnim }],
+              },
             ]}
           >
-            {/* Subtotal */}
-            <View style={styles.priceRow}>
-              <ThemedText
-                style={{
-                  fontSize: 14,
-                  color: colors.textSecondary,
-                  fontFamily: "poppinsLight",
-                }}
-              >
-                Subtotal
-              </ThemedText>
-              <ThemedText
-                style={{
-                  fontSize: 14,
-                  color: colors.text,
-                  fontFamily: "poppinsMedium",
-                }}
-              >
-                R{totalBalance.toFixed(2)}
-              </ThemedText>
-            </View>
+            {/* Price Breakdown */}
+            <View style={styles.priceBreakdown}>
+              <View style={styles.priceRow}>
+                <ThemedText
+                  style={{
+                    fontSize: 13,
+                    color: colors.textSecondary,
+                    fontFamily: "poppinsLight",
+                  }}
+                >
+                  Subtotal
+                </ThemedText>
+                <ThemedText
+                  style={{
+                    fontSize: 13,
+                    color: colors.text,
+                    fontFamily: "poppinsLight",
+                  }}
+                >
+                  R{totalBalance.toFixed(2)}
+                </ThemedText>
+              </View>
 
-            {/* Delivery Fee */}
-            <View style={styles.priceRow}>
-              <ThemedText
-                style={{
-                  fontSize: 14,
-                  color: colors.textSecondary,
-                  fontFamily: "poppinsLight",
-                }}
-              >
-                Delivery
-              </ThemedText>
-              <ThemedText
-                style={{
-                  fontSize: 14,
-                  color: colors.text,
-                  fontFamily: "poppinsMedium",
-                }}
-              >
-                R0.00
-              </ThemedText>
+              {/* <View style={styles.priceRow}>
+                <ThemedText
+                  style={{
+                    fontSize: 13,
+                    color: colors.textSecondary,
+                    fontFamily: "poppinsLight",
+                  }}
+                >
+                  Delivery
+                </ThemedText>
+                <ThemedText
+                  style={{
+                    fontSize: 13,
+                    color: "#10B981",
+                    fontFamily: "poppinsMedium",
+                  }}
+                >
+                  Free
+                </ThemedText>
+              </View> */}
             </View>
 
             {/* Divider */}
             <View
-              style={[styles.divider, { backgroundColor: colors.border }]}
+              style={[
+                styles.divider,
+                { backgroundColor: colors.border },
+              ]}
             />
 
-            {/* Total */}
-            <View style={[styles.priceRow, styles.totalRow]}>
+            {/* Total Amount */}
+            <View style={styles.totalSection}>
               <ThemedText
                 style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: colors.text,
-                  fontFamily: "poppinsMedium",
+                  fontSize: 12,
+                  color: colors.textSecondary,
+                  fontFamily: "poppinsLight",
                 }}
               >
-                Total
+                Total Amount
               </ThemedText>
               <ThemedText
                 style={{
-                  fontSize: 22,
-                  fontWeight: "700",
+                  fontSize: 32,
+                  lineHeight: 38,
                   color: colors.tint,
                   fontFamily: "poppinsMedium",
+                  marginTop: 4,
+                  letterSpacing: -1,
                 }}
               >
-                R{totalBalance.toFixed(2)}
+                R{animatedTotal.toFixed(2)}
               </ThemedText>
             </View>
 
             {/* Checkout Button */}
-            <TouchableOpacity
-              style={[styles.checkoutButton, { backgroundColor: colors.tint }]}
+            <CheckoutButton
               onPress={onCheckout}
-            >
-              <ThemedText
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: colors.background,
-                  fontFamily: "poppinsMedium",
-                }}
-              >
-                Proceed to Checkout
-              </ThemedText>
-              <Ionicons
-                name="arrow-forward-outline"
-                size={20}
-                color={colors.background}
-              />
-            </TouchableOpacity>
-          </View>
+              colors={colors}
+              totalItems={items.length}
+            />
+
+          </Animated.View>
         )}
-      </ThemedView>
+      </Animated.View>
     </Modal>
   );
 };
 
+// 🔹 Animated Price Display Component
+const PriceDisplay: React.FC<{
+  priceAnim: Animated.Value;
+  colors: any;
+  totalPrice: number;
+}> = ({ priceAnim, colors, totalPrice }) => {
+  const [displayPrice, setDisplayPrice] = useState(totalPrice);
+
+  useEffect(() => {
+    const listenerId = priceAnim.addListener(({ value }) => {
+      setDisplayPrice(value);
+    });
+
+    return () => {
+      priceAnim.removeListener(listenerId);
+    };
+  }, [priceAnim]);
+
+  return (
+    <ThemedText
+      style={[
+        styles.totalPrice,
+        { color: colors.tint, fontFamily: "poppinsMedium" },
+      ]}
+    >
+      R{displayPrice.toFixed(2)}
+    </ThemedText>
+  );
+};
+
+// 🔹 Animated Checkout Button Component
+const CheckoutButton: React.FC<{
+  onPress: () => void;
+  colors: any;
+  totalItems: number;
+}> = ({ onPress, colors, totalItems }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.spring(scaleAnim, {
+        toValue: 0.95,
+        useNativeDriver: true,
+        tension: 300,
+        friction: 10,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 300,
+        friction: 10,
+      }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{ scale: scaleAnim }, { scale: pulseAnim }],
+      }}
+    >
+      <TouchableOpacity
+        style={[
+          styles.checkoutBtn,
+          { backgroundColor: colors.tint },
+        ]}
+        onPress={handlePress}
+        activeOpacity={0.9}
+      >
+        <ThemedText
+          style={{
+            fontSize: 16,
+            color: colors.background,
+            fontFamily: "poppinsMedium",
+          }}
+        >
+          CHECKOUT NOW
+        </ThemedText>
+        <View style={[styles.checkoutBadge, { backgroundColor: colors.card }]}>
+          <ThemedText
+            style={{
+              fontSize: 12,
+              color: colors.tint,
+              fontFamily: "poppinsMedium",
+            }}
+          >
+            {totalItems}
+          </ThemedText>
+        </View>
+      
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
 const styles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
   modalContainer: {
     flex: 1,
     paddingTop: Platform.OS === "ios" ? 60 : 10,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  modalHeader: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
+    marginBottom: 8,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
+    letterSpacing: -0.5,
+  },
+  closeBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     flexGrow: 1,
   },
   itemWrapper: {
-    marginBottom: 12,
+    marginHorizontal: 8,
+    marginVertical: 8,
     position: "relative",
   },
-  deleteButton: {
+  deleteButtonBg: {
     position: "absolute",
     right: 0,
     top: 0,
     bottom: 0,
-    width: 120,
+    width: 100,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#EF4444",
+    borderRadius: 16,
     zIndex: 1,
-    borderRadius: 12,
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  deleteButtonTouch: {
+    width: 120,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   cartItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 24,
     zIndex: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 0.5,
   },
-  itemInfo: {
+  leftSection: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginRight: 12,
   },
-  itemName: {
-    fontSize: 14,
-  },
-  itemPrice: {
-    fontSize: 16,
-  },
-  quantityControl: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
+  iconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  productDetails: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  rightSection: {
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  totalPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  quantitySelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 18,
+    paddingHorizontal: 4,
+    paddingVertical: 5,
+    gap: 8,
+  },
+  quantityBtn: {
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 14,
+    backgroundColor: 'rgba(210, 208, 208, 0.4)',
+    borderWidth: 0.5,
+    borderColor: 'rgba(128, 127, 127, 0.93)',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 20,
   },
-  emptyText: {
-    fontSize: 18,
-    marginTop: 16,
+  emptyIconBg: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    letterSpacing: -0.3,
+    marginBottom: 8,
   },
   bottomSection: {
-    borderTopWidth: 1,
-    padding: 16,
-    paddingBottom: Platform.OS === "ios" ? 32 : 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  priceBreakdown: {
+    gap: 10,
   },
   priceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
   },
   divider: {
     height: 1,
-    marginVertical: 12,
+    marginVertical: 14,
   },
-  totalRow: {
-    marginBottom: 16,
+  totalSection: {
+    marginBottom: 20,
   },
-  checkoutButton: {
+  checkoutBtn: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 0,
+    marginBottom: 12,
+    position: "relative",
+  },
+  checkoutBadge: {
+    position: "absolute",
+    top: -18,
+    right: 20,
+    borderRadius: 18,
+    width: 34,
+    height: 34,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
