@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Image,
-  Platform,
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Animated,
-  Alert,
-} from "react-native";
+import { CartItem, CartModal } from "@/components/CartModal";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
-import { CartModal, CartItem } from "@/components/CartModal";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Easing,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface Product {
   id: string;
@@ -88,6 +89,15 @@ export default function WaterSalesScreen() {
   const [cartVisible, setCartVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(500))[0];
 
+  // Animation refs
+  const cartButtonScale = useRef(new Animated.Value(1)).current;
+  const cartBadgeScale = useRef(new Animated.Value(1)).current;
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+  const toastTranslateY = useRef(new Animated.Value(-100)).current;
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Cart management
   const [cartItems, setCartItems] = useState<Map<string, CartItemWithDetails>>(
     new Map()
@@ -117,6 +127,15 @@ export default function WaterSalesScreen() {
     fetchProducts(1, true);
   }, [fetchProducts]);
 
+  // Cleanup toast timer on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
   // Load more on page change
   useEffect(() => {
     if (page > 1) {
@@ -129,6 +148,90 @@ export default function WaterSalesScreen() {
       setPage((prev) => prev + 1);
     }
   };
+
+  // 🔹 Show toast notification
+  const showToastNotification = useCallback((message: string) => {
+    // Clear any existing timer
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    setToastMessage(message);
+    setShowToast(true);
+
+    // Reset animations
+    toastTranslateY.setValue(-100);
+    toastOpacity.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(toastTranslateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 50,
+        friction: 8,
+      }),
+      Animated.timing(toastOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+    ]).start();
+
+    // Auto hide after 2 seconds
+    toastTimerRef.current = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(toastTranslateY, {
+          toValue: -100,
+          duration: 250,
+          useNativeDriver: true,
+          easing: Easing.in(Easing.ease),
+        }),
+        Animated.timing(toastOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowToast(false);
+        toastTimerRef.current = null;
+      });
+    }, 2000);
+  }, []);
+
+  // 🔹 Animate cart button
+  const animateCartButton = useCallback(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(cartButtonScale, {
+          toValue: 1.2,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+        Animated.spring(cartBadgeScale, {
+          toValue: 1.5,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.spring(cartButtonScale, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+        Animated.spring(cartBadgeScale, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 300,
+          friction: 3,
+        }),
+      ]),
+    ]).start();
+  }, []);
 
   // 🔹 Cart functions
   const addToCart = useCallback(
@@ -158,14 +261,11 @@ export default function WaterSalesScreen() {
         return updated;
       });
 
-      Alert.alert(
-        "Success",
-        `${product.name} added to cart!`,
-        [{ text: "OK", onPress: () => {} }],
-        { cancelable: true }
-      );
+      // Animate cart button and show toast
+      animateCartButton();
+      showToastNotification(`${product.name} added to cart!`);
     },
-    []
+    [animateCartButton, showToastNotification]
   );
 
   const removeFromCart = useCallback((productId: string) => {
@@ -410,29 +510,43 @@ export default function WaterSalesScreen() {
           </ThemedText>
         </View>
 
-        <TouchableOpacity
-          style={[styles.cartButton, { backgroundColor: "transparent" }]}
-          onPress={() => setCartVisible(true)}
+        <Animated.View
+          style={{
+            transform: [{ scale: cartButtonScale }],
+          }}
         >
-          <Ionicons
-            name="cart-outline"
-            size={28}
-            color={colors.textSecondary}
-          />
-          {cartStats.totalItems > 0 && (
-            <View style={[styles.cartBadge, { backgroundColor: colors.tint }]}>
-              <ThemedText
-                style={{
-                  fontSize: 12,
-                  color: "white",
-                  fontFamily: "poppinsExtraLight",
-                }}
+          <TouchableOpacity
+            style={[styles.cartButton, { backgroundColor: "transparent" }]}
+            onPress={() => setCartVisible(true)}
+          >
+            <Ionicons
+              name="cart-outline"
+              size={28}
+              color={colors.textSecondary}
+            />
+            {cartStats.totalItems > 0 && (
+              <Animated.View
+                style={[
+                  styles.cartBadge,
+                  {
+                    backgroundColor: colors.tint,
+                    transform: [{ scale: cartBadgeScale }],
+                  },
+                ]}
               >
-                {cartStats.totalItems}
-              </ThemedText>
-            </View>
-          )}
-        </TouchableOpacity>
+                <ThemedText
+                  style={{
+                    fontSize: 12,
+                    color: "white",
+                    fontFamily: "poppinsExtraLight",
+                  }}
+                >
+                  {cartStats.totalItems}
+                </ThemedText>
+              </Animated.View>
+            )}
+          </TouchableOpacity>
+        </Animated.View>
       </View>
 
       {/* Search + Filter */}
@@ -584,6 +698,47 @@ export default function WaterSalesScreen() {
           </Animated.View>
         </View>
       </Modal>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <Animated.View
+          style={[
+            styles.toastContainer,
+            {
+              opacity: toastOpacity,
+              transform: [{ translateY: toastTranslateY }],
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.toast,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.tint,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.toastIconContainer,
+                { backgroundColor: `${colors.tint}20` },
+              ]}
+            >
+              <Ionicons name="checkmark-circle" size={24} color={colors.tint} />
+            </View>
+            <ThemedText
+              style={[
+                styles.toastText,
+                { color: colors.text, fontFamily: "poppinsMedium" },
+              ]}
+              numberOfLines={2}
+            >
+              {toastMessage}
+            </ThemedText>
+          </View>
+        </Animated.View>
+      )}
 
       {/* CART MODAL */}
       <CartModal
@@ -758,5 +913,41 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 20,
+  },
+  toastContainer: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 100 : 90,
+    left: 16,
+    right: 16,
+    zIndex: 1000,
+    alignItems: "center",
+  },
+  toast: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    minHeight: 56,
+    maxWidth: "100%",
+  },
+  toastIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
