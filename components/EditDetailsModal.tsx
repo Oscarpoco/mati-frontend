@@ -172,30 +172,29 @@ export default function EditDetailsModal({
             { borderBottomColor: colors.border, paddingTop: 15 },
           ]}
         >
+            <ThemedText
+              style={{
+                color: colors.text,
+                textAlign: "center",
+                fontSize: 24,
+                fontFamily: 'poppinsBold',
+              }}
+            >
+              Edit Details
+            </ThemedText>
           <TouchableOpacity
             onPress={handleClose}
             style={{
-              width: 45,
-              height: 45,
+              width: 40,
+              height: 40,
               justifyContent: "center",
               alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
+              borderRadius: 16,
+              backgroundColor: colors.card,
             }}
           >
-            <Ionicons name="chevron-back" size={28} color={colors.background} />
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
-          <ThemedText
-            style={{
-              color: colors.text,
-              textAlign: "center",
-              fontSize: 24,
-              fontFamily: 'poppinsBold',
-            }}
-          >
-            Edit Details
-          </ThemedText>
-          <View style={{ width: 50, height: 50 }} />
         </View>
 
         <ScrollView
@@ -318,7 +317,7 @@ export default function EditDetailsModal({
                 }}
               >
                 <Ionicons
-                  name="checkmark-outline"
+                  name="save"
                   size={24}
                   color={colors.background}
                 />

@@ -120,24 +120,10 @@ export default function DocumentsModal({
             {
               borderBottomColor: colors.border,
               paddingTop: 15,
-              justifyContent: "flex-start",
-              gap: "20%",
+              justifyContent: "space-between"
             },
           ]}
         >
-          <TouchableOpacity
-            onPress={handleClose}
-            style={{
-              width: 45,
-              height: 45,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
-            }}
-          >
-            <Ionicons name="chevron-back" size={28} color={colors.background} />
-          </TouchableOpacity>
           <ThemedText
             style={{
               color: colors.text,
@@ -149,6 +135,19 @@ export default function DocumentsModal({
           >
             Documents
           </ThemedText>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={{
+              width: 40,
+              height: 40,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 16,
+              backgroundColor: colors.card,
+            }}
+          >
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
 
         <ScrollView

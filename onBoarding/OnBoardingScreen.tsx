@@ -7,7 +7,7 @@ import {
   useColorScheme,
   Animated,
 } from "react-native";
-import { Colors, Fonts } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { ThemedText } from "@/components/themed-text";
@@ -153,7 +153,7 @@ export default function OnboardingScreen({
             width: 140,
             height: 140,
             borderRadius: 70,
-            backgroundColor: item.color + "20",
+            backgroundColor: item.color,
             justifyContent: "center",
             alignItems: "center",
             marginBottom: 40,
@@ -203,11 +203,11 @@ export default function OnboardingScreen({
       {/* Skip Button */}
       {currentIndex < onboardingData.length - 1 && (
         <TouchableOpacity
-          style={[styles.skipButton, { backgroundColor: 'transparent' }]}
+          style={[styles.skipButton, { backgroundColor: colors.tint }]}
           onPress={handleSkip}
         >
-          <ThemedText style={[styles.skipText, { color: colors.textSecondary }]}>
-            SKIP
+          <ThemedText style={[styles.skipText, { color: colors.text }]}>
+            PRESS HERE TO SKIP THE ONBOARDING
           </ThemedText>
         </TouchableOpacity>
       )}
@@ -283,7 +283,7 @@ export default function OnboardingScreen({
               <ThemedText
                 style={[
                   styles.title,
-                  { color: colors.text, fontFamily: Fonts.sans },
+                  { color: colors.text },
                 ]}
               >
                 {item.title}
@@ -413,20 +413,19 @@ const styles = {
   } as any,
 
   skipButton: {
-    alignSelf: "flex-end",
+    width: "100%",
     paddingVertical: 6,
     marginBottom: 8,
-    marginHorizontal: 24,
-    borderRadius: 16,
   } as any,
 
   skipText: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 16,
+    fontFamily: "poppinsBold",
+    textAlign: "center",
   } as any,
 
   progressBarContainer: {
-    height: 15,
+    height: 5,
     marginBottom: 24,
     overflow: "hidden",
   } as any,
@@ -452,7 +451,7 @@ const styles = {
 
   stepText: {
     fontSize: 11,
-    fontWeight: "600",
+    fontFamily: "poppinsMedium",
     textTransform: "uppercase",
     marginBottom: 16,
     letterSpacing: 1,
@@ -460,7 +459,7 @@ const styles = {
 
   title: {
     fontSize: 32,
-    fontWeight: "800",
+    fontFamily: "poppinsBlack",
     marginBottom: 16,
     textAlign: "center",
     letterSpacing: -0.5,
@@ -469,7 +468,7 @@ const styles = {
 
   description: {
     fontSize: 16,
-    fontWeight: "500",
+    fontFamily: "poppinsLight",
     textAlign: "center",
     maxWidth: "95%",
   } as any,
@@ -526,8 +525,8 @@ const styles = {
   } as any,
 
   confirmText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 18,
+    fontFamily: "poppinsBold",
     textAlign: "center",
     letterSpacing: 1.2,
     opacity: 0.7,

@@ -240,17 +240,16 @@ export default function AddressModal({
   const renderListView = () => (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
+        <ThemedText style={styles.headerTitle}>Addresses</ThemedText>
         <TouchableOpacity
           onPress={() => {
             resetForm();
             onClose();
           }}
-          style={[styles.backButton, { backgroundColor: colors.tint }]}
+          style={[styles.backButton, { backgroundColor: colors.card }]}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
+          <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Addresses</ThemedText>
-        <View style={{ width: 50 }} />
       </View>
 
       <FlatList
@@ -350,14 +349,13 @@ export default function AddressModal({
   const renderFormView = () => (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
+        <ThemedText style={styles.headerTitle}>Add Address</ThemedText>
         <TouchableOpacity
           onPress={() => setCurrentView("list")}
-          style={[styles.backButton, { backgroundColor: colors.tint }]}
+          style={[styles.backButton, { backgroundColor: colors.card }]}
         >
           <Ionicons name="chevron-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>Add Address</ThemedText>
-        <View style={{ width: 50 }} />
       </View>
 
       <ScrollView
@@ -725,7 +723,7 @@ export default function AddressModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 30,
   },
   header: {
     flexDirection: "row",
@@ -735,16 +733,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backButton: {
-    width: 45,
-    height: 45,
-    borderRadius: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,
     fontFamily: "poppinsBold",
-    flex: 1,
     textAlign: "center",
   },
   addressCard: {

@@ -116,30 +116,29 @@ export default function TermsModal({
             { borderBottomColor: colors.border, paddingTop: 15 },
           ]}
         >
-          <TouchableOpacity
-            onPress={handleClose}
-            style={{
-              width: 45,
-              height: 45,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
-            }}
-          >
-            <Ionicons name="chevron-back" size={28} color={colors.background} />
-          </TouchableOpacity>
           <ThemedText
             style={{
               color: colors.text,
               textAlign: "center",
               fontSize: 22,
-              fontFamily: 'poppinsBold',
+              fontFamily: "poppinsBold",
             }}
           >
             Terms & Conditions
           </ThemedText>
-          <View style={{ width: 50, height: 50 }} />
+          <TouchableOpacity
+            onPress={handleClose}
+            style={{
+              width: 40,
+              height: 40,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 16,
+              backgroundColor: colors.card,
+            }}
+          >
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -177,7 +176,6 @@ const styles = {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    gap: 20
   },
   modalContent: {
     paddingHorizontal: 16,
@@ -189,6 +187,6 @@ const styles = {
     lineHeight: 24,
     opacity: 0.8,
     marginBottom: 0,
-    fontFamily: 'poppinsExtraLight',
+    fontFamily: "poppinsExtraLight",
   },
 };

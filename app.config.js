@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "Mati",
     slug: "mati-frontend",
-    version: "1.5.0",
+    version: "1.7.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "matifrontend",
@@ -46,6 +46,9 @@ export default {
           },
         },
       ],
+     
+    "expo-web-browser"
+
     ],
 
     experiments: {

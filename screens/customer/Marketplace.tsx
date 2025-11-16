@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -9,13 +9,14 @@ import {
   FlatList,
   Modal,
   Animated,
+  Alert,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
-import { CartModal, CartItem  } from "@/components/CartModal";
+import { CartModal, CartItem } from "@/components/CartModal";
 
 interface Product {
   id: string;
@@ -27,9 +28,14 @@ interface Product {
   rating: string;
 }
 
+interface CartItemWithDetails extends CartItem {
+  product: Product;
+  quantity: number;
+}
+
 const PAGE_SIZE = 12;
 
-// 🧊 Generate dummy products (randomized images + price)
+// 🧊 Generate dummy products with realistic stock status
 const generateDummyProducts = (page: number): Product[] => {
   const products: Product[] = [];
   const types: Array<"water" | "ice"> = ["water", "ice"];
@@ -54,11 +60,11 @@ const generateDummyProducts = (page: number): Product[] => {
 
     products.push({
       id: `product-${idx}`,
-      name: `Premium ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+      name: `Premium ${type.charAt(0).toUpperCase() + type.slice(1)} - ${idx}`,
       type,
       price: Math.floor(Math.random() * 200) + 50,
       image: randomImage,
-      inStock: false,
+      inStock: Math.random() > 0.3, // 70% chance of being in stock
       rating: (Math.random() * 2 + 3).toFixed(1),
     });
   }
@@ -70,15 +76,22 @@ export default function WaterSalesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
+  // Product management
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [showFilterModal, setShowFilterModal] = useState(false)
+
+  // UI state
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [cartVisible, setCartVisible] = useState(false);
-const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const slideAnim = useState(new Animated.Value(500))[0];
+
+  // Cart management
+  const [cartItems, setCartItems] = useState<Map<string, CartItemWithDetails>>(
+    new Map()
+  );
 
   // 🔹 Fetch mock products
   const fetchProducts = useCallback(
@@ -86,39 +99,129 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
       if (loading && !isInitial) return;
       isInitial ? setInitialLoading(true) : setLoading(true);
 
-      await new Promise((r) => setTimeout(r, 600)); // simulate delay
+      // await new Promise((r) => setTimeout(r, 600)); // simulate delay
 
       const newProducts = generateDummyProducts(pageNum);
       if (pageNum >= 5) setHasMore(false);
 
-      setProducts((prev) => (isInitial ? newProducts : [...prev, ...newProducts]));
+      setProducts((prev) =>
+        isInitial ? newProducts : [...prev, ...newProducts]
+      );
       isInitial ? setInitialLoading(false) : setLoading(false);
     },
     [loading]
   );
 
+  // Initial load
   useEffect(() => {
     fetchProducts(1, true);
-  }, []);
+  }, [fetchProducts]);
 
+  // Load more on page change
   useEffect(() => {
-    if (page > 1) fetchProducts(page);
-  }, [page]);
+    if (page > 1) {
+      fetchProducts(page);
+    }
+  }, [page, fetchProducts]);
 
   const loadMore = () => {
-    if (!loading && !initialLoading && hasMore) setPage((prev) => prev + 1);
+    if (!loading && !initialLoading && hasMore) {
+      setPage((prev) => prev + 1);
+    }
   };
+
+  // 🔹 Cart functions
+  const addToCart = useCallback(
+    (product: Product) => {
+      if (!product.inStock) {
+        Alert.alert("Out of Stock", `${product.name} is currently out of stock.`);
+        return;
+      }
+
+      setCartItems((prev) => {
+        const updated = new Map(prev);
+        const existingItem = updated.get(product.id);
+
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          updated.set(product.id, {
+            id: product.id,
+            product,
+            quantity: 1,
+            name: product.name,
+            price: product.price,
+          });
+        }
+
+        return updated;
+      });
+
+      Alert.alert(
+        "Success",
+        `${product.name} added to cart!`,
+        [{ text: "OK", onPress: () => {} }],
+        { cancelable: true }
+      );
+    },
+    []
+  );
+
+  const removeFromCart = useCallback((productId: string) => {
+    setCartItems((prev) => {
+      const updated = new Map(prev);
+      updated.delete(productId);
+      return updated;
+    });
+  }, []);
+
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+
+    setCartItems((prev) => {
+      const updated = new Map(prev);
+      const item = updated.get(productId);
+      if (item) {
+        item.quantity = quantity;
+      }
+      return updated;
+    });
+  }, [removeFromCart]);
+
+  // Memoized cart calculations with proper Map size check
+  const cartStats = useMemo(() => {
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    if (cartItems && cartItems.size > 0) {
+      cartItems.forEach((item) => {
+        totalItems += item.quantity;
+        totalPrice += item.price * item.quantity;
+      });
+    }
+
+    return { totalItems, totalPrice };
+  }, [cartItems]);
 
   // 🔹 Modal controls
   const openFilterModal = () => {
     setShowFilterModal(true);
-    Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: false }).start();
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   };
 
   const closeFilterModal = () => {
-    Animated.timing(slideAnim, { toValue: 500, duration: 300, useNativeDriver: false }).start(() =>
-      setShowFilterModal(false)
-    );
+    Animated.timing(slideAnim, {
+      toValue: 500,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => setShowFilterModal(false));
   };
 
   // 🔹 Sorting functions
@@ -133,63 +236,147 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
   };
 
   // 🔹 Product card component
-  const ProductCard = ({ item }: { item: Product }) => (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={[styles.productCard, { backgroundColor: colors.background, borderColor: colors.border }]}
-    >
-      <View style={styles.imageContainer}>
-        <Image source={item.image} style={styles.productImage} resizeMode="stretch" />
+  const ProductCard = ({ item }: { item: Product }) => {
+    const isInCart = cartItems.has(item.id);
+    const cartQuantity = cartItems.get(item.id)?.quantity ?? 0;
 
-        {/* 🔸 Type Badge */}
-        <View style={styles.badge}>
-          <ThemedText style={styles.badgeText}>{item.type.toUpperCase()}</ThemedText>
-        </View>
-      </View>
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[
+          styles.productCard,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <View style={styles.imageContainer}>
+          <Image
+            source={item.image}
+            style={styles.productImage}
+            resizeMode="stretch"
+          />
 
-      <View style={styles.productContent}>
-        <ThemedText
-          style={[styles.productName, { color: colors.text, fontFamily: "poppinsMedium" }]}
-          numberOfLines={2}
-        >
-          {item.name}
-        </ThemedText>
-
-        <View style={styles.ratingRow}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons name="star" size={14} color="#FFD700" />
-            <ThemedText
-              style={{ fontSize: 12, color: colors.textSecondary, marginLeft: 4, fontFamily: "poppinsLight" }}
-            >
-              {item.rating}
+          {/* Type Badge */}
+          <View style={styles.badge}>
+            <ThemedText style={styles.badgeText}>
+              {item.type.toUpperCase()}
             </ThemedText>
           </View>
 
-          <ThemedText style={[styles.price, { color: colors.text, fontFamily: "poppinsMedium" }]}>
-            R{item.price.toFixed(2)}
-          </ThemedText>
+          {/* Stock Badge */}
+          {!item.inStock && (
+            <View
+              style={[
+                styles.stockBadge,
+                { backgroundColor: "rgba(255, 0, 0, 0.7)" },
+              ]}
+            >
+              <ThemedText
+                style={{
+                  fontSize: 10,
+                  fontWeight: "700",
+                  color: "white",
+                  fontFamily: "poppinsMedium",
+                }}
+              >
+                OUT OF STOCK
+              </ThemedText>
+            </View>
+          )}
         </View>
 
-        <TouchableOpacity
-          style={[styles.outOfStockButton, { borderColor: colors.textSecondary }]}
-          disabled
-        >
-          <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
+        <View style={styles.productContent}>
           <ThemedText
-            style={{
-              fontSize: 12,
-              fontWeight: "700",
-              color: colors.textSecondary,
-              marginLeft: 6,
-              fontFamily: "poppinsMedium",
-            }}
+            style={[
+              styles.productName,
+              { color: colors.text, fontFamily: "poppinsMedium" },
+            ]}
+            numberOfLines={2}
           >
-            OUT OF STOCK
+            {item.name}
           </ThemedText>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+
+          <View style={styles.ratingRow}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Ionicons name="star" size={14} color="#FFD700" />
+              <ThemedText
+                style={{
+                  fontSize: 12,
+                  color: colors.textSecondary,
+                  marginLeft: 4,
+                  fontFamily: "poppinsLight",
+                }}
+              >
+                {item.rating}
+              </ThemedText>
+            </View>
+
+            <ThemedText
+              style={[
+                styles.price,
+                { color: colors.text, fontFamily: "poppinsMedium" },
+              ]}
+            >
+              R{item.price.toFixed(2)}
+            </ThemedText>
+          </View>
+
+          {/* Action Button - Conditional based on stock */}
+          {item.inStock ? (
+            <TouchableOpacity
+              style={[
+                styles.addToCartButton,
+                {
+                  backgroundColor: colors.tint,
+                  borderColor: colors.tint,
+                },
+              ]}
+              onPress={() => addToCart(item)}
+            >
+              <Ionicons name="add-circle" size={16} color="white" />
+              <ThemedText
+                style={{
+                  fontSize: 12,
+                  fontWeight: "700",
+                  color: "white",
+                  marginLeft: 6,
+                  fontFamily: "poppinsMedium",
+                }}
+              >
+                {isInCart ? `IN CART (${cartQuantity})` : "ADD TO CART"}
+              </ThemedText>
+            </TouchableOpacity>
+          ) : (
+            <View
+              style={[
+                styles.outOfStockButton,
+                { borderColor: colors.textSecondary },
+              ]}
+            >
+              <Ionicons
+                name="close-circle"
+                size={16}
+                color={colors.textSecondary}
+              />
+              <ThemedText
+                style={{
+                  fontSize: 12,
+                  fontWeight: "700",
+                  color: colors.textSecondary,
+                  marginLeft: 6,
+                  fontFamily: "poppinsMedium",
+                }}
+              >
+                OUT OF STOCK
+              </ThemedText>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   // 🔹 Loader screen
   if (initialLoading) {
@@ -231,17 +418,19 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
             size={28}
             color={colors.textSecondary}
           />
-          <View style={[styles.cartBadge, { backgroundColor: "transparent" }]}>
-            <ThemedText
-              style={{
-                fontSize: 14,
-                color: "white",
-                fontFamily: "poppinsExtraLight",
-              }}
-            >
-              0
-            </ThemedText>
-          </View>
+          {cartStats.totalItems > 0 && (
+            <View style={[styles.cartBadge, { backgroundColor: colors.tint }]}>
+              <ThemedText
+                style={{
+                  fontSize: 12,
+                  color: "white",
+                  fontFamily: "poppinsExtraLight",
+                }}
+              >
+                {cartStats.totalItems}
+              </ThemedText>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -327,19 +516,6 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
             ]}
           >
             <View style={styles.popupHeader}>
-              <TouchableOpacity
-                onPress={closeFilterModal}
-                style={{
-                  width: 45,
-                  height: 45,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 18,
-                  backgroundColor: colors.tint,
-                }}
-              >
-                <Ionicons name="chevron-back" size={24} color={colors.background} />
-              </TouchableOpacity>
               <ThemedText
                 style={[
                   styles.popupTitle,
@@ -348,6 +524,19 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
               >
                 Sort by Price
               </ThemedText>
+              <TouchableOpacity
+                onPress={closeFilterModal}
+                style={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 16,
+                  backgroundColor: colors.card,
+                }}
+              >
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
             </View>
 
             <View style={styles.popupContent}>
@@ -362,7 +551,10 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
                   color={colors.tint}
                 />
                 <ThemedText
-                  style={{ fontFamily: "poppinsMedium", color: colors.text }}
+                  style={{
+                    fontFamily: "poppinsMedium",
+                    color: colors.text,
+                  }}
                 >
                   LOW TO HIGH
                 </ThemedText>
@@ -379,7 +571,10 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
                   color={colors.tint}
                 />
                 <ThemedText
-                  style={{ fontFamily: "poppinsMedium", color: colors.text }}
+                  style={{
+                    fontFamily: "poppinsMedium",
+                    color: colors.text,
+                  }}
                 >
                   HIGH TO LOW
                 </ThemedText>
@@ -389,19 +584,27 @@ const [cartItems, setCartItems] = useState<CartItem[]>([]);
         </View>
       </Modal>
 
-      {/* CART */}
+      {/* CART MODAL */}
       <CartModal
         visible={cartVisible}
         onClose={() => setCartVisible(false)}
-        items={cartItems}
-        onUpdateQuantity={(id, qty) => {
-          /* update logic */
-        }}
-        onRemoveItem={(id) => {
-          /* remove logic */
-        }}
+        items={Array.from(cartItems.values())}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
         onCheckout={() => {
-          /* checkout logic */
+          Alert.alert(
+            "Order Placed",
+            `Total: R${cartStats.totalPrice.toFixed(2)}\n${cartStats.totalItems} items`,
+            [
+              {
+                text: "Continue Shopping",
+                onPress: () => {
+                  setCartVisible(false);
+                  setCartItems(new Map());
+                },
+              },
+            ]
+          );
         }}
       />
     </ThemedView>
@@ -432,8 +635,8 @@ const styles = StyleSheet.create({
   },
   cartBadge: {
     position: "absolute",
-    top: -6,
-    right: -6,
+    top: -4,
+    right: -4,
     width: 24,
     height: 24,
     borderRadius: 8,
@@ -484,15 +687,36 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   badgeText: { fontSize: 10, fontFamily: "poppinsMedium" },
+  stockBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
   productContent: { padding: 10 },
   productName: { fontSize: 14, marginBottom: 8 },
-  ratingRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  ratingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
   price: { fontSize: 16 },
+  addToCartButton: {
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
   outOfStockButton: {
     flexDirection: "row",
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 0,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -513,7 +737,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 25,
   },
-  popupHeader: { flexDirection: "row", alignItems: "center", gap: 20, marginBottom: 20 },
+  popupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
   popupTitle: { fontSize: 22 },
   popupContent: { gap: 14 },
   sortButton: {

@@ -34,7 +34,6 @@ import {
 } from "@/redux/slice/getAllRequests";
 // ENDS
 
-
 // INTERFACE
 interface Request {
   requestId: string;
@@ -60,12 +59,11 @@ export interface Provider {
 // ENDS
 
 export default function ProviderHomeScreen() {
-
   // THEME
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
   // ENDS
-  
+
   // REDUX AUTH STATE
   const dispatch = useAppDispatch();
   const { user, token } = useAppSelector((state: RootState) => state.auth);
@@ -94,7 +92,6 @@ export default function ProviderHomeScreen() {
     if (token) {
       dispatch(getAllRequests(token));
     }
-
   }, [dispatch, token]);
   // ENDS
 
@@ -198,7 +195,6 @@ export default function ProviderHomeScreen() {
   };
   // ENDS
 
-
   // RENDER CARD
   const renderRequestCard = ({ item }: { item: Request }) => {
     return (
@@ -216,7 +212,7 @@ export default function ProviderHomeScreen() {
             <ThemedText
               style={[
                 styles.customerName,
-                { color: colors.text, fontFamily: 'poppinsMedium', },
+                { color: colors.text, fontFamily: "poppinsMedium" },
               ]}
             >
               {item.name || "Customer"}
@@ -224,7 +220,7 @@ export default function ProviderHomeScreen() {
             <ThemedText
               style={[
                 styles.location,
-                { color: colors.textSecondary, fontFamily: 'poppinsMedium'},
+                { color: colors.textSecondary, fontFamily: "poppinsMedium" },
               ]}
             >
               {item.location.address}
@@ -240,7 +236,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.distanceText,
-                { color: colors.tint, fontFamily: 'poppinsBold', },
+                { color: colors.tint, fontFamily: "poppinsBold" },
               ]}
             >
               {item.distance.toFixed(2)} km
@@ -254,7 +250,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.text, fontFamily: 'poppinsMedium', },
+                { color: colors.text, fontFamily: "poppinsMedium" },
               ]}
             >
               {item.litres} L
@@ -266,7 +262,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.text, fontFamily: 'poppinsLight', },
+                { color: colors.text, fontFamily: "poppinsLight" },
               ]}
             >
               Needed by the {formatCreatedDate(item.date)}
@@ -278,7 +274,7 @@ export default function ProviderHomeScreen() {
             <Text
               style={[
                 styles.detailText,
-                { color: colors.textSecondary, fontFamily: 'poppinsLight', },
+                { color: colors.textSecondary, fontFamily: "poppinsLight" },
               ]}
             >
               Requested on the {formatCreatedDate(item.createdAt)}
@@ -303,7 +299,7 @@ export default function ProviderHomeScreen() {
                 styles.buttonText,
                 {
                   color: colors.warningRed,
-                  fontFamily: 'poppinsLight',
+                  fontFamily: "poppinsLight",
                 },
               ]}
             >
@@ -336,7 +332,7 @@ export default function ProviderHomeScreen() {
                     styles.buttonText,
                     {
                       color: colors.background,
-                      fontFamily: 'poppinsLight',
+                      fontFamily: "poppinsLight",
                     },
                   ]}
                 >
@@ -363,7 +359,7 @@ export default function ProviderHomeScreen() {
       <ThemedText
         style={[
           styles.emptyMessage,
-          { color: colors.textSecondary, fontFamily: 'poppinsBold', },
+          { color: colors.textSecondary, fontFamily: "poppinsBold" },
         ]}
       >
         No requests near you at the moment
@@ -411,26 +407,6 @@ export default function ProviderHomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
-
-      {/* Welcome Section */}
-      <View style={styles.header}>
-        <ThemedText style={[styles.title, { fontFamily: 'poppinsMedium', }]}>
-          Welcome
-        </ThemedText>
-        <ThemedText
-          numberOfLines={1}
-          style={[
-            styles.title,
-            {
-              fontFamily: 'poppinsLight',
-              textTransform: "capitalize",
-              fontSize: 48,
-            },
-          ]}
-        >
-          {user?.name}
-        </ThemedText>
       </View>
 
       <FlatList
@@ -493,7 +469,7 @@ const styles = StyleSheet.create({
   },
 
   requestCard: {
-    borderRadius: 38,
+    borderRadius: 0,
     padding: 18,
     marginBottom: 12,
     borderWidth: 1,
@@ -524,7 +500,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 8,
     paddingVertical: 10,
-    borderRadius: 16,
+    borderRadius: 0,
     gap: 4,
   },
 
@@ -557,7 +533,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 18,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     gap: 6,
@@ -568,7 +544,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 18,
+    borderRadius: 0,
     justifyContent: "center",
     alignItems: "center",
     gap: 6,

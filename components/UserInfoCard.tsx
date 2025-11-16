@@ -111,7 +111,7 @@ export default function UserInfoCard({ user, colors }: UserInfoCardProps) {
           opacity: animOpacity,
           height: animHeight.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 180],
+            outputRange: [0, userType === "provider"? 210 : 180],
           }),
           overflow: "hidden",
         }}
@@ -199,14 +199,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   userInfoLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "poppinsBold",
     opacity: 0.7,
     textTransform: "uppercase",
     textAlign: "left",
   },
   userInfoValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "200",
     textTransform: "uppercase",
     textAlign: "right",

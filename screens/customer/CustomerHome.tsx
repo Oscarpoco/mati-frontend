@@ -429,24 +429,24 @@ export default function CustomerHomeScreen() {
           ]}
         >
           <View style={styles.calendarHeader}>
+            <ThemedText style={styles.calendarTitle}>Delivery Date</ThemedText>
             <TouchableOpacity
               onPress={() => setDatePickerVisible(false)}
               style={{
-                width: 45,
-                height: 45,
+                width: 40,
+                height: 40,
                 justifyContent: "center",
                 alignItems: "center",
-                borderRadius: 18,
-                backgroundColor: colors.tint,
+                borderRadius: 16,
+                backgroundColor: colors.card,
               }}
             >
               <Ionicons
-                name="chevron-back"
-                size={28}
-                color={colors.background}
+                name="close"
+                size={24}
+                color={colors.text}
               />
             </TouchableOpacity>
-            <ThemedText style={styles.calendarTitle}>Delivery Date</ThemedText>
           </View>
 
           <View

@@ -43,7 +43,10 @@ export const CartModal: React.FC<CartModalProps> = ({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
-  const totalBalance = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalBalance = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   // 🔹 Cart Item Component with Swipe Delete
   const CartItemComponent = ({ item }: { item: CartItem }) => {
@@ -131,15 +134,15 @@ export const CartModal: React.FC<CartModalProps> = ({
           <View
             style={[
               styles.quantityControl,
-              { backgroundColor: colors.background, borderColor: colors.border },
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
             ]}
           >
             <TouchableOpacity
               onPress={() =>
-                onUpdateQuantity(
-                  item.id,
-                  Math.max(1, item.quantity - 1)
-                )
+                onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
               }
               style={styles.quantityButton}
             >
@@ -159,9 +162,7 @@ export const CartModal: React.FC<CartModalProps> = ({
             </ThemedText>
 
             <TouchableOpacity
-              onPress={() =>
-                onUpdateQuantity(item.id, item.quantity + 1)
-              }
+              onPress={() => onUpdateQuantity(item.id, item.quantity + 1)}
               style={styles.quantityButton}
             >
               <Ionicons name="add-outline" size={18} color={colors.tint} />
@@ -211,19 +212,6 @@ export const CartModal: React.FC<CartModalProps> = ({
         <View
           style={[styles.modalHeader, { borderBottomColor: colors.border }]}
         >
-          <TouchableOpacity
-            onPress={onClose}
-            style={{
-              width: 45,
-              height: 45,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 18,
-              backgroundColor: colors.tint,
-            }}
-          >
-            <Ionicons name="chevron-back" size={28} color={colors.text} />
-          </TouchableOpacity>
           <ThemedText
             style={[
               styles.headerTitle,
@@ -232,7 +220,19 @@ export const CartModal: React.FC<CartModalProps> = ({
           >
             Your Cart
           </ThemedText>
-          <View style={{ width: 28 }} />
+          <TouchableOpacity
+            onPress={onClose}
+            style={{
+              width: 40,
+              height: 40,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 16,
+              backgroundColor: colors.card,
+            }}
+          >
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
 
         {/* Cart Items */}
@@ -360,7 +360,7 @@ export const CartModal: React.FC<CartModalProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 10,
   },
   modalHeader: {
     flexDirection: "row",
@@ -372,7 +372,6 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "600",
   },
   listContent: {
     padding: 16,
