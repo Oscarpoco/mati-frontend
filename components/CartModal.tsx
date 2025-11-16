@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 10,
+    paddingTop: Platform.OS === "ios" ? 60 : 20,
     position: "absolute",
     top: 0,
     left: 0,
@@ -1024,7 +1024,7 @@ const styles = StyleSheet.create({
   bottomSection: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: Platform.OS === "ios" ? 34 : 0,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,

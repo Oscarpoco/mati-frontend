@@ -196,7 +196,7 @@ export default function ActionButtons({
             style={{
               height: 50,
               width: 50,
-              backgroundColor: colors.background,
+              backgroundColor: colors.card,
               borderRadius: 18,
               justifyContent: "center",
               alignItems: "center",

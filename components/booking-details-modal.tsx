@@ -1,19 +1,18 @@
+import { ThemedText } from "@/components/themed-text";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  StyleSheet,
-  View,
-  ScrollView,
-  TouchableOpacity,
   Animated,
   Dimensions,
   Modal,
+  ScrollView,
   StatusBar,
-  Platform
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { ThemedText } from "@/components/themed-text";
-import { Colors, Fonts } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { Ionicons } from "@expo/vector-icons";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -150,15 +149,15 @@ export function BookingDetailsModal({
       ];
     } else if (status === "confirmed") {
       return [
-        { label: "Picked", completed: true },
+        { label: "Confirmed", completed: true },
         { label: "In Transit", completed: true },
         { label: "Delivery", completed: false },
       ];
     } else if (status === "delivered") {
       return [
-        { label: "Picked", completed: true },
+        { label: "Confirmed", completed: true },
+        { label: "In Transit", completed: true },
         { label: "Delivered", completed: true },
-        { label: "Completed", completed: true },
       ];
     } else {
       return [
@@ -194,18 +193,13 @@ export function BookingDetailsModal({
         ]}
       >
         <View style={styles.modalHeader}>
-          <TouchableOpacity
-            onPress={onClose}
-            style={[styles.headerButton, { backgroundColor: colors.card }]}
-          >
-            <Ionicons name="chevron-back" size={24} color={colors.tint} />
-          </TouchableOpacity>
+          
           <ThemedText style={styles.headerTitle}>Order Details</ThemedText>
           <TouchableOpacity
             onPress={onClose}
             style={[styles.headerButton, { backgroundColor: colors.card }]}
           >
-            <Ionicons name="scan" size={24} color={colors.tint} />
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -459,7 +453,9 @@ export function BookingDetailsModal({
               <View style={{ flex: 1 }}>
                 <ThemedText style={styles.dateLabel}>Est. Delivery</ThemedText>
                 <ThemedText style={styles.dateValue}>
-                  {selectedBooking.expectedDelivery}
+                  {selectedBooking.expectedDelivery === "N/A" 
+                    ? "TBD" 
+                    : selectedBooking.expectedDelivery}
                 </ThemedText>
               </View>
             </View>
@@ -496,18 +492,60 @@ export function BookingDetailsModal({
             </View>
           )}
 
-          {selectedBooking.status !== "pending" && (
+          {/* Action Buttons */}
+          {selectedBooking.status === "delivered" && (
             <TouchableOpacity
               style={[
-                styles.liveTrackingButton,
+                styles.actionButton,
                 { backgroundColor: colors.tint },
               ]}
+              activeOpacity={0.8}
             >
               <View
                 style={{
                   width: 56,
                   height: 56,
-                  borderRadius: 35,
+                  borderRadius: 28,
+                  backgroundColor: colors.background,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons name="star" size={24} color={colors.tint} />
+              </View>
+              <ThemedText
+                style={{
+                  fontSize: 16,
+                  fontFamily: "poppinsBold",
+                  color: colors.background,
+                  textTransform: "uppercase",
+                  flex: 1,
+                  marginLeft: 12,
+                }}
+              >
+                Review Provider
+              </ThemedText>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.background}
+              />
+            </TouchableOpacity>
+          )}
+
+          {selectedBooking.status === "confirmed" && (
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: colors.tint },
+              ]}
+              activeOpacity={0.8}
+            >
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
                   backgroundColor: colors.background,
                   justifyContent: "center",
                   alignItems: "center",
@@ -515,38 +553,23 @@ export function BookingDetailsModal({
               >
                 <Ionicons name="location" size={24} color={colors.tint} />
               </View>
-
               <ThemedText
                 style={{
-                  fontSize: 18,
+                  fontSize: 16,
                   fontFamily: "poppinsBold",
                   color: colors.background,
                   textTransform: "uppercase",
+                  flex: 1,
+                  marginLeft: 12,
                 }}
               >
-                REVIEW PROVIDER
+                Track Delivery
               </ThemedText>
-
-              <View style={{ flexDirection: "row", gap: 0 }}>
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.background}
-                  style={{ marginTop: 4 }}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.background}
-                  style={{ marginTop: 4 }}
-                />
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={colors.background}
-                  style={{ marginTop: 4 }}
-                />
-              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.background}
+              />
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -571,7 +594,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: screenHeight * .85,
+    maxHeight: screenHeight * .9,
   },
 
   modalHeader: {
@@ -585,18 +608,16 @@ const styles = StyleSheet.create({
   },
 
   headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: "poppinsBold",
-    flex: 1,
-    textAlign: "center",
   },
 
   modalContent: {
@@ -878,13 +899,15 @@ const styles = StyleSheet.create({
     fontFamily: "poppinsBold",
   },
 
-  liveTrackingButton: {
+  actionButton: {
     alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 32,
+    borderRadius: 28,
     flexDirection: "row",
-    padding: 4,
+    padding: 8,
     paddingRight: 20,
+    paddingLeft: 8,
     marginBottom: 40,
+    minHeight: 72,
   },
 });
